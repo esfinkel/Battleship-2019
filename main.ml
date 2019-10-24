@@ -8,15 +8,18 @@ let print_help unit : unit =
                        "\nUse 'remove' and ship name to remove it from the board.";
                        "\nUse 'ready' when your board is set up and ready to play";
                        "\n\n Gameplay commands:";
-                       "\nUse 'shoot' and a coordinate to shoot that spot"
+                       "\nUse 'shoot' and a coordinate to shoot that spot";
+                       "\nUse 'status' to see what ships you still have.";
+                       "\nUse 'quit' to quit the game."
                      ])); ()
+
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [blue]
                   "\n\nWelcome to Battleship!\n");
   print_help ();
-  failwith "unimplemented"
+  board_setup ()
 
 (* Execute the game engine. *)
 let () = main ()
