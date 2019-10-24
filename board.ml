@@ -1,3 +1,9 @@
+exception OffBoard
+exception Misaligned (* boat locations are not same row/column *)
+exception WrongLength (* boat locations are wrong distance apart *)
+exception OverlappingBoats 
+exception NoBoat
+
 type t = unit
 
 type ship = {

@@ -13,7 +13,7 @@ let make_parse_test
 
 let command_tests = [
   make_parse_test "normal place" "place ship board shot ship" 
-    (Place ["hip"; "board"; "shot"; "ship"]);
+    (Place ["ship"; "board"; "shot"; "ship"]);
 ]
 
 let board_tests = [
