@@ -15,6 +15,8 @@ type command =
   | Shoot of object_phrase
   | Status
   | Help 
+  | Quit 
+  | Ready
 
 (** Raised when an empty command is parsed. *)
 exception Empty
@@ -33,9 +35,9 @@ exception Malformed
 
     Raises: [Malformed] if the command is malformed. A command
     is {i malformed} if the verb is neither "place", "remove", "shoot", "status" 
-    nor "help", or if the verb is "status" or "help" and there is a non-empty 
-    object phrase, or if the verb is "place", "remove", "shoot", or "status" 
-    and there is an empty object phrase. *)
+    nor "help", or if the verb is "status", "help", "ready" or "quit" and there 
+    is a non-empty object phrase, or if the verb is "place", "remove", "shoot", 
+    or "status" and there is an empty object phrase. *)
 
 val parse : string -> command 
 
