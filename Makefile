@@ -1,4 +1,4 @@
-MODULES=command state main author boardstate myboardstate opponentboardstate
+MODULES=command main author board 
 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
