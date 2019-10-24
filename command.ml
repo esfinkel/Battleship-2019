@@ -5,12 +5,14 @@ type ship = {
   size : int
 }
 
+type object_phrase = string list
+
 type location = string 
 
 type command = 
-  | Place of ship_name * location * location
-  | Remove of ship_name
-  | Shoot of location
+  | Place of object_phrase
+  | Remove of object_phrase
+  | Shoot of object_phrase
   | Status
   | Help 
 
