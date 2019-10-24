@@ -11,6 +11,7 @@ type spot
 (* variant type opponent_spot (hidden | hit_ship | shot_missed) *)
 (* variant type Spot (MySpot of my_spot | OpponentSpot of opponent_spot) *)
 
+
 (** [init_board ()] is a new battleship board, with all cells initialized
     to Water *)
 val init_board : unit -> t 
