@@ -1,4 +1,5 @@
 MODULES=command main author board 
+# test
 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
