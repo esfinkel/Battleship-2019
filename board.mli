@@ -5,12 +5,9 @@
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
-type ship = {
-  name : Command.ship_name;
-  size : int
-}
+type ship 
 
-type spot =  Water | ShotWater | Ship of ship | HitShip of ship
+type spot
 (* variant type opponent_spot (hidden | hit_ship | shot_missed) *)
 (* variant type Spot (MySpot of my_spot | OpponentSpot of opponent_spot) *)
 
