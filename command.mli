@@ -34,10 +34,11 @@ exception Malformed
     Raises: [Empty] if [str] is the empty string or contains only spaces. 
 
     Raises: [Malformed] if the command is malformed. A command
-    is {i malformed} if the verb is neither "place", "remove", "shoot", "status" 
-    nor "help", or if the verb is "status", "help", "ready" or "quit" and there 
-    is a non-empty object phrase, or if the verb is "place", "remove", "shoot", 
-    or "status" and there is an empty object phrase. *)
+    is {i malformed} if the verb is neither "place", "remove", "shoot", 
+    "status", "help", "quit", nor "ready", or if the verb is "status", "help", 
+    "ready" or "quit" and there is a non-empty object phrase, or if the verb 
+    is "place", "remove", "shoot", or "status" and there is an empty object 
+    phrase. *)
 
 val parse : string -> command 
 
