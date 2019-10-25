@@ -1,14 +1,11 @@
-(* move these to the ml file *)
-(* AF : *)
-(* RI : *)
 
 exception OffBoard
 exception Misaligned
 exception WrongLength
-exception DuplicateBoat
-exception OverlappingBoats 
+exception DuplicateShip
+exception OverlappingShips 
 
-exception NoBoat
+exception NoShip
 exception DuplicateShot
 
 (** The abstract type of values representing one player's battleship board. *)
@@ -31,15 +28,15 @@ val init_board : unit -> t
     - OffBoard if [l1] or [l2] is off the game board
     - Misaligned if [l1] and [l2] are not in the same row or column
     - WrongLength if [l1] and [l2] are the wrong distance apart
-    - DuplicateBoat if the ship has already been placed
-    - OverlappingBoats if the ship would overlap with a ship already
-        present in t. *)
+    - DuplicateShip if the ship has already been placed
+    - OverlappingShips if the ship would overlap with a ship already
+        present in [b]. *)
 val place : Command.ship_name * Command.location * Command.location -> t -> unit 
 
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
     has been removed, and the cells replaced with Water.
-    Raise
-    - NoBoat if that boat has not been placed. *)
+    Raises:
+    - NoShip if that ship has not been placed. *)
 val remove : Command.ship_name -> t -> unit 
 
 (** [shoot l b] is [()]. The location on [b] reprented by [l] has now
