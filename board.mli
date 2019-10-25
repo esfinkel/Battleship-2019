@@ -39,6 +39,10 @@ val place : Command.ship_name * Command.location * Command.location -> t -> unit
     - NoShip if that ship has not been placed. *)
 val remove : Command.ship_name -> t -> unit 
 
+(** [complete b] is true iff [b] holds one of all of the ships
+    in Command.ship_name. *)
+val complete : t -> bool
+
 (** [shoot l b] is [()]. The location on [b] reprented by [l] has now
     been shot.
     Raises:

@@ -16,6 +16,11 @@ type ship = {
 
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
 
+(** [row_col loc] is the [(row, column)] coordinate pair corresponding
+    to [loc]. *)
+let row_col (loc : Command.location) : (int*int) =
+  failwith "unimplemented"
+
 
 (** AF: the spot array array
     [
@@ -33,18 +38,24 @@ type spot =  Water | ShotWater | Ship of ship | HitShip of ship
     where [n] is the "size" of [s]. The remaining cells are Water or 
     ShotWater. *)
 
-type t = unit
+let board_size = 10
+type t = spot array array 
 
-(* type t = spot array array  *)
+let init_board () = Water
+                    |> Array.make board_size
+                    |> Array.make board_size
 
+let place _ b =
+  failwith "unimplemented"
 
+let remove _ b = 
+  failwith "unimplemented"
 
-let init_board () = ()
+let shoot _ b = 
+  failwith "unimplemented"
 
-let place _ b = ()
+let status b = 
+  failwith "unimplemented"
 
-let remove _ b = ()
-
-let shoot _ b = ()
-
-let status b = ""
+let complete b = 
+  failwith "unimplemented"
