@@ -174,7 +174,6 @@ let overlapping_ship l1 l2 b =
     done
   done
 
-(* this should call the above functions *)
 let place s l1 l2 b =
   let ship = get_ship s b in 
   on_board l1 b;
@@ -192,12 +191,11 @@ let place s l1 l2 b =
     done
   done
 
-(* - OffBoard if [l1] or [l2] is off the game board *)
-(* - Misaligned if [l1] and [l2] are not in the same row or column *)
-(* - WrongLength if [l1] and [l2] are the wrong distance apart *)
-(* - DuplicateShip if the ship has already been placed *)
-(* - OverlappingShips if the ship would overlap with a ship already
-    present in [b]. *)
+
+let is_dead (s:ship) (g : spot array array) = 
+  let dead_in_row (s:ship) (r : spot array) = 
+    Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
+  s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
 let remove _ b = 
   failwith "unimplemented"
@@ -210,3 +208,22 @@ let status b =
 
 let complete b = 
   failwith "unimplemented"
+
+let rec row_str self g = function
+  | [] -> []
+  | Water::t -> (if self then "w" else "?")::(row_str true g t)
+  | ShotWater::t -> (if self then "x" else "w")::(row_str true g t)
+  | (Ship _)::t -> (if self then "O" else "?")::(row_str true g t)
+  | (HitShip s)::t -> (if is_dead s g then "#" else "X")::(row_str true g t)
+
+let to_string_grid is_self b =
+  b.grid |> Array.to_list
+  |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))
+
+let string_self (b:t) = to_string_grid true b
+
+let string_other b = to_string_grid false b
+
+
+
+
