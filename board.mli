@@ -48,7 +48,7 @@ val place : string -> Command.location -> Command.location -> t -> unit
     has been removed, and the cells replaced with Water.
     Raises:
     - NoShip if that ship has not been placed. *)
-val remove : ship_name -> t -> unit 
+val remove : string -> t -> unit 
 
 (** [complete b] is true iff [b] holds one of all of the ships
     in Command.ship_name. *)
