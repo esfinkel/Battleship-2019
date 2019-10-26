@@ -8,6 +8,7 @@ exception OverlappingShips
 exception NoShip
 exception DuplicateShot
 
+exception InvalidLoc
 
 type ship = {
   name : Command.ship_name;
@@ -20,7 +21,19 @@ type spot =  Water | ShotWater | Ship of ship | HitShip of ship
 (** [row_col loc] is the [(row, column)] coordinate pair corresponding
     to [loc]. *)
 let row_col (loc : Command.location) : (int*int) =
-  failwith "unimplemented"
+  let r = Str.regexp "\\([a-z]\\)\\([0-9]+\\)" in
+  let pull_regex s =
+    Str.global_replace r "\\1 \\2" (String.lowercase_ascii s)
+    |> String.split_on_char ' ' in
+  let index (c:char) : int = Char.code c - 97 in
+  let tup = function
+    | letter::number::[] -> (
+        String.get letter 0 |> index,
+        Stdlib.int_of_string number - 1
+      )
+    | _ -> raise InvalidLoc
+  in
+  loc |> pull_regex |> tup
 
 
 (** AF: the spot array array

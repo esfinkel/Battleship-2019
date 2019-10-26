@@ -8,6 +8,8 @@ exception OverlappingShips
 exception NoShip
 exception DuplicateShot
 
+exception InvalidLoc
+
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
