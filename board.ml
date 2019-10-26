@@ -10,6 +10,11 @@ exception DuplicateShot
 
 exception InvalidLoc
 
+
+(* should be in command *)
+exception InvalidShipName
+
+
 type ship = {
   name : Command.ship_name;
   size : int;
@@ -53,16 +58,68 @@ let row_col (loc : Command.location) : (int*int) =
     ShotWater. *)
 
 let board_size = 10
-type t = spot array array 
 
-let init_board () = Water
-                    |> Array.make_matrix board_size board_size
+type t = {
+  grid: spot array array;
+  ships: ship list
+}
 
+let init_ships () = [
+  {
+    name=Command.Battleship;
+    size=4;
+    on_board=false;
+  };
+  {
+    name=Command.Cruiser;
+    size=2;
+    on_board=false;
+  };
+  {
+    name=Command.Carrier;
+    size=5;
+    on_board=false;
+  };
+  {
+    name=Command.Destroyer;
+    size=3;
+    on_board=false;
+  };
+  {
+    name=Command.Submarine;
+    size=3;
+    on_board=false;
+  };
+]
+
+
+let init_board () = {
+  grid=Water |> Array.make_matrix board_size board_size;
+  ships = init_ships ();
+}
+
+
+(** [ship_of_string str] is the ship with string name [str]. *)
+let ship_of_string = function
+  | "battleship" -> Command.Battleship
+  | "cruiser" -> Command.Cruiser
+  | "carrier" -> Command.Carrier
+  | "destroyer" -> Command.Destroyer
+  | "submarine" -> Command.Submarine
+  | _ -> raise InvalidShipName
+
+
+let get_ship str_name b =
+  let sh_name = ship_of_string str_name in
+  List.filter (fun s -> s.name=sh_name) b.ships |>
+  function 
+  | s::[] -> s
+  | _ -> raise NoShip
 
 (** [on_board loc] raises [OffBoard] iff [loc] refers to an invalid location 
     on board [b]. *)
 let on_board (loc : Command.location) (b : t) =
-  let size = Array.length b in
+  let size = board_size in
   match row_col loc with 
   | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
   | _ -> raise OffBoard
@@ -112,13 +169,13 @@ let place s l1 l2 b =
   aligned l1 l2;
   right_length l1 l2 s;
   duplicate_ship s;
-  overlapping_ship l1 l2 b;
+  overlapping_ship l1 l2 b.grid;
   let x_1, y_1 = row_col l1 in
   let x_2, y_2 = row_col l2 in 
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
       s.on_board <- true;
-      b.(x).(y) <- Ship s
+      b.grid.(x).(y) <- Ship s
     done
   done
 
