@@ -103,7 +103,7 @@ let init_board () = {
 }
 
 
-(** [ship_of_string str] is the ship with string name [str]. *)
+(** [ship_of_string str] is the ship_name with string name [str]. *)
 let ship_of_string = function
   | "battleship" -> Battleship
   | "cruiser" -> Cruiser
@@ -112,7 +112,7 @@ let ship_of_string = function
   | "submarine" -> Submarine
   | _ -> raise InvalidShipName
 
-(** [string_of_ship shp] is the string name of ship [shp]. *)
+(** [string_of_ship shp] is the string name of ship_name [shp]. *)
 let string_of_ship = function
   | Battleship -> "battleship"
   | Cruiser -> "cruiser"
@@ -158,8 +158,8 @@ let right_length loc1 loc2 s =
 (** [duplicate_ship s] raises [DuplicateShip] iff [s] is already 
     present on [b]. *)
 let duplicate_ship s = 
-  if s.on_board then ()
-  else raise DuplicateShip
+  if s.on_board then raise DuplicateShip
+  else ()
 
 (** [overlapping_ship s b] is true iff [s] would overlap with a ship
     already present on [b]. *)
@@ -197,6 +197,13 @@ let is_dead (s:ship) (g : spot array array) =
     Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
+let did_lose b = 
+  is_dead (get_ship "battleship" b) b.grid &&
+  is_dead (get_ship "cruiser" b) b.grid && 
+  is_dead (get_ship "carrier" b) b.grid &&
+  is_dead (get_ship "destroyer" b) b.grid && 
+  is_dead (get_ship "submarine" b) b.grid 
+
 let remove_from_row i r s b = 
   Array.iteri (fun j spot -> if (spot = Ship (get_ship s b)) then 
                   b.grid.(i).(j) <- Water else ()) r
@@ -215,7 +222,8 @@ let shoot l b =
   | _ -> raise DuplicateShot
 
 let status b = 
-  failwith "unimplemented"
+  if did_lose b then "All of your ships have been destroyed."
+  else ""
 
 let complete b = 
   failwith "unimplemented"
