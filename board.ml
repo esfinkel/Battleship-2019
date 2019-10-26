@@ -43,8 +43,8 @@ let board_size = 10
 type t = spot array array 
 
 let init_board () = Water
-                    |> Array.make board_size
-                    |> Array.make board_size
+                    |> Array.make_matrix board_size board_size
+
 
 (** [on_board loc] raises [OffBoard] iff [loc] refers to an invalid location 
     on board [b]. *)
@@ -85,8 +85,20 @@ let overlapping_ship s b =
   failwith "unimplemented"
 
 (* this should call the above functions *)
-let place _ b =
-  failwith "unimplemented"
+let place s l1 l2 b =
+  on_board l1 b;
+  on_board l2 b;
+  aligned l1 l2;
+  right_length l1 l2 s;
+  duplicate_ship s;
+  let x_1, y_1 = row_col l1 in
+  let x_2, y_2 = row_col l2 in 
+  for x = x_1 to x_2 do
+    for y = y_1 to y_2 do 
+      b.(x).(y) <- Ship s
+    done
+  done
+
 (* - OffBoard if [l1] or [l2] is off the game board *)
 (* - Misaligned if [l1] and [l2] are not in the same row or column *)
 (* - WrongLength if [l1] and [l2] are the wrong distance apart *)

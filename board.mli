@@ -31,7 +31,7 @@ val init_board : unit -> t
     - DuplicateShip if the ship has already been placed
     - OverlappingShips if the ship would overlap with a ship already
         present in [b]. *)
-val place : Command.ship_name * Command.location * Command.location -> t -> unit 
+val place : Command.ship_name -> Command.location -> Command.location -> t -> unit 
 
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
     has been removed, and the cells replaced with Water.
