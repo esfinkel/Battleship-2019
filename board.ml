@@ -197,8 +197,15 @@ let is_dead (s:ship) (g : spot array array) =
     Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
-let remove _ b = 
-  failwith "unimplemented"
+let remove_from_row i r s b = 
+  Array.iteri (fun j spot -> if (spot = Ship (get_ship s b)) then 
+                  b.grid.(i).(j) <- Water else ()) r
+
+let remove s b = 
+  let ship = get_ship s b in 
+  if ship.on_board then
+    Array.iteri (fun i r -> remove_from_row i r s b) b.grid 
+  else raise NoShip
 
 let shoot _ b = 
   failwith "unimplemented"
