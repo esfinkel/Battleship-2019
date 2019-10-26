@@ -14,9 +14,11 @@ exception InvalidLoc
 (* should be in command *)
 exception InvalidShipName
 
+(** The type [ship_name] represents the name of each ship in the game. *)
+type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 
 type ship = {
-  name : Command.ship_name;
+  name : ship_name;
   size : int;
   mutable on_board: bool
 }
@@ -66,27 +68,27 @@ type t = {
 
 let init_ships () = [
   {
-    name=Command.Battleship;
+    name=Battleship;
     size=4;
     on_board=false;
   };
   {
-    name=Command.Cruiser;
+    name=Cruiser;
     size=2;
     on_board=false;
   };
   {
-    name=Command.Carrier;
+    name=Carrier;
     size=5;
     on_board=false;
   };
   {
-    name=Command.Destroyer;
+    name=Destroyer;
     size=3;
     on_board=false;
   };
   {
-    name=Command.Submarine;
+    name=Submarine;
     size=3;
     on_board=false;
   };
@@ -101,12 +103,20 @@ let init_board () = {
 
 (** [ship_of_string str] is the ship with string name [str]. *)
 let ship_of_string = function
-  | "battleship" -> Command.Battleship
-  | "cruiser" -> Command.Cruiser
-  | "carrier" -> Command.Carrier
-  | "destroyer" -> Command.Destroyer
-  | "submarine" -> Command.Submarine
+  | "battleship" -> Battleship
+  | "cruiser" -> Cruiser
+  | "carrier" -> Carrier
+  | "destroyer" -> Destroyer
+  | "submarine" -> Submarine
   | _ -> raise InvalidShipName
+
+(** [string_of_ship shp] is the string name of ship [shp]. *)
+let string_of_ship = function
+  | Battleship -> "battleship"
+  | Cruiser -> "cruiser"
+  | Carrier -> "carrier"
+  | Destroyer -> "destroyer"
+  | Submarine -> "submarine"
 
 
 let get_ship str_name b =

@@ -1,6 +1,3 @@
-(** The type [ship_name] represents the name of each ship in the game. *)
-type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
-
 (** The type [location] represents a specific location on the gameboard. 
     (e.g. A6, B10, etc.) *)
 type location = string 
