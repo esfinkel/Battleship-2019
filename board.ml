@@ -207,8 +207,12 @@ let remove s b =
     Array.iteri (fun i r -> remove_from_row i r s b) b.grid 
   else raise NoShip
 
-let shoot _ b = 
-  failwith "unimplemented"
+let shoot l b = 
+  let x, y = row_col l in 
+  match b.grid.(x).(y) with 
+  | Water -> b.grid.(x).(y) <- ShotWater
+  | Ship s -> b.grid.(x).(y) <- HitShip s 
+  | _ -> raise DuplicateShot
 
 let status b = 
   failwith "unimplemented"
