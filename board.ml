@@ -230,8 +230,8 @@ let complete b =
   List.fold_left
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
-(** [string_self b] is the grid (string list list) representation of
-    board [b]. Represented as seen by the board's player iff [is_self] is
+(** [to_string_grid is_self b] is the grid (string list list) representation
+    of board [b]. Represented as seen by the board's player iff [is_self] is
     [true]. *)
 let to_string_grid is_self b =
   let rec row_str self g = function
