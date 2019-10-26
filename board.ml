@@ -11,18 +11,19 @@ exception DuplicateShot
 exception InvalidLoc
 
 
-(* should be in command *)
 exception InvalidShipName
 
 (** The type [ship_name] represents the name of each ship in the game. *)
 type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 
+(** The abstract type of values representing a ship. *)
 type ship = {
   name : ship_name;
   size : int;
   mutable on_board: bool
 }
 
+(** The abstract type of values representing a board spot. *)
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
 
 (** [row_col loc] is the [(row, column)] coordinate pair corresponding
@@ -59,15 +60,15 @@ let row_col (loc : Command.location) : (int*int) =
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
     [HitShip s]). The remaining cells are Water or ShotWater. 
 *)
-
-
-let board_size = 10
-
 type t = {
   grid: spot array array;
   ships: ship list
 }
 
+let board_size = 10
+
+(** [init_ships ()] is a list of all ships in gameplay, with the appropriate
+    names and sizes, and [on_board] set to [false]. *)
 let init_ships () = [
   {
     name=Battleship;
@@ -120,7 +121,7 @@ let string_of_ship = function
   | Destroyer -> "destroyer"
   | Submarine -> "submarine"
 
-
+(** [get_ship str_name b] is the ship on [b] with string name [str_name]. *)
 let get_ship str_name b =
   let sh_name = ship_of_string str_name in
   List.filter (fun s -> s.name=sh_name) b.ships |>
@@ -136,8 +137,8 @@ let on_board (loc : Command.location) (b : t) =
   | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
   | _ -> raise OffBoard
 
-(** [aligned loc1 loc2] raises [Misaligned] iff [loc1] and [loc2] are not in the
-    same row or column. *)
+(** [aligned loc1 loc2] raises [Misaligned] iff [loc1] and [loc2] are not
+    in the same row or column. *)
 let aligned loc1 loc2 =
   match row_col loc1, row_col loc2 with
   | (r1, c1), (r2, c2) when r1=r2 || c1=c2 -> ()
@@ -191,7 +192,7 @@ let place s l1 l2 b =
     done
   done
 
-(** [is_dead s g] is true if [s] is a sunken ship in the grid [g]. 
+(** [is_dead s g] is true if [s] is a sunken ship in the grid [g] (). 
     False otherwise. *)
 let is_dead (s:ship) (g : spot array array) = 
   let dead_in_row (s:ship) (r : spot array) = 
@@ -200,12 +201,8 @@ let is_dead (s:ship) (g : spot array array) =
 
 (** [did_lose b] is true if all ships have been destroyed in [b]. 
     False otherwise. *)
-let did_lose b = 
-  is_dead (get_ship "battleship" b) b.grid &&
-  is_dead (get_ship "cruiser" b) b.grid && 
-  is_dead (get_ship "carrier" b) b.grid &&
-  is_dead (get_ship "destroyer" b) b.grid && 
-  is_dead (get_ship "submarine" b) b.grid 
+let did_lose b = List.fold_left
+    (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
 (* helper for [remove] *)
 let remove_from_row i r s b = 
@@ -230,16 +227,20 @@ let status b =
   else ""
 
 let complete b = 
-  failwith "unimplemented"
+  List.fold_left
+    (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
-let rec row_str self g = function
-  | [] -> []
-  | Water::t -> (if self then "w" else "?")::(row_str true g t)
-  | ShotWater::t -> (if self then "x" else "w")::(row_str true g t)
-  | (Ship _)::t -> (if self then "O" else "?")::(row_str true g t)
-  | (HitShip s)::t -> (if is_dead s g then "#" else "X")::(row_str true g t)
-
+(** [string_self b] is the grid (string list list) representation of
+    board [b]. Represented as seen by the board's player iff [is_self] is
+    [true]. *)
 let to_string_grid is_self b =
+  let rec row_str self g = function
+    | [] -> []
+    | Water::t -> (if self then "w" else "?")::(row_str self g t)
+    | ShotWater::t -> (if self then "x" else "w")::(row_str self g t)
+    | (Ship _)::t -> (if self then "O" else "?")::(row_str self g t)
+    | (HitShip s)::t ->
+      (if is_dead s g then "#" else "X")::(row_str self g t) in
   b.grid |> Array.to_list
   |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))
 

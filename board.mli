@@ -16,12 +16,6 @@ type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
-(** The abstract type of values representing a ship. *)
-type ship 
-
-(** The abstract type of values representing a board spot. *)
-type spot
-
 (** [ship_of_string str] is the ship with string name [str]. *)
 val ship_of_string : string -> ship_name
 
@@ -62,3 +56,11 @@ val shoot : Command.location -> t -> unit
 
 (** [status b] is a string representing the status of [b]. *)
 val status : t -> string 
+
+(** [string_self b] is the grid (string list list) representation of
+    board [b], as seen by the board's player. *)
+val string_self : t -> string list list
+
+(** [string_other b] is the grid (string list list) representation of
+    board [b], as seen by other players. *)
+val string_other : t -> string list list
