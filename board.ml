@@ -13,7 +13,7 @@ exception InvalidLoc
 type ship = {
   name : Command.ship_name;
   size : int;
-  on_board: bool
+  mutable on_board: bool
 }
 
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
@@ -94,8 +94,16 @@ let duplicate_ship s =
 
 (** [overlapping_ship s b] is true iff [s] would overlap with a ship
     already present on [b]. *)
-let overlapping_ship s b =
-  failwith "unimplemented"
+let overlapping_ship l1 l2 b =
+  let x_1, y_1 = row_col l1 in
+  let x_2, y_2 = row_col l2 in 
+  for x = x_1 to x_2 do
+    for y = y_1 to y_2 do 
+      match b.(x).(y) with
+      | Water -> ()
+      | _ -> raise OverlappingShips 
+    done
+  done
 
 (* this should call the above functions *)
 let place s l1 l2 b =
@@ -104,10 +112,12 @@ let place s l1 l2 b =
   aligned l1 l2;
   right_length l1 l2 s;
   duplicate_ship s;
+  overlapping_ship l1 l2 b;
   let x_1, y_1 = row_col l1 in
   let x_2, y_2 = row_col l2 in 
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
+      s.on_board <- true;
       b.(x).(y) <- Ship s
     done
   done
