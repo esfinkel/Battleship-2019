@@ -58,41 +58,54 @@ let try_placing (ship_phrase: string list) board =
 let try_removing ship_phrase board =
   ()
 
-let rec continue_setup p1_board p2_board = 
+let rec continue_setup p1_board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase p1_board; 
     display_board p1_board;
-    continue_setup p1_board p2_board
+    continue_setup p1_board 
   | Remove ship_phrase -> try_removing ship_phrase p1_board;
     display_board p1_board;
-    continue_setup p1_board p2_board
+    continue_setup p1_board 
   | Help -> print_help (); 
-    continue_setup p1_board p2_board
+    continue_setup p1_board 
   | Quit -> ()
   | Ready -> ()
   | Status -> ()
   | Shoot _ -> ()
   | exception Command.Malformed -> ANSITerminal.(print_string [red] "Please input a valid command.");
-    continue_setup p1_board p2_board
+    continue_setup p1_board 
   | exception Command.Empty -> ANSITerminal.(print_string [red] "Please input a valid command.");
-    continue_setup p1_board p2_board
+    continue_setup p1_board 
 
-let p1_setup p1_board p2_board =
+let p1_setup p1_board  =
   display_board p1_board;
   ANSITerminal.(print_string [blue]
                   ("\n\nPlayer 1 please set up your board." 
                    ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
                    ^ "\nUse 'remove' <ship name> to remove a ship."
                    ^ "\nUse 'ready' when all your ships are placed to continue."));
-  continue_setup p1_board p2_board
+  continue_setup p1_board
 
+let p2_setup p2_board =
+  display_board p2_board;
+  ANSITerminal.(print_string [blue]
+                  ("\n\nPlayer 2 please set up your board." 
+                   ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+                   ^ "\nUse 'remove' <ship name> to remove a ship."
+                   ^ "\nUse 'ready' when all your ships are placed to continue."));
+  continue_setup p2_board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [blue]
                   "\n\nWelcome to Battleship!\n");
   print_help ();
-  p1_setup (Board.init_board ()) (Board.init_board ())
+  let p1_board = Board.init_board () in
+  let p2_board = Board.init_board () in
+  p1_setup p1_board;
+  p2_setup p2_board;
+  ()
+
 
 (* Execute the game engine. *)
 let () = main () 
