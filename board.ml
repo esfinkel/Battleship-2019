@@ -11,7 +11,8 @@ exception DuplicateShot
 
 type ship = {
   name : Command.ship_name;
-  size : int
+  size : int;
+  on_board: bool
 }
 
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
@@ -45,32 +46,38 @@ let init_board () = Water
                     |> Array.make board_size
                     |> Array.make board_size
 
-(** [on_board loc] is true iff [loc] refers to a valid location on board
-    [b]. *)
+(** [on_board loc] raises [OffBoard] iff [loc] refers to an invalid location 
+    on board [b]. *)
 let on_board (loc : Command.location) (b : t) =
   let size = Array.length b in
   match row_col loc with 
-  | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> true
-  | _ -> false
+  | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
+  | _ -> raise OffBoard
 
-(** [aligned loc1 loc2] is true iff [loc1] and [loc2] are in the
+(** [aligned loc1 loc2] raises [Misaligned] iff [loc1] and [loc2] are not in the
     same row or column. *)
 let aligned loc1 loc2 =
   match row_col loc1, row_col loc2 with
-  | (r1, c1), (r2, c2) when r1=r2 || c1=c2 -> true
-  | _ -> false
+  | (r1, c1), (r2, c2) when r1=r2 || c1=c2 -> ()
+  | _ -> raise Misaligned
 
-(** [right_length loc1 loc2 s] is true iff the inclusive distance
-    between loc1 and loc2 equals the size of [s]. *)
+(** [right_length loc1 loc2 s] raises [WrongLength] iff the inclusive distance
+    between loc1 and loc2 does not equal the size of [s]. *)
 let right_length loc1 loc2 s =
   let (r1, c1), (r2, c2) = row_col loc1, row_col loc2 in
-  if r1 = r2 then (c1 - c2 + 1 = s.size) || (c2 - c1 + 1 = s.size)
-  else if c1 = c2 then (r1 - r2 + 1 = s.size) || (r2 - r1 + 1 = s.size)
-  else false
+  if r1 = r2 then 
+    if (c1 - c2 + 1 = s.size) || (c2 - c1 + 1 = s.size) then ()
+    else raise WrongLength
+  else if c1 = c2 then 
+    if (r1 - r2 + 1 = s.size) || (r2 - r1 + 1 = s.size) then () 
+    else raise WrongLength
+  else raise WrongLength
 
-(** [duplicate_ship s b] is true iff [s] is already present on [b]. *)
-let duplicate_ship s b = 
-  failwith "unimplemented"
+(** [duplicate_ship s] raises [DuplicateShip] iff [s] is already 
+    present on [b]. *)
+let duplicate_ship s = 
+  if s.on_board then ()
+  else raise DuplicateShip
 
 (** [overlapping_ship s b] is true iff [s] would overlap with a ship
     already present on [b]. *)
