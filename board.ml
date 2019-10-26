@@ -164,18 +164,19 @@ let overlapping_ship l1 l2 b =
 
 (* this should call the above functions *)
 let place s l1 l2 b =
+  let ship = get_ship s b in 
   on_board l1 b;
   on_board l2 b;
   aligned l1 l2;
-  right_length l1 l2 s;
-  duplicate_ship s;
+  right_length l1 l2 ship;
+  duplicate_ship ship;
   overlapping_ship l1 l2 b.grid;
   let x_1, y_1 = row_col l1 in
   let x_2, y_2 = row_col l2 in 
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
-      s.on_board <- true;
-      b.grid.(x).(y) <- Ship s
+      ship.on_board <- true;
+      b.grid.(x).(y) <- Ship ship
     done
   done
 

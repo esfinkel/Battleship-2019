@@ -1,5 +1,6 @@
 open OUnit2
 open Command
+open Board
 
 (** [make_parse_test name str_input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with 
@@ -21,14 +22,14 @@ let make_parse_exn_test
       assert_raises expected_exn (fun () -> parse str_input))
 
 let command_tests = [
-  make_parse_test "normal place" "place ship board shot ship" 
-    (Place ["ship"; "board"; "shot"; "ship"]);
+  make_parse_test "normal place" "place ship on shot ship" 
+    (Place ["ship"; "shot"; "ship"]);
   make_parse_test "remove with spaces" "     remove     ship     "
     (Remove ["ship"]);
-  make_parse_test "normal shoot" "shoot Ship LEFT right down" 
-    (Shoot ["Ship"; "LEFT"; "right"; "down"]);
-  make_parse_test "shoot with numbers and spaces" "shoot ship   6 7   789 down" 
-    (Shoot ["ship"; "6"; "7"; "789"; "down"]);
+  make_parse_test "normal shoot" "shoot Ship" 
+    (Shoot ["Ship"]);
+  make_parse_test "shoot with numbers and spaces" " shoot 6  " 
+    (Shoot ["6"]);
   make_parse_test "normal quit" "quit" Quit;
   make_parse_test "quit with spaces" "    quit   " Quit;
   make_parse_test "normal status" "status" Status;
