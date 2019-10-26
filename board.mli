@@ -22,6 +22,12 @@ type ship
 (** The abstract type of values representing a board spot. *)
 type spot
 
+(** [ship_of_string str] is the ship with string name [str]. *)
+val ship_of_string : string -> ship_name
+
+(** [string_of_ship shp] is the string name of ship [shp]. *)
+val string_of_ship : ship_name -> string 
+
 (** [init_board ()] is a new [t], with all cells initialized
     to [Water] *)
 val init_board : unit -> t 
@@ -42,7 +48,7 @@ val place : string -> Command.location -> Command.location -> t -> unit
     has been removed, and the cells replaced with Water.
     Raises:
     - NoShip if that ship has not been placed. *)
-val remove : ship_name -> t -> unit 
+val remove : string -> t -> unit 
 
 (** [complete b] is true iff [b] holds one of all of the ships
     in Command.ship_name. *)
