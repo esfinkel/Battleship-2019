@@ -43,21 +43,23 @@ let row_col (loc : Command.location) : (int*int) =
   loc |> pull_regex |> tup
 
 
-(** AF: the spot array array
-    [
-      [|
-        [|Water; ShotWater|];
-        [|Ship s1; HitShip s2|]
-      |]
-    ] represents a board
+(** AF: the record
+    { grid = [
+        [|
+          [|Water; ShotWater|];
+          [|Ship s1; HitShip s2|]
+        |];
+      ships = [s1; s2]
+    } represents a board
     where position A1 is water, position A2 is water that has been
     shot, position B1 is a cell of ship s1, and position B2 is a cell
     of ship s2 (and that shell has been shot).
 
-    RI : Once board setup has ended, every ship [s] in Command.ship_name 
-    appears exactly [n] times in [t] (either as a Ship or HitShip),
-    where [n] is the "size" of [s]. The remaining cells are Water or 
-    ShotWater. *)
+    RI : Once board setup has ended, every ship [s] in [t.ships] 
+    appears exactly [s.size] times in [t.grid], either as [Ship s] or
+    [HitShip s]). The remaining cells are Water or ShotWater. 
+*)
+
 
 let board_size = 10
 
