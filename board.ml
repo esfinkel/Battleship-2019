@@ -191,12 +191,15 @@ let place s l1 l2 b =
     done
   done
 
-
+(** [is_dead s g] is true if [s] is a sunken ship in the grid [g]. 
+    False otherwise. *)
 let is_dead (s:ship) (g : spot array array) = 
   let dead_in_row (s:ship) (r : spot array) = 
     Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
+(** [did_lose b] is true if all ships have been destroyed in [b]. 
+    False otherwise. *)
 let did_lose b = 
   is_dead (get_ship "battleship" b) b.grid &&
   is_dead (get_ship "cruiser" b) b.grid && 
@@ -204,6 +207,7 @@ let did_lose b =
   is_dead (get_ship "destroyer" b) b.grid && 
   is_dead (get_ship "submarine" b) b.grid 
 
+(* helper for [remove] *)
 let remove_from_row i r s b = 
   Array.iteri (fun j spot -> if (spot = Ship (get_ship s b)) then 
                   b.grid.(i).(j) <- Water else ()) r
