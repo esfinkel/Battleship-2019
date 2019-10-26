@@ -22,6 +22,12 @@ type ship
 (** The abstract type of values representing a board spot. *)
 type spot
 
+(** [ship_of_string str] is the ship with string name [str]. *)
+val ship_of_string : string -> ship_name
+
+(** [string_of_ship shp] is the string name of ship [shp]. *)
+val string_of_ship : ship_name -> string 
+
 (** [init_board ()] is a new [t], with all cells initialized
     to [Water] *)
 val init_board : unit -> t 
