@@ -1,5 +1,5 @@
 (** The type [location] represents a specific location on the gameboard. 
-    (e.g. A6, B10, etc.) *)
+    (e.g. ["A6"], ["B10"], etc.) *)
 type location = string 
 
 type object_phrase = string list
@@ -36,7 +36,6 @@ exception Malformed
     "ready" or "quit" and there is a non-empty object phrase, or if the verb 
     is "place", "remove", "shoot", or "status" and there is an empty object 
     phrase. *)
-
 val parse : string -> command 
 
 
