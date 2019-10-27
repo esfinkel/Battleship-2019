@@ -1,3 +1,6 @@
+let clear_screen () =
+  ANSITerminal.(erase Screen)
+
 
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
@@ -18,10 +21,11 @@ let print_grid grid =
     List.iter print_cell row;
     print_newline ()
   in
-  print_string " ";
   let rec print_nums s e =
     if s <= e then (print_string " "; print_int s; print_nums (s+1) e) else ()
   in
+  print_newline ();
+  print_string " ";
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ();
   List.iteri print_row grid
@@ -101,8 +105,8 @@ let try_removing ship_phrase board =
 let rec continue_setup p1_board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase p1_board; 
-    display_board p1_board;
-    continue_setup p1_board 
+    display_board p1_board; if Board.complete p1_board then () else
+      continue_setup p1_board 
   | Remove ship_phrase -> try_removing ship_phrase p1_board;
     display_board p1_board;
     continue_setup p1_board 
