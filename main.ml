@@ -40,7 +40,7 @@ let try_placing (ship_phrase: string list) board =
      | exception Board.WrongLength -> 
        ANSITerminal.
          (print_string [red]
-            ("\n\nYou cannot place the ship with "
+            ("\n\nYou cannot place this ship with "
              ^ "those coordinates. The ship must have" 
              ^ " the right length"));
      | exception Board.DuplicateShip -> 
@@ -58,6 +58,7 @@ let try_placing (ship_phrase: string list) board =
 let try_removing ship_phrase board =
   ()
 
+
 let rec continue_setup p1_board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase p1_board; 
@@ -70,13 +71,16 @@ let rec continue_setup p1_board  =
     continue_setup p1_board 
   | Quit -> ()
   | Ready -> ()
-  | Status -> ()
-  | Shoot _ -> ()
+  | Status -> ANSITerminal.(print_string [red] "\n\nYou cannot check your game status until you begin playing.");
+    continue_setup p1_board
+  | Shoot _ -> ANSITerminal.(print_string [red] "\n\nYou cannot check your game status until you begin playing.");
+    continue_setup p1_board
   | exception Command.Malformed -> ANSITerminal.(print_string [red] "Please input a valid command.");
     continue_setup p1_board 
   | exception Command.Empty -> ANSITerminal.(print_string [red] "Please input a valid command.");
     continue_setup p1_board 
 
+(** [p1_setup p1_board] starts the process of setting up Player 1's board.*)
 let p1_setup p1_board  =
   display_board p1_board;
   ANSITerminal.(print_string [blue]
@@ -86,6 +90,7 @@ let p1_setup p1_board  =
                    ^ "\nUse 'ready' when all your ships are placed to continue."));
   continue_setup p1_board
 
+(** [p2_setup p2_board] starts the process of setting up Player 2's board.*)
 let p2_setup p2_board =
   display_board p2_board;
   ANSITerminal.(print_string [blue]
