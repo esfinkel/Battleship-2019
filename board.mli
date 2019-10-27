@@ -9,6 +9,8 @@ exception NoShip
 exception DuplicateShot
 
 exception InvalidLoc
+exception InvalidShipName
+
 
 (** The type [ship_name] represents the name of each ship in the game. *)
 type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine

@@ -64,7 +64,8 @@ let read_command unit : string =
   | new_command -> new_command
 
 let display_board board =
-  ()
+  print_other_board board;
+  print_self_board board
 
 let try_placing (ship_phrase: string list) board =
   match ship_phrase with
@@ -91,16 +92,30 @@ let try_placing (ship_phrase: string list) board =
        ANSITerminal.
          (print_string [red]
             ("\n\nYou already placed that ship. Try placing a different one."));
-     | exception Board.OverlappingShips ->
+     | exception Board.InvalidShipName ->
        ANSITerminal.(print_string [red] 
-                       ("\n\nYou cannot place that ship there."
-                        ^ " Another ship is already there."));
+                       ("\n\nYou cannot place that ship."
+                        ^ " Please enter a valid ship name."));
      | _ -> print_string ("\n\nYou placed the "  ^  name))
   | _ -> print_string "\n parsing error"
 
 
 let try_removing ship_phrase board =
-  ()
+  match ship_phrase with
+  | name::[] ->
+    (match Board.remove name board with
+     | exception Board.NoShip -> 
+       ANSITerminal.
+         (print_string [red] ("\n\nYou cannot remove that ship."
+                              ^ "\nPlease enter a valid ship that is on" 
+                              ^ " the board."));
+     | exception Board.InvalidShipName ->
+       ANSITerminal.
+         (print_string [red] ("\n\nYou cannot remove that ship."
+                              ^ "\nPlease enter a valid ship name that is on" 
+                              ^ " the board."));
+     | _ -> print_string ("\n\nYou removed the "  ^  name))
+  | _ -> print_string "\n parsing error"
 
 
 let rec continue_setup p1_board  = 
@@ -113,7 +128,7 @@ let rec continue_setup p1_board  =
     continue_setup p1_board 
   | Help -> print_help (); 
     continue_setup p1_board 
-  | Quit -> ()
+  | Quit -> exit 0;
   | Ready -> ()
   | Status -> ANSITerminal.(print_string [red] "\n\nYou cannot check your game status until you begin playing.");
     continue_setup p1_board

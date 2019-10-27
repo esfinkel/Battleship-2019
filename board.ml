@@ -43,6 +43,13 @@ let row_col (loc : Command.location) : (int*int) =
   in
   loc |> pull_regex |> tup
 
+(** [ordered l1 l2] are the coordinates of location [l1] and location [l2], 
+    except they are swapped if given in the reverse order. *)
+let ordered l1 l2 = 
+  if (fst (row_col l1) < fst (row_col l2)) || (snd (row_col l1) < snd (row_col l2)) then 
+    (row_col l1),(row_col l2)
+  else 
+    (row_col l2),(row_col l1)
 
 (** AF: the record
     { grid = [
@@ -183,8 +190,7 @@ let place s l1 l2 b =
   right_length l1 l2 ship;
   duplicate_ship ship;
   overlapping_ship l1 l2 b.grid;
-  let x_1, y_1 = row_col l1 in
-  let x_2, y_2 = row_col l2 in 
+  let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
       ship.on_board <- true;
@@ -211,8 +217,9 @@ let remove_from_row i r s b =
 
 let remove s b = 
   let ship = get_ship s b in 
-  if ship.on_board then
-    Array.iteri (fun i r -> remove_from_row i r s b) b.grid 
+  if ship.on_board 
+  then (ship.on_board <- false; 
+        Array.iteri (fun i r -> remove_from_row i r s b) b.grid;)
   else raise NoShip
 
 let shoot l b = 
