@@ -24,8 +24,8 @@ let make_parse_exn_test
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
     (Place ["ship"; "shot"; "ship"]);
-  make_parse_test "remove with spaces" "     remove     ship     "
-    (Remove ["ship"]);
+  (* make_parse_test "remove with spaces" "     remove     ship     "
+     (Remove ["ship"]); *)
   make_parse_test "normal shoot" "shoot Ship" 
     (Shoot ["Ship"]);
   make_parse_test "shoot with numbers and spaces" " shoot 6  " 
@@ -40,8 +40,8 @@ let command_tests = [
   make_parse_test "ready with spaces" "    ready   " Ready;
   make_parse_exn_test "place with empty [object_phrase]" "place          "
     Malformed;
-  make_parse_exn_test "remove with empty [object_phrase]" "          remove"
-    Malformed;
+  (* make_parse_exn_test "remove with empty [object_phrase]" "          remove"
+     Malformed; *)
   make_parse_exn_test "shoot with empty [object_phrase]" "       shoot      "
     Malformed;
   make_parse_exn_test "incorrect verb" "play" Malformed;

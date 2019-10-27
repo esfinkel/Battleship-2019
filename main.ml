@@ -44,18 +44,19 @@ let print_other_board b =
 
 (** [print_help] prints the list of valid commands. *)
 let print_help unit : unit = 
-  ANSITerminal.(print_string [blue] 
-                  (String.concat "" 
-                     [ "\n\nGame set-up commands:";
-                       "\nUse 'place' with the ship name and start location"
-                       ^ "and end location on the board.";
-                       "\nUse 'remove' and ship name to remove it from the board.";
-                       "\nUse 'ready' when your board is set up and ready to play.";
-                       "\n\n Gameplay commands:";
-                       "\nUse 'shoot' and a coordinate to shoot that spot";
-                       "\nUse 'status' to see what ships you still have.";
-                       "\nUse 'quit' to quit the game."
-                     ])); ()
+  ANSITerminal.(
+    print_string [blue] 
+      (String.concat "\n" 
+         [ "\n\nGame set-up commands:";
+           "Use 'place' with the ship name and start location"
+           ^ " and end location on the board.";
+           (* "Use 'remove' and ship name to remove it from the board."; *)
+           "Use 'ready' when your board is set up and ready to play.";
+           "\n Gameplay commands:";
+           "Use 'shoot' and a coordinate to shoot that spot";
+           "Use 'status' to see what ships you still have.";
+           "Use 'quit' to quit the game."
+         ])); ()
 
 let read_command unit : string =
   print_string "\n> ";
@@ -69,45 +70,51 @@ let display_board board =
 
 let try_placing (ship_phrase: string list) board =
   match ship_phrase with
-  | name::l1::l2::[] ->
-    (match Board.place name l1 l2 board with
-     | exception Board.OffBoard -> 
-       ANSITerminal.
-         (print_string [red] ("\n\nYou cannot place the ship"
-                              ^ "there.\nPlease enter coordinates that are on" 
-                              ^ " the board."));
-     | exception Board.Misaligned -> 
-       ANSITerminal.
-         (print_string [red]
-            ("\n\nYou cannot place the ship with those "
-             ^ "coordinates. Coordinates must be in the "
-             ^ "same row or column."));
-     | exception Board.WrongLength -> 
-       ANSITerminal.
-         (print_string [red]
-            ("\n\nYou cannot place this ship with "
-             ^ "those coordinates. The ship must have" 
-             ^ " the right length"));
-     | exception Board.DuplicateShip -> 
-       ANSITerminal.
-         (print_string [red]
-            ("\n\nYou already placed that ship. Try placing a different one."));
-     | exception Board.InvalidShipName ->
-       ANSITerminal.(print_string [red] 
-                       ("\n\nYou cannot place that ship."
-                        ^ " Please enter a valid ship name."));
-     | exception Board.OverlappingShips ->
-       ANSITerminal.(print_string [red] 
-                       ("\n\nYou cannot place that ship there."
-                        ^ " There is already a ship on those coordinates."
-                        ^ " Try placing the ship in a different location."));
-     | _ -> print_string ("\n\nYou placed the "  ^  name))
-  | _ -> print_string "\n parsing error"
+  | name::l1::l2::[] -> (
+      match Board.place name l1 l2 board with
+      | exception Board.OffBoard -> 
+        ANSITerminal.
+          (print_string [red] (
+              "\n\nYou cannot place the ship"
+              ^ "there.\nPlease enter coordinates that are on" 
+              ^ " the board.")
+          );
+      | exception Board.Misaligned -> 
+        ANSITerminal.
+          (print_string [red]
+             ("\n\nYou cannot place the ship with those "
+              ^ "coordinates. Coordinates must be in the "
+              ^ "same row or column."));
+      | exception Board.WrongLength -> 
+        ANSITerminal.
+          (print_string [red]
+             ("\n\nYou cannot place this ship with "
+              ^ "those coordinates. The ship must have" 
+              ^ " the right length"));
+        (* | exception Board.DuplicateShip -> 
+           ANSITerminal.
+            (print_string [red]
+               ("\n\nYou already placed that ship. Try placing a different one.")); *)
+      | exception Board.InvalidShipName ->
+        ANSITerminal.(print_string [red] 
+                        ("\n\nYou cannot place that ship."
+                         ^ " Please enter a valid ship name."));
+      | exception Board.OverlappingShips ->
+        ANSITerminal.(print_string [red] 
+                        ("\n\nYou cannot place that ship there."
+                         ^ " There is already a ship on those coordinates."
+                         ^ " Try placing the ship in a different location."));
+      | () -> print_self_board board;
+        print_endline ("\n\nYou placed the "  ^  name);
+        Board.setup_status board |> print_endline
+    )
+  | _ -> print_endline "\n parsing error"
 
 
-let try_removing ship_phrase board =
-  match ship_phrase with
-  | name::[] ->
+(* todo decide whether to keep *)
+(* let try_removing ship_phrase board =
+   match ship_phrase with
+   | name::[] ->
     (match Board.remove name board with
      | exception Board.NoShip -> 
        ANSITerminal.
@@ -120,60 +127,78 @@ let try_removing ship_phrase board =
                               ^ "\nPlease enter a valid ship name that is on" 
                               ^ " the board."));
      | _ -> print_string ("\n\nYou removed the "  ^  name))
-  | _ -> print_string "\n parsing error"
+   | _ -> print_string "\n parsing error" *)
 
 
-let rec continue_setup p1_board  = 
+let rec continue_setup board  = 
   match Command.parse (read_command ()) with
-  | Place ship_phrase -> try_placing ship_phrase p1_board; 
-    display_board p1_board; if Board.complete p1_board then () else
-      continue_setup p1_board 
-  | Remove ship_phrase -> try_removing ship_phrase p1_board;
-    display_board p1_board;
-    continue_setup p1_board 
+  | Place ship_phrase -> try_placing ship_phrase board; 
+    (* display_board board; *)
+    if Board.complete board then
+      print_endline "All ships placed.\nType 'ready' to continue." else ();
+    continue_setup board 
+  (* | Remove ship_phrase -> try_removing ship_phrase board;
+     display_board board;
+     continue_setup board  *)
   | Help -> print_help (); 
-    continue_setup p1_board 
+    continue_setup board 
   | Quit -> exit 0;
-  | Ready -> ()
-  | Status -> ANSITerminal.(print_string [red] "\n\nYou cannot check your game status until you begin playing.");
-    continue_setup p1_board
-  | Shoot _ -> ANSITerminal.(print_string [red] "\n\nYou cannot check your game status until you begin playing.");
-    continue_setup p1_board
-  | exception Command.Malformed -> ANSITerminal.(print_string [red] "Please input a valid command.");
-    continue_setup p1_board 
-  | exception Command.Empty -> ANSITerminal.(print_string [red] "Please input a valid command.");
-    continue_setup p1_board 
+  | Ready -> if Board.complete board then () else
+      (ANSITerminal.(print_string [red] "no you're not!");
+       continue_setup board)
+  | Status -> ANSITerminal.(
+      print_string [red]
+        "\n\nYou cannot check your game status until you begin playing."
+    );
+    continue_setup board
+  | Shoot _ -> ANSITerminal.(
+      print_string [red]
+        "\n\nYou cannot check your game status until you begin playing."
+    );
+    continue_setup board
+  | exception Command.Malformed -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    continue_setup board 
+  | exception Command.Empty -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    continue_setup board 
 
 (** [p1_setup p1_board] starts the process of setting up Player 1's board.*)
 let p1_setup p1_board  =
-  display_board p1_board;
-  ANSITerminal.(print_string [blue]
-                  ("\n\nPlayer 1 please set up your board." 
-                   ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
-                   ^ "\nUse 'remove' <ship name> to remove a ship."
-                   ^ "\nUse 'ready' when all your ships are placed to continue."));
+  print_self_board p1_board;  Board.setup_status p1_board |> print_endline;
+  ANSITerminal.(
+    print_string [blue]
+      ("\n\nPlayer 1 please set up your board." 
+       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+       (* ^ "\nUse 'remove' <ship name> to remove a ship." *)
+       ^ "\nUse 'ready' when all your ships are placed to continue.")
+  );
   continue_setup p1_board
 
 (** [p2_setup p2_board] starts the process of setting up Player 2's board.*)
 let p2_setup p2_board =
-  display_board p2_board;
-  ANSITerminal.(print_string [blue]
-                  ("\n\nPlayer 2 please set up your board." 
-                   ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
-                   ^ "\nUse 'remove' <ship name> to remove a ship."
-                   ^ "\nUse 'ready' when all your ships are placed to continue."));
+  print_self_board p2_board; Board.setup_status p2_board |> print_endline;
+  ANSITerminal.(
+    print_string [blue]
+      ("\n\nPlayer 2 please set up your board." 
+       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+       (* ^ "\nUse 'remove' <ship name> to remove a ship." *)
+       ^ "\nUse 'ready' when all your ships are placed to continue.")
+  );
   continue_setup p2_board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [blue]
                   "\n\nWelcome to Battleship!\n");
-  print_help ();
+  (* print_help (); *)
   let p1_board = Board.init_board () in
   let p2_board = Board.init_board () in
-  p1_setup p1_board;
-  p2_setup p2_board;
-  ()
+  p1_setup p1_board; clear_screen ();
+  p2_setup p2_board; clear_screen ();
+  print_endline "this is where gameplay would be."
 
 
 (* Execute the game engine. *)

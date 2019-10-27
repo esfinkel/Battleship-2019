@@ -8,7 +8,7 @@ type object_phrase = string list
     into a verb and and possibly an object phrase. *)
 type command = 
   | Place of object_phrase
-  | Remove of object_phrase
+  (* | Remove of object_phrase *)
   | Shoot of object_phrase
   | Status
   | Help 

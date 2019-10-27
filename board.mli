@@ -2,7 +2,7 @@
 exception OffBoard
 exception Misaligned
 exception WrongLength
-exception DuplicateShip
+(* exception DuplicateShip     todo decide whether to keep *)
 exception OverlappingShips 
 
 exception NoShip
@@ -28,23 +28,27 @@ val string_of_ship : ship_name -> string
     to [Water] *)
 val init_board : unit -> t 
 
+(* todo decide whether to keep *)
+(* - DuplicateShip if the ship has already been placed *)
+
 (** [place (n, l1, l2) b] is [()]. If legal, [b] now has a ship with 
     name [n], and its ends are in locations on t represented by
     [l1] and [l2].
+    If that ship was already on [b], it is removed before being re-placed.
     Raises:
     - OffBoard if [l1] or [l2] is off the game board
     - Misaligned if [l1] and [l2] are not in the same row or column
     - WrongLength if [l1] and [l2] are the wrong distance apart
-    - DuplicateShip if the ship has already been placed
     - OverlappingShips if the ship would overlap with a ship already
         present in [b]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
+(* todo decide whether to keep *)
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
     has been removed, and the cells replaced with Water.
     Raises:
     - NoShip if that ship has not been placed. *)
-val remove : string -> t -> unit 
+(* val remove : string -> t -> unit  *)
 
 (** [complete b] is true iff [b] holds one of all of the ships
     in Command.ship_name. *)
@@ -55,6 +59,10 @@ val complete : t -> bool
     Raises:
     - DuplicateShot if that location has already been shot. *)
 val shoot : Command.location -> t -> unit
+
+(** [setup_status b] is a string representing the status of [b], where
+    [b] has not yet completed setup. *)
+val setup_status : t -> string
 
 (** [status b] is a string representing the status of [b]. *)
 val status : t -> string 

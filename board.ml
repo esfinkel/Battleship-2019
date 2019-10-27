@@ -69,7 +69,8 @@ let ordered l1 l2 =
 *)
 type t = {
   grid: spot array array;
-  ships: ship list
+  ships: ship list;
+  player_name: string
 }
 
 let board_size = 10
@@ -108,6 +109,7 @@ let init_ships () = [
 let init_board () = {
   grid=Water |> Array.make_matrix board_size board_size;
   ships = init_ships ();
+  player_name="";
 }
 
 
@@ -127,6 +129,12 @@ let string_of_ship = function
   | Carrier -> "carrier"
   | Destroyer -> "destroyer"
   | Submarine -> "submarine"
+
+let ships_tostring shp_lst = 
+  let to_string sh = 
+    (string_of_ship sh.name)^" (length "^(sh.size |> string_of_int)^")" in
+  if List.length shp_lst = 0 then "None" else
+    String.concat "; " (List.map to_string shp_lst) 
 
 (** [get_ship str_name b] is the ship on [b] with string name [str_name]. *)
 let get_ship str_name b =
@@ -172,8 +180,7 @@ let duplicate_ship s =
 (** [overlapping_ship s b] is true iff [s] would overlap with a ship
     already present on [b]. *)
 let overlapping_ship l1 l2 b =
-  let x_1, y_1 = row_col l1 in
-  let x_2, y_2 = row_col l2 in 
+  let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in  
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
       match b.(x).(y) with
@@ -182,13 +189,25 @@ let overlapping_ship l1 l2 b =
     done
   done
 
+(* helper for [remove] *)
+let remove_from_row i r s b = 
+  Array.iteri (fun j spot -> if (spot = Ship s) then 
+                  b.grid.(i).(j) <- Water else ()) r
+
+let remove sh b = 
+  (* let ship = get_ship s b in  *)
+  if sh.on_board 
+  then (sh.on_board <- false; 
+        Array.iteri (fun i r -> remove_from_row i r sh b) b.grid;)
+  else raise NoShip
+
 let place s l1 l2 b =
   let ship = get_ship s b in 
   on_board l1 b;
   on_board l2 b;
   aligned l1 l2;
   right_length l1 l2 ship;
-  duplicate_ship ship;
+  (try duplicate_ship ship with | _ -> remove ship b);
   overlapping_ship l1 l2 b.grid;
   let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
   for x = x_1 to x_2 do
@@ -210,17 +229,7 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
-(* helper for [remove] *)
-let remove_from_row i r s b = 
-  Array.iteri (fun j spot -> if (spot = Ship (get_ship s b)) then 
-                  b.grid.(i).(j) <- Water else ()) r
 
-let remove s b = 
-  let ship = get_ship s b in 
-  if ship.on_board 
-  then (ship.on_board <- false; 
-        Array.iteri (fun i r -> remove_from_row i r s b) b.grid;)
-  else raise NoShip
 
 let shoot l b = 
   let x, y = row_col l in 
@@ -228,6 +237,15 @@ let shoot l b =
   | Water -> b.grid.(x).(y) <- ShotWater
   | Ship s -> b.grid.(x).(y) <- HitShip s 
   | _ -> raise DuplicateShot
+
+
+let setup_status b = 
+  let on_board = List.filter (fun s -> s.on_board) b.ships in
+  let off_board = List.filter (fun s -> not s.on_board) b.ships in
+  "On the board: "
+  ^ (ships_tostring on_board)
+  ^ "\nOff the board: "
+  ^ (ships_tostring off_board)
 
 let status b = 
   if did_lose b then "All of your ships have been destroyed."
