@@ -96,6 +96,11 @@ let try_placing (ship_phrase: string list) board =
        ANSITerminal.(print_string [red] 
                        ("\n\nYou cannot place that ship."
                         ^ " Please enter a valid ship name."));
+     | exception Board.OverlappingShips ->
+       ANSITerminal.(print_string [red] 
+                       ("\n\nYou cannot place that ship there."
+                        ^ " There is already a ship on those coordinates."
+                        ^ " Try placing the ship in a different location."));
      | _ -> print_string ("\n\nYou placed the "  ^  name))
   | _ -> print_string "\n parsing error"
 
