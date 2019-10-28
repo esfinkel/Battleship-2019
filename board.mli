@@ -30,9 +30,6 @@ val init_board : string option -> t
 (** [player_name b] is the name of the owner of [b]. *)
 val player_name : t -> string
 
-(* todo decide whether to keep *)
-(* - DuplicateShip if the ship has already been placed *)
-
 (** [place (n, l1, l2) b] is [()]. If legal, [b] now has a ship with 
     name [n], and its ends are in locations on t represented by
     [l1] and [l2].
