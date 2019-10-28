@@ -6,7 +6,7 @@ let clear_screen () =
     (string list list) [grid]. *)
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
-      | "w" -> print_string [blue] "w "
+      | "w" -> print_string [cyan] "w "
       | "x" -> print_string [white; on_black] "x "
       | "?" -> print_string [white; on_black] "? "
       | "O" -> print_string [white; on_black] "O "
@@ -45,7 +45,7 @@ let print_other_board b =
 (** [print_help] prints the list of valid commands. *)
 let print_help unit : unit = 
   ANSITerminal.(
-    print_string [blue] 
+    print_string [cyan] 
       (String.concat "\n" 
          [ "\n\nGame set-up commands:";
            "Use 'place' with the ship name and start location"
@@ -142,7 +142,7 @@ let rec continue_setup board  =
 let setup board  =
   print_self_board board;  Board.setup_status board |> print_endline;
   ANSITerminal.(
-    print_string [blue]
+    print_string [cyan]
       ("\n\n"^(Board.player_name board)^": please set up your board." 
        ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
        ^ "\nUse 'ready' when all your ships are placed to continue.")
@@ -151,7 +151,7 @@ let setup board  =
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
-  ANSITerminal.(print_string [blue]
+  ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   (* print_help (); *)
   print_endline "Player 1 name?";
