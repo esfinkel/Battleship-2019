@@ -106,11 +106,14 @@ let init_ships () = [
 ]
 
 
-let init_board () = {
-  grid=Water |> Array.make_matrix board_size board_size;
-  ships = init_ships ();
-  player_name="";
-}
+let init_board player_name = let pn = match player_name with
+    | None -> ""
+    | Some n -> n in
+  {
+    grid=Water |> Array.make_matrix board_size board_size;
+    ships = init_ships ();
+    player_name= pn;
+  }
 
 
 (** [ship_of_string str] is the ship_name with string name [str]. *)

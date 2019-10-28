@@ -26,7 +26,7 @@ val string_of_ship : ship_name -> string
 
 (** [init_board ()] is a new [t], with all cells initialized
     to [Water] *)
-val init_board : unit -> t 
+val init_board : string option -> t 
 
 (* todo decide whether to keep *)
 (* - DuplicateShip if the ship has already been placed *)

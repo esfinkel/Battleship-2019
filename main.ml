@@ -194,8 +194,12 @@ let main () =
   ANSITerminal.(print_string [blue]
                   "\n\nWelcome to Battleship!\n");
   (* print_help (); *)
-  let p1_board = Board.init_board () in
-  let p2_board = Board.init_board () in
+  print_endline "Player 1 name?";
+  let p1_name = Some (read_command ()) in
+  print_endline "Player 2 name?";
+  let p2_name = Some (read_command ()) in
+  let p1_board = Board.init_board p1_name in
+  let p2_board = Board.init_board p2_name in
   p1_setup p1_board; clear_screen ();
   p2_setup p2_board; clear_screen ();
   print_endline "this is where gameplay would be."
