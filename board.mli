@@ -28,6 +28,9 @@ val string_of_ship : ship_name -> string
     to [Water] *)
 val init_board : string option -> t 
 
+(** [player_name b] is the name of the owner of [b]. *)
+val player_name : t -> string
+
 (* todo decide whether to keep *)
 (* - DuplicateShip if the ship has already been placed *)
 

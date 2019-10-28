@@ -115,6 +115,8 @@ let init_board player_name = let pn = match player_name with
     player_name= pn;
   }
 
+let player_name b = b.player_name
+
 
 (** [ship_of_string str] is the ship_name with string name [str]. *)
 let ship_of_string = function

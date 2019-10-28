@@ -165,29 +165,17 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
-(** [p1_setup p1_board] starts the process of setting up Player 1's board.*)
-let p1_setup p1_board  =
-  print_self_board p1_board;  Board.setup_status p1_board |> print_endline;
+(** [setup board] starts the process of setting up [board].*)
+let setup board  =
+  print_self_board board;  Board.setup_status board |> print_endline;
   ANSITerminal.(
     print_string [blue]
-      ("\n\nPlayer 1 please set up your board." 
+      ("\n\n"^(Board.player_name board)^": please set up your board." 
        ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
        (* ^ "\nUse 'remove' <ship name> to remove a ship." *)
        ^ "\nUse 'ready' when all your ships are placed to continue.")
   );
-  continue_setup p1_board
-
-(** [p2_setup p2_board] starts the process of setting up Player 2's board.*)
-let p2_setup p2_board =
-  print_self_board p2_board; Board.setup_status p2_board |> print_endline;
-  ANSITerminal.(
-    print_string [blue]
-      ("\n\nPlayer 2 please set up your board." 
-       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
-       (* ^ "\nUse 'remove' <ship name> to remove a ship." *)
-       ^ "\nUse 'ready' when all your ships are placed to continue.")
-  );
-  continue_setup p2_board
+  continue_setup board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
@@ -200,8 +188,9 @@ let main () =
   let p2_name = Some (read_command ()) in
   let p1_board = Board.init_board p1_name in
   let p2_board = Board.init_board p2_name in
-  p1_setup p1_board; clear_screen ();
-  p2_setup p2_board; clear_screen ();
+  clear_screen ();
+  setup p1_board; clear_screen ();
+  setup p2_board; clear_screen ();
   print_endline "this is where gameplay would be."
 
 
