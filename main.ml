@@ -144,7 +144,7 @@ let rec continue_setup board  =
     continue_setup board 
   | Quit -> exit 0;
   | Ready -> if Board.complete board then () else
-      (ANSITerminal.(print_string [red] "no you're not!");
+      (ANSITerminal.(print_string [red] "No you're not! Make sure all your ships are placed.");
        continue_setup board)
   | Status -> ANSITerminal.(
       print_string [red]
