@@ -2,14 +2,12 @@
 exception OffBoard
 exception Misaligned
 exception WrongLength
-exception DuplicateShip
 exception OverlappingShips 
 
 exception NoShip
 exception DuplicateShot
 
 exception InvalidLoc
-
 
 exception InvalidShipName
 
@@ -176,12 +174,6 @@ let right_length loc1 loc2 s =
     else raise WrongLength
   else raise WrongLength
 
-(** [duplicate_ship s] raises [DuplicateShip] iff [s] is already 
-    present on [b]. *)
-let duplicate_ship s = 
-  if s.on_board then raise DuplicateShip
-  else ()
-
 (** [overlapping_ship s b] is true iff [s] would overlap with a ship
     already present on [b]. *)
 let overlapping_ship l1 l2 b =
@@ -199,8 +191,11 @@ let remove_from_row i r s b =
   Array.iteri (fun j spot -> if (spot = Ship s) then 
                   b.grid.(i).(j) <- Water else ()) r
 
+(** [remove n b] is [()]. If a ship with name [n] was present in [b], it
+    has been removed, and the cells replaced with Water.
+    Raises:
+    - NoShip if that ship has not been placed. *)
 let remove sh b = 
-  (* let ship = get_ship s b in  *)
   if sh.on_board 
   then (sh.on_board <- false; 
         Array.iteri (fun i r -> remove_from_row i r sh b) b.grid;)
@@ -212,7 +207,7 @@ let place s l1 l2 b =
   on_board l2 b;
   aligned l1 l2;
   right_length l1 l2 ship;
-  (try duplicate_ship ship with | _ -> remove ship b);
+  if ship.on_board then remove ship b else ();
   overlapping_ship l1 l2 b.grid;
   let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
   for x = x_1 to x_2 do

@@ -2,7 +2,6 @@
 exception OffBoard
 exception Misaligned
 exception WrongLength
-(* exception DuplicateShip     todo decide whether to keep *)
 exception OverlappingShips 
 
 exception NoShip
@@ -46,12 +45,6 @@ val player_name : t -> string
         present in [b]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
-(* todo decide whether to keep *)
-(** [remove n b] is [()]. If a ship with name [n] was present in [b], it
-    has been removed, and the cells replaced with Water.
-    Raises:
-    - NoShip if that ship has not been placed. *)
-(* val remove : string -> t -> unit  *)
 
 (** [complete b] is true iff [b] holds one of all of the ships
     in Command.ship_name. *)

@@ -50,7 +50,6 @@ let print_help unit : unit =
          [ "\n\nGame set-up commands:";
            "Use 'place' with the ship name and start location"
            ^ " and end location on the board.";
-           (* "Use 'remove' and ship name to remove it from the board."; *)
            "Use 'ready' when your board is set up and ready to play.";
            "\n Gameplay commands:";
            "Use 'shoot' and a coordinate to shoot that spot";
@@ -91,10 +90,6 @@ let try_placing (ship_phrase: string list) board =
              ("\n\nYou cannot place this ship with "
               ^ "those coordinates. The ship must have" 
               ^ " the right length"));
-        (* | exception Board.DuplicateShip -> 
-           ANSITerminal.
-            (print_string [red]
-               ("\n\nYou already placed that ship. Try placing a different one.")); *)
       | exception Board.InvalidShipName ->
         ANSITerminal.(print_string [red] 
                         ("\n\nYou cannot place that ship."
@@ -111,25 +106,6 @@ let try_placing (ship_phrase: string list) board =
   | _ -> print_endline "\n parsing error"
 
 
-(* todo decide whether to keep *)
-(* let try_removing ship_phrase board =
-   match ship_phrase with
-   | name::[] ->
-    (match Board.remove name board with
-     | exception Board.NoShip -> 
-       ANSITerminal.
-         (print_string [red] ("\n\nYou cannot remove that ship."
-                              ^ "\nPlease enter a valid ship that is on" 
-                              ^ " the board."));
-     | exception Board.InvalidShipName ->
-       ANSITerminal.
-         (print_string [red] ("\n\nYou cannot remove that ship."
-                              ^ "\nPlease enter a valid ship name that is on" 
-                              ^ " the board."));
-     | _ -> print_string ("\n\nYou removed the "  ^  name))
-   | _ -> print_string "\n parsing error" *)
-
-
 let rec continue_setup board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
@@ -137,9 +113,6 @@ let rec continue_setup board  =
     if Board.complete board then
       print_endline "All ships placed.\nType 'ready' to continue." else ();
     continue_setup board 
-  (* | Remove ship_phrase -> try_removing ship_phrase board;
-     display_board board;
-     continue_setup board  *)
   | Help -> print_help (); 
     continue_setup board 
   | Quit -> exit 0;
@@ -172,7 +145,6 @@ let setup board  =
     print_string [blue]
       ("\n\n"^(Board.player_name board)^": please set up your board." 
        ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
-       (* ^ "\nUse 'remove' <ship name> to remove a ship." *)
        ^ "\nUse 'ready' when all your ships are placed to continue.")
   );
   continue_setup board
