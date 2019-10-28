@@ -153,7 +153,7 @@ let rec continue_setup board  =
     continue_setup board
   | Shoot _ -> ANSITerminal.(
       print_string [red]
-        "\n\nYou cannot check your game status until you begin playing."
+        "\n\nYou cannot shoot until you begin playing."
     );
     continue_setup board
   | exception Command.Malformed -> ANSITerminal.(
