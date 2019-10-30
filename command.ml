@@ -6,7 +6,6 @@ type location = string
 
 type command = 
   | Place of object_phrase
-  (* | Remove of object_phrase *)
   | Shoot of object_phrase
   | Status
   | Help 
@@ -24,7 +23,6 @@ let parse str =
   |> function
   | [] -> raise Empty
   | "place"::boat::"on"::l1::l2::[] -> Place (boat::l1::l2::[])
-  (* | "remove"::boat::[] -> Remove (boat::[]) *)
   | "shoot"::loc::[] -> Shoot (loc::[])
   | "status"::[] -> Status
   | "help"::[] -> Help
