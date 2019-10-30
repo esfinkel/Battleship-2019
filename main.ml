@@ -48,8 +48,8 @@ let print_help unit : unit =
     print_string [cyan] 
       (String.concat "\n" 
          [ "\n\nGame set-up commands:";
-           "Use 'place' with the ship name and start location"
-           ^ " and end location on the board.";
+           "Use 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+           ^ " to place a ship on the board.";
            "Use 'ready' when your board is set up and ready to play.";
            "\n Gameplay commands:";
            "Use 'shoot' and a coordinate to shoot that spot";
@@ -98,7 +98,7 @@ let try_placing (ship_phrase: string list) board =
         ANSITerminal.(print_string [red] 
                         ("\n\nYou cannot place that ship there."
                          ^ " There is already a ship on those coordinates."
-                         ^ " Try placing the ship in a different location."));
+                         ^ " Try placing the ship on a different location."));
       | () -> print_self_board board;
         print_endline ("\n\nYou placed the "  ^  name);
         Board.setup_status board |> print_endline
@@ -149,15 +149,25 @@ let setup board  =
   );
   continue_setup board
 
+(** [check_p2_name p1_name] checks the name each player inputs is not empty 
+    and is different than [p1_name]. *)
+let rec check_p2_name p1_name =
+  let x = read_command () in 
+  if (x 
+      |> String.split_on_char ' ' 
+      |> List.filter (fun x -> x <> "") = []) || (Some x = p1_name) 
+  then (print_endline "Please enter a valid name."; 
+        check_p2_name p1_name) else Some x
+
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   (* print_help (); *)
   print_endline "Player 1 name?";
-  let p1_name = Some (read_command ()) in
+  let p1_name = check_p2_name None in
   print_endline "Player 2 name?";
-  let p2_name = Some (read_command ()) in
+  let p2_name = check_p2_name p1_name in 
   let p1_board = Board.init_board p1_name in
   let p2_board = Board.init_board p2_name in
   clear_screen ();
