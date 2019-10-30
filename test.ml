@@ -100,15 +100,16 @@ let () = Board.shoot "a3" b2
 let board_tests = [
 
   (* assert (Board.player_name b1 = "fake name") *)
-
-
-
   make_board_op_exn_test "OverlappingShips"
     (Board.place "destroyer" "b1" "b3") b1 Board.OverlappingShips;
   make_board_op_exn_test "InvalidLoc"
     (Board.place "destroyer" "b9" "b12") b1 Board.OffBoard;
   make_board_op_exn_test "InvalidShipName"
     (Board.place "destroyor" "b9" "b12") b1 Board.InvalidShipName;
+  make_board_op_exn_test "WrongLength"
+    (Board.place "destroyer" "b2" "b9") b1 Board.WrongLength;
+  make_board_op_exn_test "Misaligned"
+    (Board.place "destroyer" "b2" "c7") b1 Board.Misaligned;
 
 
 
