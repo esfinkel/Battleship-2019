@@ -103,6 +103,12 @@ let board_tests = [
 
   make_board_op_exn_test "OverlappingShips"
     (Board.place "destroyer" "b1" "b3") b1 Board.OverlappingShips;
+  make_board_op_exn_test "InvalidLoc"
+    (Board.place "destroyer" "b9" "b12") b1 Board.OffBoard;
+  make_board_op_exn_test "InvalidShipName"
+    (Board.place "destroyor" "b9" "b12") b1 Board.InvalidShipName;
+
+
 
   (* make setup_status b1 test - only battleship is on the grid *)
 
@@ -121,7 +127,7 @@ let board_tests = [
 
   (* we will test shoot by gameplay. unless someone wants to  *)
   make_no_exn_raised_test "can shoot without error"
-    (Board.shoot "a3") b1;
+    (Board.shoot "a3") b1; 
 
   make_equal_test "b1 has not lost" Board.status b1 "";
 
