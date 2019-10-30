@@ -93,7 +93,9 @@ let command_tests = [
 
 (* init_board  *)
 let b1 = Board.init_board "fake name"
+let b2 = Board.init_board "fake name 2"
 let () = Board.place "battleship" "b2" "e2" b1
+let () = Board.shoot "a3" b2
 
 let board_tests = [
 
@@ -132,7 +134,7 @@ let board_tests = [
   make_equal_test "b1 has not lost" Board.status b1 "";
 
   make_board_op_exn_test "shoot shot location" (Board.shoot "a3")
-    b1 Board.DuplicateShot;
+    b2 Board.DuplicateShot;
 
   (* shoot remaining ships *)
 
