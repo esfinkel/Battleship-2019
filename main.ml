@@ -167,9 +167,8 @@ let get_names () =  print_endline "Player 1 name?";
   let p2_name = check_p2_name p1_name in 
   (p1_name, p2_name)
 
-
-(** [main ()] prompts for the game to play, then starts it. *)
-let main () =
+(** [multiplayer ()] prompts for the game to play, then starts it. *)
+let multiplayer () = 
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   let p1, p2 = get_names () in
@@ -179,6 +178,10 @@ let main () =
   setup p1_board; clear_screen ();
   setup p2_board; clear_screen ();
   print_endline "this is where gameplay would be."
+
+
+(** [main ()] prompts for the game to play, then starts it. *)
+let main () = multiplayer ()
 
 
 (* Execute the game engine. *)
