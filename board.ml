@@ -18,7 +18,8 @@ type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 type ship = {
   name : ship_name;
   size : int;
-  mutable on_board: bool
+  mutable on_board: bool;
+  default : (Command.location * Command.location);
 }
 
 (** The abstract type of values representing a board spot. *)
@@ -80,26 +81,31 @@ let init_ships () = [
     name=Battleship;
     size=4;
     on_board=false;
+    default=("a1", "a4")
   };
   {
     name=Cruiser;
     size=2;
     on_board=false;
+    default=("b1", "b2")
   };
   {
     name=Carrier;
     size=5;
     on_board=false;
+    default=("d2", "d6")
   };
   {
     name=Destroyer;
     size=3;
     on_board=false;
+    default=("e2", "g2")
   };
   {
     name=Submarine;
     size=3;
     on_board=false;
+    default=("f4", "f6")
   };
 ]
 
@@ -197,21 +203,28 @@ let remove sh b =
         Array.iteri (fun i r -> remove_from_row i r sh b) b.grid;)
   else raise NoShip
 
-let place s l1 l2 b =
-  let ship = get_ship s b in 
-  on_board l1 b;
-  on_board l2 b;
-  aligned l1 l2;
-  right_length l1 l2 ship;
-  if ship.on_board then remove ship b else ();
-  overlapping_ship l1 l2 b.grid;
-  let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
-  for x = x_1 to x_2 do
-    for y = y_1 to y_2 do 
-      ship.on_board <- true;
-      b.grid.(x).(y) <- Ship ship
+
+let rec place s l1 l2 b =
+  if s="random" then (
+    List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+    List.fold_left
+      (fun _ sh -> let def1, def2 = sh.default in
+        place (string_of_ship sh.name) def1 def2 b) () b.ships 
+  ) else
+    let ship = get_ship s b in 
+    on_board l1 b;
+    on_board l2 b;
+    aligned l1 l2;
+    right_length l1 l2 ship;
+    if ship.on_board then remove ship b else ();
+    overlapping_ship l1 l2 b.grid;
+    let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
+    for x = x_1 to x_2 do
+      for y = y_1 to y_2 do 
+        ship.on_board <- true;
+        b.grid.(x).(y) <- Ship ship
+      done
     done
-  done
 
 (** [is_dead s g] is true if [s] is a sunken ship in the grid [g] (). 
     False otherwise. *)
