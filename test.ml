@@ -21,6 +21,37 @@ let make_parse_exn_test
   name >:: (fun _ -> 
       assert_raises expected_exn (fun () -> parse str_input))
 
+(** [make_board_op_exn_test name f board expected_exn] constructs an OUnit test 
+    named [name] that asserts [f board] raises the [expected_exn]. *)
+let make_board_op_exn_test
+    (name : string)
+    (f : Board.t -> unit)
+    (board : Board.t)
+    (expected_exn : exn) : test = 
+  name >:: (fun _ -> 
+      assert_raises expected_exn (fun () -> f board))
+
+(** [make_no_exn_raised_test name f board] constructs an OUnit test
+    named [name] that asserts the quality of [())] with 
+    [f board]. *)
+let make_no_exn_raised_test
+    (name : string)
+    (f : Board.t -> unit)
+    (board : Board.t) = 
+  name >:: (fun _ -> 
+      assert_equal () (f board)
+    )
+
+let make_equal_test
+    (name : string)
+    (f : Board.t -> 'a)
+    (board : Board.t)
+    (expected_output : 'a) = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (f board)
+    )
+
+
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
     (Place ["ship"; "shot"; "ship"]);
@@ -59,9 +90,55 @@ let command_tests = [
     Malformed;  
 ]
 
+
+(* init_board  *)
+let b1 = Board.init_board "fake name"
+let () = Board.place "battleship" "b2" "e2" b1
+
 let board_tests = [
 
+  (* assert (Board.player_name b1 = "fake name") *)
+
+
+
+  make_board_op_exn_test "OverlappingShips"
+    (Board.place "destroyer" "b1" "b3") b1 Board.OverlappingShips;
+
+  (* make setup_status b1 test - only battleship is on the grid *)
+
+  (* make test for offboard *)
+  (* make test for misaligned *)
+  (* make test for wronglength *)
+  (* make one test with make_no_exn_raised_test (and l1 > l2) *)
+
+  make_equal_test "incomplete" Board.complete b1 false;
+
+
+  (* insert the other ships *)
+
+
+  (* make_equal_test "complete" Board.complete b1 true; *)
+
+  (* we will test shoot by gameplay. unless someone wants to  *)
+  make_no_exn_raised_test "can shoot without error"
+    (Board.shoot "a3") b1;
+
+  make_equal_test "b1 has not lost" Board.status b1 "";
+
+  make_board_op_exn_test "shoot shot location" (Board.shoot "a3")
+    b1 Board.DuplicateShot;
+
+  (* shoot remaining ships *)
+
+  (* make_equal_test "b1 has lost" Board.status b1
+     "All of your ships have been destroyed."; *)
+
+  (* let's just test string_self and string_other by inspection, unless
+     someone really wants to make the grid *)
+
+
 ]
+
 
 let suite =
   "test suite for A2"  >::: List.flatten [

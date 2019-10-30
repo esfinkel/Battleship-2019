@@ -153,23 +153,28 @@ let setup board  =
     and is different than [p1_name]. *)
 let rec check_p2_name p1_name =
   let x = read_command () in 
-  if (x 
+  if (x = p1_name) || (
+      x 
       |> String.split_on_char ' ' 
-      |> List.filter (fun x -> x <> "") = []) || (Some x = p1_name) 
+      |> List.filter (fun x -> x <> "") = []
+    )  
   then (print_endline "Please enter a valid name."; 
-        check_p2_name p1_name) else Some x
+        check_p2_name p1_name) else x
+
+let get_names () =  print_endline "Player 1 name?";
+  let p1_name = check_p2_name "" in
+  print_endline "Player 2 name?";
+  let p2_name = check_p2_name p1_name in 
+  (p1_name, p2_name)
+
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () =
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
-  (* print_help (); *)
-  print_endline "Player 1 name?";
-  let p1_name = check_p2_name None in
-  print_endline "Player 2 name?";
-  let p2_name = check_p2_name p1_name in 
-  let p1_board = Board.init_board p1_name in
-  let p2_board = Board.init_board p2_name in
+  let p1, p2 = get_names () in
+  let p1_board = Board.init_board p1 in
+  let p2_board = Board.init_board p2 in
   clear_screen ();
   setup p1_board; clear_screen ();
   setup p2_board; clear_screen ();

@@ -17,20 +17,14 @@ type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
-(** [ship_of_string str] is the ship with string name [str]. *)
-val ship_of_string : string -> ship_name
-
-(** [string_of_ship shp] is the string name of ship [shp]. *)
-val string_of_ship : ship_name -> string 
-
-(** [init_board ()] is a new [t], with all cells initialized
-    to [Water] *)
-val init_board : string option -> t 
+(** [init_board n] is a new [t], with all cells initialized to [Water] and
+    player_name [n]. *)
+val init_board : string -> t 
 
 (** [player_name b] is the name of the owner of [b]. *)
 val player_name : t -> string
 
-(** [place (n, l1, l2) b] is [()]. If legal, [b] now has a ship with 
+(** [place n l1 l2 b] is [()]. If legal, [b] now has a ship with 
     name [n], and its ends are in locations on t represented by
     [l1] and [l2].
     If that ship was already on [b], it is removed before being re-placed.
