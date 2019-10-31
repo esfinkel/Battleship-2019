@@ -156,6 +156,9 @@ let try_shooting shoot_phrase board =
       | exception Board.DuplicateShot -> ANSITerminal.(
           print_string [red] "You've already shot there! Try shooting somewhere else!"
         );
+      | exception Board.InvalidLoc -> ANSITerminal.(
+          print_string [red] "You can't shoot there! Try shooting somewhere else!"
+        );
       | _ -> display_board board; 
         print_endline ("You shot: " ^ loc); end
   | _ -> print_endline "\n parsing error"
