@@ -258,7 +258,7 @@ let setup_status b =
 
 let status b = 
   if did_lose b then "All of your ships have been destroyed."
-  else ""
+  else "You still have ships left. (Just a placeholder for now)"
 
 let complete b = 
   List.fold_left
