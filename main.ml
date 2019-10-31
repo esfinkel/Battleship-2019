@@ -1,3 +1,4 @@
+
 let clear_screen () =
   ANSITerminal.(erase Screen)
 
@@ -139,6 +140,12 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
+let wait () =
+  clear_screen ();
+  ANSITerminal.(
+    print_string [cyan] "please switch players! then press enter");
+  match read_command () with | _ -> ()
+
 (** [setup board] starts the process of setting up [board].*)
 let setup board  =
   print_self_board board;  Board.setup_status board |> print_endline;
@@ -150,7 +157,7 @@ let setup board  =
   );
   continue_setup board
 
-let try_shooting shoot_phrase target_board my_board =
+let rec try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
       match Board.shoot loc target_board with 
@@ -161,11 +168,12 @@ let try_shooting shoot_phrase target_board my_board =
           print_string [red] "That's not on the board!"
         );
       | _ -> display_board target_board my_board; 
-        print_endline ("You shot: " ^ loc); end
+        print_endline ("You shot: " ^ loc);
+        wait ();
+        next_move target_board my_board
+    end
   | _ -> print_endline "\n parsing error"
-
-
-let rec continue_game board o_board = 
+and continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> 
     print_endline "You can't move your ships during the game!"; 
@@ -192,14 +200,7 @@ let rec continue_game board o_board =
       print_string [red] "Please input a valid command."
     );
     continue_game board o_board
-
-let wait () =
-  clear_screen ();
-  ANSITerminal.(
-    print_string [cyan] "please switch players! then press enter");
-  match read_command () with | _ -> ()
-
-let rec next_move board o_board = 
+and next_move board o_board = 
   clear_screen ();
   display_board o_board board; 
   ANSITerminal.(
