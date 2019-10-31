@@ -243,6 +243,7 @@ let did_lose b = List.fold_left
 let shoot l b = 
   let x, y = row_col l in 
   match b.grid.(x).(y) with 
+  | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater
   | Ship s -> b.grid.(x).(y) <- HitShip s 
   | _ -> raise DuplicateShot
