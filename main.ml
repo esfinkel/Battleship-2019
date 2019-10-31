@@ -140,11 +140,26 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
+
+let wait_next_move () = 
+  clear_screen ();
+  ANSITerminal.(
+    print_string [cyan] "press enter to reveal your board.");
+  match read_command () with 
+  | _ -> ()
+
+let pause () =
+  ANSITerminal.(
+    print_string [cyan] "please press enter then switch players!");
+  match read_command () with 
+  | _ -> wait_next_move ()
+
 let wait () =
   clear_screen ();
   ANSITerminal.(
     print_string [cyan] "please switch players! then press enter");
-  match read_command () with | _ -> ()
+  match read_command () with 
+  | _ -> ()
 
 (** [setup board] starts the process of setting up [board].*)
 let setup board  =
@@ -169,7 +184,7 @@ let rec try_shooting shoot_phrase target_board my_board =
         );
       | _ -> display_board target_board my_board; 
         print_endline ("You shot: " ^ loc);
-        wait ();
+        pause ();
         next_move target_board my_board
     end
   | _ -> print_endline "\n parsing error"
