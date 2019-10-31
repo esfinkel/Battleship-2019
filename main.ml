@@ -7,7 +7,7 @@ let clear_screen () =
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
       | "w" -> print_string [cyan] "w "
-      | "x" -> print_string [white; on_black] "x "
+      | "x" -> print_string [cyan] "x "
       | "?" -> print_string [white; on_black] "? "
       | "O" -> print_string [white; on_black] "O "
       | "X" -> print_string [red] "X "
@@ -63,9 +63,9 @@ let read_command unit : string =
   | exception End_of_file -> "End of file exception thrown."
   | new_command -> new_command
 
-let display_board board =
-  print_other_board board;
-  print_self_board board
+let display_board other_board my_board =
+  print_other_board other_board;
+  print_self_board my_board
 
 let try_placing (ship_phrase: string list) board =
   match ship_phrase with
@@ -117,7 +117,8 @@ let rec continue_setup board  =
     continue_setup board 
   | Quit -> exit 0;
   | Ready -> if Board.complete board then () else
-      (ANSITerminal.(print_string [red] "No you're not! Make sure all your ships are placed.");
+      (ANSITerminal.(print_string [red]
+                       "No you're not! Make sure all your ships are placed.");
        continue_setup board)
   | Status -> ANSITerminal.(
       print_string [red]
@@ -149,57 +150,66 @@ let setup board  =
   );
   continue_setup board
 
-let try_shooting shoot_phrase board =
+let try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
-      match Board.shoot loc board with 
+      match Board.shoot loc target_board with 
       | exception Board.DuplicateShot -> ANSITerminal.(
           print_string [red] "You've already shot there! Try shooting somewhere else!"
         );
       | exception Board.InvalidLoc -> ANSITerminal.(
-          print_string [red] "You can't shoot there! Try shooting somewhere else!"
+          print_string [red] "That's not on the board!"
         );
-      | _ -> display_board board; 
+      | _ -> display_board target_board my_board; 
         print_endline ("You shot: " ^ loc); end
   | _ -> print_endline "\n parsing error"
 
 
-let rec continue_game board = 
+let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> 
     print_endline "You can't move your ships during the game!"; 
-    continue_game board 
+    continue_game board o_board
   | Help -> print_help (); 
-    continue_game board 
+    continue_game board o_board
   | Quit -> exit 0;
   | Ready -> (* Need a way to check if the opponent has shot yet. 
                 Maybe a mutable field similar to ship._onboard. *) 
-    continue_game board;
+    ()
   | Status -> ANSITerminal.(
       print_string [cyan] (Board.status board)
     );
-    continue_setup board
-  | Shoot shoot_phrase -> try_shooting shoot_phrase board;
+    continue_game board o_board
+  | Shoot shoot_phrase -> try_shooting shoot_phrase o_board board;
     (* Need a way to check if the opponent has shot yet. 
        Maybe a mutable field similar to ship._onboard. *) 
-    continue_game board
+    continue_game board o_board
   | exception Command.Malformed -> ANSITerminal.(
       print_string [red] "Please input a valid command."
     );
-    continue_game board 
+    continue_game board o_board
   | exception Command.Empty -> ANSITerminal.(
       print_string [red] "Please input a valid command."
     );
-    continue_game board 
+    continue_game board o_board
 
-let setup_game board = 
-  display_board board; 
+let wait () =
+  clear_screen ();
+  ANSITerminal.(
+    print_string [cyan] "please switch players! then press enter");
+  match read_command () with | _ -> ()
+
+let rec next_move board o_board = 
+  clear_screen ();
+  display_board o_board board; 
   ANSITerminal.(
     print_string [cyan]
       ("\n\n"^(Board.player_name board)^": please make your move." 
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
        ^ "\nUse 'status' to check your status"));
-  continue_game board
+  continue_game board o_board;
+  if (true) then (wait (); next_move o_board board) else () (* boards are swapped! *)
+(* change "true" to "if nobody has won" *)
 
 (** [check_p2_name p1_name] checks the name each player inputs is not empty 
     and is different than [p1_name]. *)
@@ -229,7 +239,11 @@ let multiplayer () =
   clear_screen ();
   setup p1_board; clear_screen ();
   setup p2_board; clear_screen ();
-  setup_game p1_board;
+  ANSITerminal.(print_string [cyan]
+                  ("Player "^(Board.player_name p1_board)^
+                   ": please take control, then press enter!\n"));
+  (match read_command () with | _ -> ());
+  next_move p1_board p2_board;
   print_endline "this is where gameplay would be."
 
 
