@@ -149,6 +149,55 @@ let setup board  =
   );
   continue_setup board
 
+let try_shooting shoot_phrase board =
+  match shoot_phrase with 
+  | loc::[] -> begin 
+      match Board.shoot loc board with 
+      | exception Board.DuplicateShot -> ANSITerminal.(
+          print_string [red] "You've already shot there! Try shooting somewhere else!"
+        );
+      | _ -> display_board board; 
+        print_endline ("You shot: " ^ loc); end
+  | _ -> print_endline "\n parsing error"
+
+
+let rec continue_game board = 
+  match Command.parse (read_command ()) with
+  | Place _ -> 
+    print_endline "You can't move your ships during the game!"; 
+    continue_game board 
+  | Help -> print_help (); 
+    continue_game board 
+  | Quit -> exit 0;
+  | Ready -> (* Need a way to check if the opponent has shot yet. 
+                Maybe a mutable field similar to ship._onboard. *) 
+    continue_game board;
+  | Status -> ANSITerminal.(
+      print_string [cyan] (Board.status board)
+    );
+    continue_setup board
+  | Shoot shoot_phrase -> try_shooting shoot_phrase board;
+    (* Need a way to check if the opponent has shot yet. 
+       Maybe a mutable field similar to ship._onboard. *) 
+    continue_game board
+  | exception Command.Malformed -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    continue_game board 
+  | exception Command.Empty -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    continue_game board 
+
+let setup_game board = 
+  display_board board; 
+  ANSITerminal.(
+    print_string [cyan]
+      ("\n\n"^(Board.player_name board)^": please make your move." 
+       ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
+       ^ "\nUse 'status' to check your status"));
+  continue_game board
+
 (** [check_p2_name p1_name] checks the name each player inputs is not empty 
     and is different than [p1_name]. *)
 let rec check_p2_name p1_name =
@@ -177,6 +226,7 @@ let multiplayer () =
   clear_screen ();
   setup p1_board; clear_screen ();
   setup p2_board; clear_screen ();
+  setup_game p1_board;
   print_endline "this is where gameplay would be."
 
 
