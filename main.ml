@@ -178,17 +178,18 @@ let rec try_shooting shoot_phrase target_board my_board =
       match Board.shoot loc target_board with 
       | exception Board.DuplicateShot -> ANSITerminal.(
           print_string [red] "You've already shot there! Try shooting somewhere else!"
-        );
+        ); false
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
-        );
+        ); false
       | _ -> display_board target_board my_board; 
         print_endline ("You shot: " ^ loc);
         pause ();
-        next_move target_board my_board
+        true
     end
-  | _ -> print_endline "\n parsing error"
-and continue_game board o_board = 
+  | _ -> print_endline "\n parsing error"; false
+
+let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> 
     print_endline "You can't move your ships during the game!"; 
@@ -203,10 +204,10 @@ and continue_game board o_board =
       print_string [cyan] (Board.status board)
     );
     continue_game board o_board
-  | Shoot shoot_phrase -> try_shooting shoot_phrase o_board board;
-    (* Need a way to check if the opponent has shot yet. 
-       Maybe a mutable field similar to ship._onboard. *) 
-    continue_game board o_board
+  | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () else continue_game board o_board
+  (* Need a way to check if the opponent has shot yet. 
+     Maybe a mutable field similar to ship._onboard. *) 
+  (* continue_game board o_board *)
   | exception Command.Malformed -> ANSITerminal.(
       print_string [red] "Please input a valid command."
     );
@@ -215,7 +216,8 @@ and continue_game board o_board =
       print_string [red] "Please input a valid command."
     );
     continue_game board o_board
-and next_move board o_board = 
+
+let rec next_move board o_board = 
   clear_screen ();
   display_board o_board board; 
   ANSITerminal.(
