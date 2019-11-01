@@ -144,20 +144,20 @@ let rec continue_setup board  =
 let wait_next_move () = 
   clear_screen ();
   ANSITerminal.(
-    print_string [cyan] "press enter to reveal your board.");
+    print_string [cyan] "Press enter to reveal your board.");
   match read_command () with 
   | _ -> ()
 
 let pause () =
   ANSITerminal.(
-    print_string [cyan] "please press enter then switch players!");
+    print_string [cyan] "Please press enter, then switch players!");
   match read_command () with 
   | _ -> wait_next_move ()
 
 let wait () =
   clear_screen ();
   ANSITerminal.(
-    print_string [cyan] "please switch players! then press enter");
+    print_string [cyan] "Please switch players, then press enter!");
   match read_command () with 
   | _ -> ()
 
@@ -166,8 +166,8 @@ let setup board  =
   print_self_board board;  Board.setup_status board |> print_endline;
   ANSITerminal.(
     print_string [cyan]
-      ("\n\n"^(Board.player_name board)^": please set up your board." 
-       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+      ("\n\n"^(Board.player_name board)^": Please set up your board." 
+       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>."
        ^ "\nUse 'ready' when all your ships are placed to continue.")
   );
   continue_setup board
@@ -183,7 +183,8 @@ let rec try_shooting shoot_phrase target_board my_board =
           print_string [red] "That's not on the board!"
         ); false
       | _ -> display_board target_board my_board; 
-        print_endline ("You shot: " ^ loc);
+        ANSITerminal.( 
+          print_string[cyan] ("You shot: " ^ loc));
         pause ();
         true
     end
@@ -191,8 +192,8 @@ let rec try_shooting shoot_phrase target_board my_board =
 
 let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
-  | Place _ -> 
-    print_endline "You can't move your ships during the game!"; 
+  | Place _ -> ANSITerminal.( 
+      print_string[red] "You can't move your ships during the game!");
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
@@ -222,11 +223,11 @@ let rec next_move board o_board =
   display_board o_board board; 
   ANSITerminal.(
     print_string [cyan]
-      ("\n\n"^(Board.player_name board)^": please make your move." 
+      ("\n\n"^(Board.player_name board)^": Please make your move." 
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
        ^ "\nUse 'status' to check your status"));
   continue_game board o_board;
-  if (true) then (wait (); next_move o_board board) else () (* boards are swapped! *)
+  if (true) then ((); next_move o_board board) else () (* boards are swapped! *)
 (* change "true" to "if nobody has won" *)
 
 (** [check_p2_name p1_name] checks the name each player inputs is not empty 
@@ -259,7 +260,7 @@ let multiplayer () =
   setup p2_board; clear_screen ();
   ANSITerminal.(print_string [cyan]
                   ("Player "^(Board.player_name p1_board)^
-                   ": please take control, then press enter!\n"));
+                   ": Please take control, then press enter!\n"));
   (match read_command () with | _ -> ());
   next_move p1_board p2_board;
   print_endline "this is where gameplay would be."
