@@ -184,7 +184,7 @@ let rec try_shooting shoot_phrase target_board my_board =
         ); false
       | _ -> display_board target_board my_board; 
         ANSITerminal.( 
-          print_string[cyan] ("You shot: " ^ loc));
+          print_string[cyan] ("You shot: " ^ loc ^ "\n"));
         pause ();
         true
     end
