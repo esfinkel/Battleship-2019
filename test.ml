@@ -57,24 +57,26 @@ let make_equal_test
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
     (Place ["ship"; "shot"; "ship"]);
-  (* make_parse_test "remove with spaces" "     remove     ship     "
-     (Remove ["ship"]); *)
+
   make_parse_test "normal shoot" "shoot Ship" 
     (Shoot ["Ship"]);
   make_parse_test "shoot with numbers and spaces" " shoot 6  " 
     (Shoot ["6"]);
+
   make_parse_test "normal quit" "quit" Quit;
   make_parse_test "quit with spaces" "    quit   " Quit;
+
   make_parse_test "normal status" "status" Status;
   make_parse_test "status with spaces" "status   " Status;
+
   make_parse_test "normal help" "help" Help;
   make_parse_test "help with spaces" "    help" Help;
+
   make_parse_test "normal ready" "ready" Ready;
   make_parse_test "ready with spaces" "    ready   " Ready;
+
   make_parse_exn_test "place with empty [object_phrase]" "place          "
     Malformed;
-  (* make_parse_exn_test "remove with empty [object_phrase]" "          remove"
-     Malformed; *)
   make_parse_exn_test "shoot with empty [object_phrase]" "       shoot      "
     Malformed;
   make_parse_exn_test "incorrect verb" "play" Malformed;
@@ -93,15 +95,16 @@ let command_tests = [
 ]
 
 
-(* init_board  *)
+(* Some of these tests make Board.t break the "all ships have been placed"
+   invariant. This couldn't happen during gameplay. *)
 let b1 = Board.init_board "fake name"
 let b2 = Board.init_board "fake name 2"
 let () = Board.place "battleship" "b2" "e2" b1
 let _ = Board.shoot "a3" b2
 
 let board_tests = [
+  make_equal_test "board player name" Board.player_name b1 "fake name";
 
-  (* assert (Board.player_name b1 = "fake name") *)
   make_board_op_exn_test "OverlappingShips"
     (Board.place "destroyer" "b1" "b3") b1 Board.OverlappingShips;
   make_board_op_exn_test "InvalidLoc"
@@ -113,14 +116,8 @@ let board_tests = [
   make_board_op_exn_test "Misaligned"
     (Board.place "destroyer" "b2" "c7") b1 Board.Misaligned;
 
-
-
-  (* make setup_status b1 test - only battleship is on the grid *)
-
-  (* make test for offboard *)
-  (* make test for misaligned *)
-  (* make test for wronglength *)
-  (* make one test with make_no_exn_raised_test (and l1 > l2) *)
+  make_no_exn_raised_test "place indices are reversed"
+    (Board.place "cruiser" "h5" "h4") b1;
 
   make_equal_test "incomplete" Board.complete b1 false;
 
