@@ -297,9 +297,10 @@ let ai_setup ai_board =
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
-  let ai_board = Board.init_board "computer" in
+  let ai_player = Ai_random.init () in
+  let ai_board = Ai_random.get_board ai_player in
   setup player_board; clear_screen ();
-  ai_setup ai_board;
+  Ai_random.place_all_ships ai_player;
   failwith "single player start game"
 
 (** [main ()] prompts for the game to play, then starts it. *)
