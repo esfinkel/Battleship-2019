@@ -271,8 +271,7 @@ let status b =
   let update = match b.status with 
     | None -> ""
     | Some m -> m in
-  if did_lose b then "All of your ships have been destroyed."
-  else "You still have ships left. "^update
+  "You still have ships left. "^update
 
 let complete b = 
   List.fold_left
