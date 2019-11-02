@@ -251,8 +251,8 @@ let rec next_move board o_board =
        ^ (Board.status board) ^ "\n"
        ^(Board.player_name board)
        ^": Please make your move." 
-       ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
-       ^ "\nUse 'status' to check your status"));
+       ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
+       ^ "\nUse 'status' to check your status."));
   continue_game board o_board;
   next_move o_board board (* boards are swapped! *)
 (* change "true" to "if nobody has won" *)
