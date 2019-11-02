@@ -275,6 +275,7 @@ let get_names () =  print_string "Player 1 name?";
 
 (** [multiplayer ()] prompts for the game to play, then starts it. *)
 let multiplayer () = 
+  clear_screen ();
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   let p1, p2 = get_names () in
