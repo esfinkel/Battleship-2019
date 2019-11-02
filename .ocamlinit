@@ -1,8 +1,4 @@
 #require "oUnit";;
-#require "yojson";;
 #require "str";;
 #require "ANSITerminal";;
 #directory "_build";;
-#load "adventure.cmo";;
-#load "command.cmo";;
-#load "state.cmo";;
