@@ -50,7 +50,7 @@ let print_help unit : unit =
            ^ " to place a ship on the board.";
            "Use 'ready' when your board is set up and ready to play.";
            "\n Gameplay commands:";
-           "Use 'shoot' and a coordinate to shoot that spot.";
+           "Use 'shoot' <coordinate> to shoot that spot.";
            "Use 'status' to see what ships you still have.";
            "Use 'quit' to quit the game."
          ])); ()
