@@ -238,14 +238,16 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
-
-
 let shoot l b = 
   let x, y = row_col l in 
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater; "It's a miss!"
-  | Ship s -> b.grid.(x).(y) <- HitShip s; "It's a hit!"
+  | Ship s -> b.grid.(x).(y) <- HitShip s; 
+    if is_dead s b.grid then 
+      ("It's a hit! You sunk your opponent's " ^ string_of_ship s.name ^ "!") 
+    else  
+      "It's a hit!"
   | _ -> raise DuplicateShot
 
 
