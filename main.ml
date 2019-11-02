@@ -173,10 +173,11 @@ let setup board  =
   continue_setup board
 
 let display_win_message winner_board = 
-  print_endline
-    ("Player "
-     ^(Board.player_name winner_board)
-     ^": You won the game! Congratulations! :) <3 ")
+  ANSITerminal.(
+    print_string [yellow]
+      ("Player "
+       ^(Board.player_name winner_board)
+       ^": You won the game! Congratulations! :) <3 \n\n"))
 
 let rec try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
