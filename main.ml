@@ -46,11 +46,11 @@ let print_help unit : unit =
     print_string [cyan] 
       (String.concat "\n" 
          [ "\n\nGame set-up commands:";
-           "Use 'place' <ship name> 'on' <coordinate 1> <coordinate 2>"
+           "Use 'place' <ship name> 'on' <coordinate 1> <coordinate 2>."
            ^ " to place a ship on the board.";
            "Use 'ready' when your board is set up and ready to play.";
            "\n Gameplay commands:";
-           "Use 'shoot' and a coordinate to shoot that spot";
+           "Use 'shoot' and a coordinate to shoot that spot.";
            "Use 'status' to see what ships you still have.";
            "Use 'quit' to quit the game."
          ])); ()
@@ -92,7 +92,7 @@ let try_placing (ship_phrase: string list) board =
           (print_string [red]
              ("\n\nYou cannot place this ship with "
               ^ "those coordinates. The ship must have" 
-              ^ " the right length"));
+              ^ " the right length."));
       | exception Board.InvalidShipName ->
         ANSITerminal.(print_string [red] 
                         ("\n\nYou cannot place that ship."
@@ -103,7 +103,7 @@ let try_placing (ship_phrase: string list) board =
                          ^ " There is already a ship on those coordinates."
                          ^ " Try placing the ship on a different location."));
       | () -> print_self_board board;
-        print_endline ("\n\nYou placed the "  ^  name);
+        print_endline ("\n\nYou placed the "  ^  name ^ ".");
         Board.setup_status board |> print_endline
     )
   | _ -> print_endline "\n parsing error"
@@ -174,14 +174,14 @@ let display_win_message winner_board =
     print_string [yellow]
       ("Player "
        ^(Board.player_name winner_board)
-       ^": You won the game! Congratulations! :) <3 \n\n"))
+       ^": You won the game! Congratulations! \n\n"))
 
 (** [try_shooting shoot_phrase target_board my_board] attempts to shoot the spot 
     stated in [shoot_phrase] on target_board and checks to see if the player has 
     won. 
 
-    Returns: [true] if the game should continue and [false] if there is a parsing 
-    error. 
+    Returns: [true] if the game should continue and [false] if there is a 
+    parsing error. 
 
     Requires: [shoot_phrase] is a valid [command] of type [Shoot _]. 
     Requires: [target_board] and [my_board] are valid boards of type [Board]. *)
@@ -190,14 +190,15 @@ let rec try_shooting shoot_phrase target_board my_board =
   | loc::[] -> begin 
       match Board.shoot loc target_board with 
       | exception Board.DuplicateShot -> ANSITerminal.(
-          print_string [red] "You've already shot there! Try shooting somewhere else!"
+          print_string [red] ("You've already shot there! Try shooting " 
+                              ^ "somewhere else!")
         ); false
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
       | message -> display_board target_board my_board; 
         ANSITerminal.( 
-          print_string [cyan] ("You shot: " ^ loc ^ "\n");
+          print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
         if (Board.did_lose target_board) then 
           (display_win_message my_board;
@@ -208,7 +209,8 @@ let rec try_shooting shoot_phrase target_board my_board =
     end
   | _ -> print_endline "\n parsing error"; false
 
-(** [continue_game board o_board] reads in a command, parses it, and executes it.
+(** [continue_game board o_board] reads in a command, parses it, and 
+    executes it.
 
     Raises: [Command.Malformed] if the command is malformed. 
     Raises: [Command.Empty] if the command is empty. *)
@@ -226,7 +228,8 @@ let rec continue_game board o_board =
       print_string [cyan] (Board.status board)
     );
     continue_game board o_board
-  | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () else continue_game board o_board
+  | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () 
+    else continue_game board o_board
   (* Need a way to check if the opponent has shot yet. 
      Maybe a mutable field similar to ship._onboard. *) 
   (* continue_game board o_board *)
