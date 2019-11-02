@@ -41,8 +41,6 @@ let print_self_board b =
 let print_other_board b =
   b |> Board.string_other |> print_grid
 
-
-
 (** [print_help] prints the list of valid commands. *)
 let print_help unit : unit = 
   ANSITerminal.(
@@ -58,16 +56,20 @@ let print_help unit : unit =
            "Use 'quit' to quit the game."
          ])); ()
 
+(** [read_command] returns a user string input from the command line. *)
 let read_command unit : string =
   print_string "\n> ";
   match read_line () with
   | exception End_of_file -> "End of file exception thrown."
   | new_command -> new_command
 
+(** [display_board ob b] displays a hidden version of the opponents board [ob] 
+    and a visible version of the players board [b]. *)
 let display_board other_board my_board =
   print_other_board other_board;
   print_self_board my_board
 
+(** [try_placing ship_phrase board] attempts to place a ship on the board. *)
 let try_placing (ship_phrase: string list) board =
   match ship_phrase with
   | name::l1::l2::[] -> (
@@ -140,7 +142,8 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
-
+(**  [wait_next_move] clears the terminal screen and waits for the next player 
+     to press enter to start their turn. *)
 let wait_next_move () = 
   clear_screen ();
   ANSITerminal.(
@@ -148,18 +151,12 @@ let wait_next_move () =
   match read_command () with 
   | _ -> ()
 
+(** [pause] waits for the current player to press enter after their turn. *)
 let pause () =
   ANSITerminal.(
     print_string [cyan] "Please press enter, then switch players!");
   match read_command () with 
   | _ -> wait_next_move ()
-
-let wait () =
-  clear_screen ();
-  ANSITerminal.(
-    print_string [cyan] "Please switch players, then press enter!");
-  match read_command () with 
-  | _ -> ()
 
 (** [setup board] starts the process of setting up [board].*)
 let setup board  =
@@ -172,6 +169,8 @@ let setup board  =
   );
   continue_setup board
 
+(** [display_win_message winner_board] displays that [winner_board.player_name] 
+    won. *)
 let display_win_message winner_board = 
   ANSITerminal.(
     print_string [yellow]
@@ -179,6 +178,15 @@ let display_win_message winner_board =
        ^(Board.player_name winner_board)
        ^": You won the game! Congratulations! :) <3 \n\n"))
 
+(** [try_shooting shoot_phrase target_board my_board] attempts to shoot the spot 
+    stated in [shoot_phrase] on target_board and checks to see if the player has 
+    won. 
+
+    Returns: [true] if the game should continue and [false] if there is a parsing 
+    error. 
+
+    Requires: [shoot_phrase] is a valid [command] of type [Shoot _]. 
+    Requires: [target_board] and [my_board] are valid boards of type [Board]. *)
 let rec try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
@@ -202,6 +210,10 @@ let rec try_shooting shoot_phrase target_board my_board =
     end
   | _ -> print_endline "\n parsing error"; false
 
+(** [continue_game board o_board] reads in a command, parses it, and executes it.
+
+    Raises: [Command.Malformed] if the command is malformed. 
+    Raises: [Command.Empty] if the command is empty. *)
 let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
@@ -257,6 +269,7 @@ let rec check_p2_name p1_name =
   then (print_endline "Please enter a valid name."; 
         check_p2_name p1_name) else x
 
+(** [get_names] asks each player for their name. *)
 let get_names () =  print_string "Player 1 name?";
   let p1_name = check_p2_name "" in
   print_string "Player 2 name?";
