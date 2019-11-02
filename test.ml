@@ -64,9 +64,6 @@ let command_tests = [
   make_parse_test "shoot with numbers and spaces" " shoot 6  " 
     (Shoot ["6"]);
 
-  make_parse_test "normal quit" "quit" Quit;
-  make_parse_test "quit with spaces" "    quit   " Quit;
-
   make_parse_test "normal status" "status" Status;
   make_parse_test "status with spaces" "status   " Status;
 

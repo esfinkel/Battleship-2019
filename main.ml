@@ -117,7 +117,6 @@ let rec continue_setup board  =
     continue_setup board 
   | Help -> print_help (); 
     continue_setup board 
-  | Quit -> exit 0;
   | Ready -> if Board.complete board then () else
       (ANSITerminal.(print_string [red]
                        "No you're not! Make sure all your ships are placed.");
@@ -220,7 +219,6 @@ let rec continue_game board o_board =
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
-  | Quit -> exit 0;
   | Ready -> (* Need a way to check if the opponent has shot yet. 
                 Maybe a mutable field similar to ship._onboard. *) 
     ()

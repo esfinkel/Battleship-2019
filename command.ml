@@ -9,7 +9,7 @@ type command =
   | Shoot of object_phrase
   | Status
   | Help 
-  | Quit
+  (*| Quit *)
   | Ready
 
 exception Empty
@@ -27,7 +27,6 @@ let parse str =
   | "shoot"::loc::[] -> Shoot (loc::[])
   | "status"::[] -> Status
   | "help"::[] -> Help
-  | "quit"::[] -> Quit
   | "ready"::[] -> Ready
   | _ -> raise Malformed
 

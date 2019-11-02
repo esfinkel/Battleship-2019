@@ -11,7 +11,6 @@ type command =
   | Shoot of object_phrase
   | Status
   | Help 
-  | Quit 
   | Ready
 
 (** Raised when an empty command is parsed. *)
