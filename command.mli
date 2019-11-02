@@ -30,7 +30,7 @@ exception Malformed
     Raises: [Empty] if [str] is the empty string or contains only spaces. 
 
     Raises: [Malformed] if the command is malformed. A command
-    is {i malformed} if the verb is neither "place", "remove", "shoot", 
+    is {i malformed} if the verb is neither "place", "shoot", 
     "status", "help", "quit", nor "ready", or if the verb is "status", "help", 
     "ready" or "quit" and there is a non-empty object phrase, or if the verb 
     is "place", "remove", "shoot", or "status" and there is an empty object 
