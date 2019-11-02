@@ -108,7 +108,6 @@ let try_placing (ship_phrase: string list) board =
     )
   | _ -> print_endline "\n parsing error"
 
-
 let rec continue_setup board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
@@ -291,7 +290,6 @@ let multiplayer () =
                    ": Please take control, then press enter!\n"));
   (match read_command () with | _ -> ());
   next_move p1_board p2_board
-
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let main () = multiplayer ()
