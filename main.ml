@@ -292,14 +292,15 @@ let rec get_name () : string = print_string "Player name?";
   else name
 
 let ai_setup ai_board =
-  failwith "Need to write ai setup"
+  Board.place "default" "" "" ai_board (* Make ai smarter *)
 
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
   let ai_board = Board.init_board "computer" in
   setup player_board; clear_screen ();
-  ai_setup ai_board
+  ai_setup ai_board;
+  failwith "single player start game"
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
