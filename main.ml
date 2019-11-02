@@ -58,7 +58,8 @@ let print_help unit : unit =
 (** [read_command] returns a user string input from the command line. *)
 let read_command unit : string =
   print_string "\n> ";
-  match read_line () with
+  match String.trim (read_line ()) with
+  | "quit" -> exit 0
   | exception End_of_file -> "End of file exception thrown."
   | new_command -> new_command
 
