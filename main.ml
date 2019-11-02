@@ -2,7 +2,6 @@
 let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen)
 
-
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
 let print_grid grid =
