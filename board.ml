@@ -205,7 +205,7 @@ let remove sh b =
 
 
 let rec place s l1 l2 b =
-  if s="random" then (
+  if s="default" then (
     List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
@@ -244,8 +244,8 @@ let shoot l b =
   let x, y = row_col l in 
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
-  | Water -> b.grid.(x).(y) <- ShotWater
-  | Ship s -> b.grid.(x).(y) <- HitShip s 
+  | Water -> b.grid.(x).(y) <- ShotWater; "It's a miss!"
+  | Ship s -> b.grid.(x).(y) <- HitShip s; "It's a hit!"
   | _ -> raise DuplicateShot
 
 

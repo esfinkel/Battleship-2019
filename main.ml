@@ -182,9 +182,10 @@ let rec try_shooting shoot_phrase target_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | _ -> display_board target_board my_board; 
+      | message -> display_board target_board my_board; 
         ANSITerminal.( 
-          print_string[cyan] ("You shot: " ^ loc ^ "\n"));
+          print_string [cyan] ("You shot: " ^ loc ^ "\n");
+          print_string [cyan] message; print_newline (););
         pause ();
         true
     end

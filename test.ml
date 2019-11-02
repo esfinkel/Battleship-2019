@@ -25,7 +25,7 @@ let make_parse_exn_test
     named [name] that asserts [f board] raises the [expected_exn]. *)
 let make_board_op_exn_test
     (name : string)
-    (f : Board.t -> unit)
+    (f : Board.t -> 'a)
     (board : Board.t)
     (expected_exn : exn) : test = 
   name >:: (fun _ -> 
@@ -36,11 +36,13 @@ let make_board_op_exn_test
     [f board]. *)
 let make_no_exn_raised_test
     (name : string)
-    (f : Board.t -> unit)
+    (f : Board.t -> 'a)
     (board : Board.t) = 
   name >:: (fun _ -> 
-      assert_equal () (f board)
+      assert_equal true ( try (f board |> ignore; true)
+                          with | _ -> false )
     )
+
 
 let make_equal_test
     (name : string)
@@ -95,7 +97,7 @@ let command_tests = [
 let b1 = Board.init_board "fake name"
 let b2 = Board.init_board "fake name 2"
 let () = Board.place "battleship" "b2" "e2" b1
-let () = Board.shoot "a3" b2
+let _ = Board.shoot "a3" b2
 
 let board_tests = [
 

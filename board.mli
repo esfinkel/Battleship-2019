@@ -45,7 +45,7 @@ val complete : t -> bool
     been shot.
     Raises:
     - DuplicateShot if that location has already been shot. *)
-val shoot : Command.location -> t -> unit
+val shoot : Command.location -> t -> string
 
 (** [setup_status b] is a string representing the status of [b], where
     [b] has not yet completed setup. *)

@@ -22,7 +22,7 @@ let parse str =
   |> List.filter (fun x -> x <> "")
   |> function
   | [] -> raise Empty
-  | "place"::"random"::[] -> Place ["random"; ""; ""]
+  | "place"::"default"::[] -> Place ["default"; ""; ""]
   | "place"::boat::"on"::l1::l2::[] -> Place (boat::l1::l2::[])
   | "shoot"::loc::[] -> Shoot (loc::[])
   | "status"::[] -> Status
