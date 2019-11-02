@@ -221,18 +221,13 @@ let rec continue_game board o_board =
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
-  | Ready -> (* Need a way to check if the opponent has shot yet. 
-                Maybe a mutable field similar to ship._onboard. *) 
-    ()
+  | Ready -> ()
   | Status -> ANSITerminal.(
       print_string [cyan] (Board.status board)
     );
     continue_game board o_board
   | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () 
     else continue_game board o_board
-  (* Need a way to check if the opponent has shot yet. 
-     Maybe a mutable field similar to ship._onboard. *) 
-  (* continue_game board o_board *)
   | exception Command.Malformed -> ANSITerminal.(
       print_string [red] "Please input a valid command."
     );
@@ -255,7 +250,6 @@ let rec next_move board o_board =
        ^ "\nUse 'status' to check your status."));
   continue_game board o_board;
   next_move o_board board (* boards are swapped! *)
-(* change "true" to "if nobody has won" *)
 
 (** [check_p2_name p1_name] checks the name each player inputs is not empty 
     and is different than [p1_name]. *)
