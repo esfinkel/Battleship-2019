@@ -244,16 +244,16 @@ let shoot l b =
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater;
-    b.status <- Some "opponent missed";
+    b.status <- Some "Your opponent missed.";
     "It's a miss!"
   | Ship s -> b.grid.(x).(y) <- HitShip s;
     let sh_name = string_of_ship s.name in
     if is_dead s b.grid then (
-      (b.status <- Some ("Your opponent sank your "^sh_name));
+      (b.status <- Some ("Your opponent sank your "^sh_name^"."));
       ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!")
     ) 
     else  (
-      (b.status <- Some ("Your opponent shot your "^sh_name));
+      (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!"
     )
   | _ -> raise DuplicateShot
