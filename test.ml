@@ -32,7 +32,7 @@ let make_board_op_exn_test
       assert_raises expected_exn (fun () -> f board))
 
 (** [make_no_exn_raised_test name f board] constructs an OUnit test
-    named [name] that asserts the quality of [())] with 
+    named [name] that asserts the quality of [()] with 
     [f board]. *)
 let make_no_exn_raised_test
     (name : string)
@@ -43,7 +43,8 @@ let make_no_exn_raised_test
                           with | _ -> false )
     )
 
-
+(** [make_equal_test name f board exp] constructs an OUnit test
+    named [name] that asserts the quality of [exp] with [f board]. *)
 let make_equal_test
     (name : string)
     (f : Board.t -> 'a)
