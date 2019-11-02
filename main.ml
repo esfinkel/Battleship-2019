@@ -1,6 +1,6 @@
 
 let clear_screen () =
-  ANSITerminal.(erase Screen)
+  ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen)
 
 
 (** [print_grid grid] prints the string representation of grid
@@ -257,9 +257,9 @@ let rec check_p2_name p1_name =
   then (print_endline "Please enter a valid name."; 
         check_p2_name p1_name) else x
 
-let get_names () =  print_endline "Player 1 name?";
+let get_names () =  print_string "Player 1 name?";
   let p1_name = check_p2_name "" in
-  print_endline "Player 2 name?";
+  print_string "Player 2 name?";
   let p2_name = check_p2_name p1_name in 
   (p1_name, p2_name)
 
