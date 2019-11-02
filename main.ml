@@ -172,6 +172,12 @@ let setup board  =
   );
   continue_setup board
 
+let display_win_message winner_board = 
+  print_endline
+    ("Player "
+     ^(Board.player_name winner_board)
+     ^": You won the game! Congratulations! :) <3 ")
+
 let rec try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
@@ -186,7 +192,11 @@ let rec try_shooting shoot_phrase target_board my_board =
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ "\n");
           print_string [cyan] message; print_newline (););
-        pause ();
+        if (Board.did_lose target_board) then 
+          (display_win_message my_board;
+           exit 0 )
+        else 
+          pause ();
         true
     end
   | _ -> print_endline "\n parsing error"; false
@@ -231,7 +241,7 @@ let rec next_move board o_board =
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
        ^ "\nUse 'status' to check your status"));
   continue_game board o_board;
-  if (true) then ((); next_move o_board board) else () (* boards are swapped! *)
+  next_move o_board board (* boards are swapped! *)
 (* change "true" to "if nobody has won" *)
 
 (** [check_p2_name p1_name] checks the name each player inputs is not empty 
@@ -266,8 +276,7 @@ let multiplayer () =
                   ("Player "^(Board.player_name p1_board)^
                    ": Please take control, then press enter!\n"));
   (match read_command () with | _ -> ());
-  next_move p1_board p2_board;
-  print_endline "this is where gameplay would be."
+  next_move p1_board p2_board
 
 
 (** [main ()] prompts for the game to play, then starts it. *)
