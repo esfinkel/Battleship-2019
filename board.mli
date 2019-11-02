@@ -11,9 +11,6 @@ exception InvalidLoc
 exception InvalidShipName
 
 
-(** The type [ship_name] represents the name of each ship in the game. *)
-type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
-
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
@@ -36,16 +33,12 @@ val player_name : t -> string
         present in [b]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
-(** [did_lose b] is true if all ships have been destroyed in [b]. 
-    False otherwise. *)
+(** [did_lose b] is true iff all ships have been destroyed in [b]. *)
 val did_lose : t -> bool
 
-(** [complete b] is true iff [b] holds one of all of the ships
-    in Command.ship_name. *)
-val complete : t -> bool
-
-(** [shoot l b] is [()]. The location on [b] reprented by [l] has now
-    been shot.
+(** [shoot l b] is a string message explaining the result of the shot.
+    The location on [b] reprented by [l] has now been shot;
+    that location on [b] has been updated to reflect this information.
     Raises:
     - DuplicateShot if that location has already been shot. *)
 val shoot : Command.location -> t -> string
@@ -56,6 +49,10 @@ val setup_status : t -> string
 
 (** [status b] is a string representing the status of [b]. *)
 val status : t -> string 
+
+(** [complete b] is true iff [b] holds one of each of the ships that 
+    belong to [b]. *)
+val complete : t -> bool
 
 (** [string_self b] is the grid (string list list) representation of
     board [b], as seen by the board's player. *)
