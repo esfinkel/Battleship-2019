@@ -22,7 +22,7 @@ type ship = {
   default : (Command.location * Command.location);
 }
 
-(** The abstract type of values representing a board spot. *)
+(** The abstract type of values representing a grid spot. *)
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
 
 (** [row_col loc] is the [(row, column)] coordinate pair corresponding
@@ -42,29 +42,33 @@ let row_col (loc : Command.location) : (int*int) =
   in
   loc |> pull_regex |> tup
 
-(** [ordered l1 l2] are the coordinates of location [l1] and location [l2], 
-    except they are swapped if given in the reverse order. *)
+(** [ordered l1 l2] is [(l1_x, l1_y), (l2_x, l2_y)], the coordinates of
+    location [l1] and location [l2] respectively, except they are swapped
+    if given in the reverse order. *)
 let ordered l1 l2 = 
-  if (fst (row_col l1) < fst (row_col l2)) || (snd (row_col l1) < snd (row_col l2)) then 
-    (row_col l1),(row_col l2)
-  else 
-    (row_col l2),(row_col l1)
+  let pos1, pos2 = (row_col l1), (row_col l2) in
+  if fst pos1 < fst pos2 || snd pos1 < snd pos2
+  then pos1, pos2
+  else pos2, pos1
 
 (** AF: the record
-    { grid = [
+    [{ grid = [
         [|
           [|Water; ShotWater|];
           [|Ship s1; HitShip s2|]
         |];
-      ships = [s1; s2]
-    } represents a board
-    where position A1 is water, position A2 is water that has been
-    shot, position B1 is a cell of ship s1, and position B2 is a cell
-    of ship s2 (and that shell has been shot).
+      ships = [s1; s2];
+      player_name = "p1";
+      status = Some "opponent missed"
+    }]
+    represents a board where the player's name is "p1", the player's
+    opponent missed their last shot, position A1 is water, position A2
+    is water that has been shot, position B1 is a cell of ship s1, and
+    position B2 is a cell of ship s2 (and that shell has been shot).
 
     RI : Once board setup has ended, every ship [s] in [t.ships] 
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
-    [HitShip s]). The remaining cells are Water or ShotWater. 
+    [HitShip s]). The remaining cells are [Water] or [ShotWater]. 
 *)
 type t = {
   grid: spot array array;
@@ -76,7 +80,8 @@ type t = {
 let board_size = 10
 
 (** [init_ships ()] is a list of all ships in gameplay, with the appropriate
-    names and sizes, and [on_board] set to [false]. *)
+    names and sizes, [on_board] set to [false], and [default] location values
+    hardcoded. *)
 let init_ships () = [
   {
     name=Battleship;
@@ -137,7 +142,9 @@ let string_of_ship = function
   | Destroyer -> "destroyer"
   | Submarine -> "submarine"
 
-let ships_tostring shp_lst = 
+(** [long_string_of_ships shp_lst] is a long-form string description
+    of [shp_lst]. *)
+let long_string_of_ships shp_lst = 
   let to_string sh = 
     (string_of_ship sh.name)^" (length "^(sh.size |> string_of_int)^")" in
   if List.length shp_lst = 0 then "None" else
@@ -151,24 +158,19 @@ let get_ship str_name b =
   | s::[] -> s
   | _ -> raise NoShip
 
-(** [on_board loc] raises [OffBoard] iff [loc] refers to an invalid location 
-    on board [b]. *)
+(** [on_board loc b] raises [OffBoard] iff [loc] refers to an invalid
+    location  on board [b]. *)
 let on_board (loc : Command.location) (b : t) =
   let size = board_size in
   match row_col loc with 
   | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
   | _ -> raise OffBoard
 
-(** [aligned loc1 loc2] raises [Misaligned] iff [loc1] and [loc2] are not
-    in the same row or column. *)
-let aligned loc1 loc2 =
-  match row_col loc1, row_col loc2 with
-  | (r1, c1), (r2, c2) when r1=r2 || c1=c2 -> ()
-  | _ -> raise Misaligned
-
-(** [right_length loc1 loc2 s] raises [WrongLength] iff the inclusive distance
-    between loc1 and loc2 does not equal the size of [s]. *)
-let right_length loc1 loc2 s =
+(** [check_alignment_and_length loc1 loc2 s] raises [WrongLength] iff the
+    inclusive distance between loc1 and loc2 does not equal the size of [s],
+    or [Misaligned] iff [loc1] and [loc2] are not in the same row or
+    column. *)
+let check_alignment_and_length loc1 loc2 s =
   let (r1, c1), (r2, c2) = row_col loc1, row_col loc2 in
   if r1 = r2 then 
     if (c1 - c2 + 1 = s.size) || (c2 - c1 + 1 = s.size) then ()
@@ -176,10 +178,10 @@ let right_length loc1 loc2 s =
   else if c1 = c2 then 
     if (r1 - r2 + 1 = s.size) || (r2 - r1 + 1 = s.size) then () 
     else raise WrongLength
-  else raise WrongLength
+  else raise Misaligned
 
-(** [overlapping_ship s b] is true iff [s] would overlap with a ship
-    already present on [b]. *)
+(** [overlapping_ship l1 l2 b] is true iff there are any ships present in
+    the span from [l1] to [l2] on [b]. *)
 let overlapping_ship l1 l2 b =
   let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in  
   for x = x_1 to x_2 do
@@ -190,19 +192,18 @@ let overlapping_ship l1 l2 b =
     done
   done
 
-(* helper for [remove] *)
-let remove_from_row i r s b = 
-  Array.iteri (fun j spot -> if (spot = Ship s) then 
-                  b.grid.(i).(j) <- Water else ()) r
 
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
-    has been removed, and the cells replaced with Water.
+    has been removed, and the cells are replaced with Water.
     Raises:
     - NoShip if that ship has not been placed. *)
 let remove sh b = 
+  let remove_from_row r s = 
+    Array.iteri (fun j spot -> if (spot = Ship s) then 
+                    r.(j) <- Water else ()) r in
   if sh.on_board 
   then (sh.on_board <- false; 
-        Array.iteri (fun i r -> remove_from_row i r sh b) b.grid;)
+        Array.iter (fun r -> remove_from_row r sh) b.grid;)
   else raise NoShip
 
 
@@ -214,13 +215,12 @@ let rec place s l1 l2 b =
         place (string_of_ship sh.name) def1 def2 b) () b.ships 
   ) else
     let ship = get_ship s b in 
+    let ((x_1, y_1) as coors_1, (x_2, y_2) as coors_2) = ordered l1 l2 in 
     on_board l1 b;
     on_board l2 b;
-    aligned l1 l2;
-    right_length l1 l2 ship;
+    check_alignment_and_length l1 l2 ship;
     if ship.on_board then remove ship b else ();
     overlapping_ship l1 l2 b.grid;
-    let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in 
     for x = x_1 to x_2 do
       for y = y_1 to y_2 do 
         ship.on_board <- true;
@@ -228,8 +228,8 @@ let rec place s l1 l2 b =
       done
     done
 
-(** [is_dead s g] is true if [s] is a sunken ship in the grid [g] (). 
-    False otherwise. *)
+(** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
+    cells have been hit). *)
 let is_dead (s:ship) (g : spot array array) = 
   let dead_in_row (s:ship) (r : spot array) = 
     Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
@@ -238,6 +238,7 @@ let is_dead (s:ship) (g : spot array array) =
 
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
+
 
 let shoot l b = 
   let x, y = row_col l in 
@@ -263,9 +264,9 @@ let setup_status b =
   let on_board = List.filter (fun s -> s.on_board) b.ships in
   let off_board = List.filter (fun s -> not s.on_board) b.ships in
   "On the board: "
-  ^ (ships_tostring on_board)
+  ^ (long_string_of_ships on_board)
   ^ "\nOff the board: "
-  ^ (ships_tostring off_board)
+  ^ (long_string_of_ships off_board)
 
 let status b = 
   let update = match b.status with 
@@ -279,8 +280,8 @@ let complete b =
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
 (** [to_string_grid is_self b] is the grid (string list list) representation
-    of board [b]. Represented as seen by the board's player iff [is_self] is
-    [true]. *)
+    of board [b]. Represented as seen by the board's player if [is_self] is
+    [true], and as seen by opponenets otherwise. *)
 let to_string_grid is_self b =
   let rec row_str self g = function
     | [] -> []
