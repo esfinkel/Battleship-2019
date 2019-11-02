@@ -3,12 +3,9 @@ exception OffBoard
 exception Misaligned
 exception WrongLength
 exception OverlappingShips 
-
 exception NoShip
 exception DuplicateShot
-
 exception InvalidLoc
-
 exception InvalidShipName
 
 (** The type [ship_name] represents the name of each ship in the game. *)
@@ -232,7 +229,9 @@ let rec place s l1 l2 b =
     cells have been hit). *)
 let is_dead (s:ship) (g : spot array array) = 
   let dead_in_row (s:ship) (r : spot array) = 
-    Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
+    Array.fold_left
+      (fun c sp -> c + (if sp = HitShip s then 1 else 0))
+      0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
 
