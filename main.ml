@@ -272,9 +272,6 @@ let get_names () =  print_string "Player 1 name?";
 
 (** [multiplayer ()] prompts for the game to play, then starts it. *)
 let multiplayer () = 
-  clear_screen ();
-  ANSITerminal.(print_string [cyan]
-                  "\n\nWelcome to Battleship!\n");
   let p1, p2 = get_names () in
   let p1_board = Board.init_board p1 in
   let p2_board = Board.init_board p2 in
@@ -287,8 +284,36 @@ let multiplayer () =
   (match read_command () with | _ -> ());
   next_move p1_board p2_board
 
+let rec get_name () : string = print_string "Player name?";
+  let name = read_command () in
+  if name = "" then (ANSITerminal.(print_string [red] 
+                                     "\n\nEnter a valid name.\n");
+                     get_name ())
+  else name
+
+let ai_setup ai_board =
+  failwith "Need to write ai setup"
+
+let singleplayer () =
+  let player = get_name () in
+  let player_board = Board.init_board player in
+  let ai_board = Board.init_board "computer" in
+  setup player_board; clear_screen ();
+  ai_setup ai_board
+
 (** [main ()] prompts for the game to play, then starts it. *)
-let main () = multiplayer ()
+let rec main () = 
+  print_string "\n1 player or 2 players? Enter '1' or '2'.";
+  match read_command () with
+  | "1" -> singleplayer ()
+  | "1 player" -> singleplayer ()
+  | "2" -> multiplayer ()
+  | "2 players" -> multiplayer ()
+  | _ -> ANSITerminal.(print_string [red] 
+                         "\n\nEnter the number of players: 1 or 2."); main ()
 
 (* Execute the game engine. *)
-let () = main () 
+let () = clear_screen ();
+  ANSITerminal.(print_string [cyan]
+                  "\n\nWelcome to Battleship!\n");
+  main () 
