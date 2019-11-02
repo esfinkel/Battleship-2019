@@ -1,7 +1,7 @@
 Our battleship game only requires the OPAM packages required 
 by the CS 3110 course.
 
-Download battleship.zip and unzip it using "unzip battleship".
+Download src.zip and unzip it using "unzip src".
 
 Go to the /cs3110-project/ directory at the command line.
 Run "make build".
