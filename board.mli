@@ -1,15 +1,25 @@
-
+(** Raised when a player attempts to place a ship on a location that is
+    off the board. *)
 exception OffBoard
+(** Raised when a player attempts to place a ship on coordinates that are 
+    not in line with each other. (eg. a3 and b6) *)
 exception Misaligned
+(** Raised when a player attempts to place a ship on coordinates that are 
+    the wrong distance away. (ie. The distance between the coordinates does
+    not equal the size of the ship.) *)
 exception WrongLength
+(** Raised when a player attempts to place a ship on a location that is
+    already occupied by another ship. *)
 exception OverlappingShips 
-
+(** Raised when a player attempts to place a ship that doesn't exist. *)
 exception NoShip
+(** Raised when a player attempts to shoot a spot that's already been shot. *)
 exception DuplicateShot
-
+(** Raised when a player attempts to shoot a location that isn't on 
+    the board. *)
 exception InvalidLoc
+(** Raised when a player attempts to place a ship that has an invalid name. *)
 exception InvalidShipName
-
 
 (** The abstract type of values representing one player's battleship board. *)
 type t 
