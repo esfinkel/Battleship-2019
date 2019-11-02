@@ -134,9 +134,6 @@ let board_tests = [
   make_no_exn_raised_test "can shoot without error"
     (Board.shoot "a3") b1; 
 
-  make_equal_test "b1 has not lost" Board.status b1
-    "You still have ships left. (Just a placeholder for now)";
-
   make_board_op_exn_test "shoot shot location" (Board.shoot "a3")
     b2 Board.DuplicateShot;
   make_board_op_exn_test "invalid shot location"

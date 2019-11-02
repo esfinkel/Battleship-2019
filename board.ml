@@ -69,7 +69,8 @@ let ordered l1 l2 =
 type t = {
   grid: spot array array;
   ships: ship list;
-  player_name: string
+  player_name: string;
+  mutable status: string option;
 }
 
 let board_size = 10
@@ -114,6 +115,7 @@ let init_board player_name = {
   grid=Water |> Array.make_matrix board_size board_size;
   ships = init_ships ();
   player_name= player_name;
+  status=None;
 }
 
 let player_name b = b.player_name
@@ -233,8 +235,7 @@ let is_dead (s:ship) (g : spot array array) =
     Array.fold_left (fun c sp -> c + (if sp = HitShip s then 1 else 0)) 0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
 
-(** [did_lose b] is true if all ships have been destroyed in [b]. 
-    False otherwise. *)
+
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
@@ -242,12 +243,19 @@ let shoot l b =
   let x, y = row_col l in 
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
-  | Water -> b.grid.(x).(y) <- ShotWater; "It's a miss!"
-  | Ship s -> b.grid.(x).(y) <- HitShip s; 
-    if is_dead s b.grid then 
-      ("It's a hit! You sunk your opponent's " ^ string_of_ship s.name ^ "!") 
-    else  
+  | Water -> b.grid.(x).(y) <- ShotWater;
+    b.status <- Some "opponent missed";
+    "It's a miss!"
+  | Ship s -> b.grid.(x).(y) <- HitShip s;
+    let sh_name = string_of_ship s.name in
+    if is_dead s b.grid then (
+      (b.status <- Some ("Your opponent sank your "^sh_name));
+      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!")
+    ) 
+    else  (
+      (b.status <- Some ("Your opponent shot your "^sh_name));
       "It's a hit!"
+    )
   | _ -> raise DuplicateShot
 
 
@@ -260,8 +268,11 @@ let setup_status b =
   ^ (ships_tostring off_board)
 
 let status b = 
+  let update = match b.status with 
+    | None -> ""
+    | Some m -> m in
   if did_lose b then "All of your ships have been destroyed."
-  else "You still have ships left. (Just a placeholder for now)"
+  else "You still have ships left. "^update
 
 let complete b = 
   List.fold_left

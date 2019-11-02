@@ -224,7 +224,10 @@ let rec next_move board o_board =
   display_board o_board board; 
   ANSITerminal.(
     print_string [cyan]
-      ("\n\n"^(Board.player_name board)^": Please make your move." 
+      ("\n\n"
+       ^ (Board.status board) ^ "\n"
+       ^(Board.player_name board)
+       ^": Please make your move." 
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location"
        ^ "\nUse 'status' to check your status"));
   continue_game board o_board;
