@@ -291,9 +291,6 @@ let rec get_name () : string = print_string "Player name?";
                      get_name ())
   else name
 
-let ai_setup ai_board =
-  Board.place "default" "" "" ai_board (* Make ai smarter *)
-
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
