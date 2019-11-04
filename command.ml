@@ -23,6 +23,7 @@ let parse str =
   |> function
   | [] -> raise Empty
   | "place"::"default"::[] -> Place ["default"; ""; ""]
+  | "place"::"random"::[] -> Place ["random"; ""; ""]
   | "place"::boat::"on"::l1::l2::[] -> Place (boat::l1::l2::[])
   | "shoot"::loc::[] -> Shoot (loc::[])
   | "status"::[] -> Status
