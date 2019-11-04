@@ -16,8 +16,7 @@ type ship = {
   name : ship_name;
   size : int;
   mutable on_board: bool;
-  default : (Command.location * Command.location);
-  random : (Command.location * Command.location);
+  default : (Command.location * Command.location)
 }
 
 (** The abstract type of values representing a grid spot. *)
@@ -86,14 +85,14 @@ let random_coordinates size : Command.location * Command.location =
   if Random.bool() then 
     let letter = choose_random_letter () in
     let number = (Random.int 10) + 1 in 
-    if ((number + size) <= board_size) then begin
+    if ((number + size) < board_size) then begin
       ((letter ^ string_of_int(number)), (letter ^ string_of_int(number + size))) end
     else begin
       ((letter ^ string_of_int(number)), (letter ^ string_of_int(number - size))) end
   else (* vertical ship placements with probability 0.5 *)
     let letter_num = (Random.int 10) in 
     let number = string_of_int((Random.int 10) + 1) in 
-    if ((letter_num + size) <= board_size) then begin
+    if ((letter_num + size) < board_size) then begin
       ((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num + size)) ^ number) end
     else begin 
       (((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num - size)) ^ number)) end
@@ -106,36 +105,31 @@ let init_ships () = [
     name=Battleship;
     size=4;
     on_board=false;
-    default=("a1", "a4");
-    random = random_coordinates 3
+    default=("a1", "a4")
   };
   {
     name=Cruiser;
     size=2;
     on_board=false;
-    default=("b1", "b2");
-    random = random_coordinates 1
+    default=("b1", "b2")
   };
   {
     name=Carrier;
     size=5;
     on_board=false;
-    default=("d2", "d6");
-    random = random_coordinates 4
+    default=("d2", "d6")
   };
   {
     name=Destroyer;
     size=3;
     on_board=false;
-    default=("e2", "g2");
-    random = random_coordinates 2
+    default=("e2", "g2")
   };
   {
     name=Submarine;
     size=3;
     on_board=false;
-    default=("f4", "f6");
-    random = random_coordinates 2
+    default=("f4", "f6")
   };
 ]
 
@@ -255,7 +249,7 @@ and place_random b =
   try 
     List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
     List.fold_left
-      (fun _ sh -> let rand1, rand2 = sh.random in
+      (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
         place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
   with exn -> place_random b
 
