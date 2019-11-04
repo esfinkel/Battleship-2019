@@ -1,4 +1,4 @@
-
+Random.self_init();
 exception OffBoard
 exception Misaligned
 exception WrongLength
@@ -17,6 +17,7 @@ type ship = {
   size : int;
   mutable on_board: bool;
   default : (Command.location * Command.location);
+  random : (Command.location * Command.location);
 }
 
 (** The abstract type of values representing a grid spot. *)
@@ -76,6 +77,27 @@ type t = {
 
 let board_size = 10
 
+let lst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
+let choose_random_letter () =  
+  List.nth lst (Random.int 10)
+
+let random_coordinates size : Command.location * Command.location = 
+  (* horizontal ship placements with probability 0.5 *)
+  if Random.bool() then 
+    let letter = choose_random_letter () in
+    let number = (Random.int 10) + 1 in 
+    if ((number + size) <= board_size) then begin
+      ((letter ^ string_of_int(number)), (letter ^ string_of_int(number + size))) end
+    else begin
+      ((letter ^ string_of_int(number)), (letter ^ string_of_int(number - size))) end
+  else (* vertical ship placements with probability 0.5 *)
+    let letter_num = (Random.int 10) in 
+    let number = string_of_int((Random.int 10) + 1) in 
+    if ((letter_num + size) <= board_size) then begin
+      ((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num + size)) ^ number) end
+    else begin 
+      (((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num - size)) ^ number)) end
+
 (** [init_ships ()] is a list of all ships in gameplay, with the appropriate
     names and sizes, [on_board] set to [false], and [default] location values
     hardcoded. *)
@@ -84,31 +106,36 @@ let init_ships () = [
     name=Battleship;
     size=4;
     on_board=false;
-    default=("a1", "a4")
+    default=("a1", "a4");
+    random = random_coordinates 3
   };
   {
     name=Cruiser;
     size=2;
     on_board=false;
-    default=("b1", "b2")
+    default=("b1", "b2");
+    random = random_coordinates 1
   };
   {
     name=Carrier;
     size=5;
     on_board=false;
-    default=("d2", "d6")
+    default=("d2", "d6");
+    random = random_coordinates 4
   };
   {
     name=Destroyer;
     size=3;
     on_board=false;
-    default=("e2", "g2")
+    default=("e2", "g2");
+    random = random_coordinates 2
   };
   {
     name=Submarine;
     size=3;
     on_board=false;
-    default=("f4", "f6")
+    default=("f4", "f6");
+    random = random_coordinates 2
   };
 ]
 
@@ -203,14 +230,14 @@ let remove sh b =
         Array.iter (fun r -> remove_from_row r sh) b.grid;)
   else raise NoShip
 
-
 let rec place s l1 l2 b =
   if s="default" then (
     List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
         place (string_of_ship sh.name) def1 def2 b) () b.ships 
-  ) else
+  ) else if s="random" then place_random b
+  else 
     let ship = get_ship s b in 
     let ((x_1, y_1) as coors_1, (x_2, y_2) as coors_2) = ordered l1 l2 in 
     on_board l1 b;
@@ -224,6 +251,13 @@ let rec place s l1 l2 b =
         b.grid.(x).(y) <- Ship ship
       done
     done
+and place_random b = 
+  try 
+    List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+    List.fold_left
+      (fun _ sh -> let rand1, rand2 = sh.random in
+        place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
+  with exn -> place_random b
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
     cells have been hit). *)
