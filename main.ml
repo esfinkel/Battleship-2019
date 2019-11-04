@@ -315,8 +315,12 @@ let rec get_name () : string = print_string "Player name?";
     );
     single_continue_game player_board ai_board*)
 
-let ai_shot player_board ai_board =
-  Ai_random.shoot_ship 
+let ai_shoot player_board ai_board =
+  Ai_random.shoot_ship player_board;
+  if (Board.did_lose player_board) then 
+    (display_win_message ai_board;
+     exit 0 )
+  else ()
 
 let rec single_next_move player_board ai_board =
   clear_screen ();
