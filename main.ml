@@ -291,6 +291,48 @@ let rec get_name () : string = print_string "Player name?";
                      get_name ())
   else name
 
+(*let rec single_continue_game player_board ai_board =
+  match Command.parse (read_command ()) with
+  | Place _ -> ANSITerminal.( 
+      print_string[red] "You can't move your ships during the game!");
+    single_continue_game player_board ai_board
+  | Help -> print_help (); 
+    single_continue_game player_board ai_board
+  | Ready -> ()
+  | Status -> ANSITerminal.(
+      print_string [cyan] (Board.status player_board)
+    );
+    single_continue_game player_board ai_board
+  | Shoot shoot_phrase -> if try_shooting shoot_phrase ai_board player_board 
+    then () 
+    else single_continue_game player_board ai_board
+  | exception Command.Malformed -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    single_continue_game player_board ai_board
+  | exception Command.Empty -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    single_continue_game player_board ai_board*)
+
+let ai_shot player_board ai_board =
+  Ai_random.shoot_ship 
+
+let rec single_next_move player_board ai_board =
+  clear_screen ();
+  display_board ai_board player_board; 
+  ANSITerminal.(
+    print_string [cyan]
+      ("\n\n"
+       ^ (Board.status player_board) ^ "\n"
+       ^(Board.player_name player_board)
+       ^": Please make your move." 
+       ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
+       ^ "\nUse 'status' to check your status."));
+  continue_game player_board ai_board;
+  ai_shoot player_board ai_board;
+  single_next_move player_board ai_board (* boards are swapped! *)
+
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
@@ -298,7 +340,7 @@ let singleplayer () =
   let ai_board = Ai_random.get_board ai_player in
   setup player_board; clear_screen ();
   Ai_random.place_all_ships ai_player;
-  failwith "single player start game"
+  single_next_move player_board ai_board
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
