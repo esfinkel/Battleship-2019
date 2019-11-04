@@ -17,6 +17,11 @@ let get_board c = c.board
 
 let place_all_ships c = Board.place "default" "" "" c.board
 
+let random_coors () =
+  let yaxis = Char.chr ((Random.int 9) + 60) |> String.make 1 in
+  let xaxis = string_of_int ((Random.int 9) + 1) in
+  yaxis ^ xaxis
 
-let rec shoot_ship b = try Board.shoot "a1" b with
+
+let rec shoot_ship b = try Board.shoot (random_coors ()) b with
   | _ -> shoot_ship b
