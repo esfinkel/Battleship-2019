@@ -1,3 +1,4 @@
+(* For generating actual random numbers. *)
 Random.self_init();
 exception OffBoard
 exception Misaligned
