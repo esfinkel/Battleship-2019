@@ -1,3 +1,4 @@
+(* For generating actual random numbers. *)
 Random.self_init();
 exception OffBoard
 exception Misaligned
@@ -76,26 +77,37 @@ type t = {
 
 let board_size = 10
 
+(* Used for getting random letters. (Didn't have to hardcode this but figured
+   it was easier since our gameboard is always the same size.) *)
 let lst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
+
+(** [choose_random_letter ()] is a random letter represented as a string from 
+    the first ten letters of the alphabet in the list [lst] defined above. *)
 let choose_random_letter () =  
   List.nth lst (Random.int 10)
 
+(** [random_coordinates size] is a set of valid random locations used for 
+    randomly placing a ship of size [size]. *)
 let random_coordinates size : Command.location * Command.location = 
   (* horizontal ship placements with probability 0.5 *)
   if Random.bool() then 
     let letter = choose_random_letter () in
     let number = (Random.int 10) + 1 in 
     if ((number + size) < board_size) then begin
-      ((letter ^ string_of_int(number)), (letter ^ string_of_int(number + size))) end
+      ((letter ^ string_of_int(number)), 
+       (letter ^ string_of_int(number + size))) end
     else begin
-      ((letter ^ string_of_int(number)), (letter ^ string_of_int(number - size))) end
+      ((letter ^ string_of_int(number)), 
+       (letter ^ string_of_int(number - size))) end
   else (* vertical ship placements with probability 0.5 *)
     let letter_num = (Random.int 10) in 
     let number = string_of_int((Random.int 10) + 1) in 
     if ((letter_num + size) < board_size) then begin
-      ((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num + size)) ^ number) end
+      ((List.nth lst letter_num) ^ number), 
+      ((List.nth lst (letter_num + size)) ^ number) end
     else begin 
-      (((List.nth lst letter_num) ^ number), ((List.nth lst (letter_num - size)) ^ number)) end
+      (((List.nth lst letter_num) ^ number), 
+       ((List.nth lst (letter_num - size)) ^ number)) end
 
 (** [init_ships ()] is a list of all ships in gameplay, with the appropriate
     names and sizes, [on_board] set to [false], and [default] location values
