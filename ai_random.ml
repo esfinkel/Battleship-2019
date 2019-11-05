@@ -18,8 +18,8 @@ let get_board c = c.board
 let place_all_ships c = Board.place "random" "" "" c.board
 
 let random_coors () =
-  let yaxis = Char.chr ((Random.int 9) + 65) |> String.make 1 in
-  let xaxis = string_of_int ((Random.int 9) + 1) in
+  let yaxis = Char.chr ((Random.int 10) + 65) |> String.make 1 in
+  let xaxis = string_of_int ((Random.int 10) + 1) in
   yaxis ^ xaxis
 
 
