@@ -15,7 +15,7 @@ let init () =
 
 let get_board c = c.board
 
-let place_all_ships c = Board.place "default" "" "" c.board
+let place_all_ships c = Board.place "random" "" "" c.board
 
 let random_coors () =
   let yaxis = Char.chr ((Random.int 9) + 65) |> String.make 1 in
