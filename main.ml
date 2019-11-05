@@ -221,7 +221,10 @@ let rec continue_game board o_board =
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
-  | Ready -> ()
+  | Ready -> ANSITerminal.(
+      print_string [red] "Please input a valid command."
+    );
+    continue_game board o_board
   | Status -> ANSITerminal.(
       print_string [cyan] (Board.status board)
     );
