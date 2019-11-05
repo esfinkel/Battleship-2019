@@ -7,7 +7,7 @@ let clear_screen () =
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
       | "w" -> print_string [cyan] "w "
-      | "x" -> print_string [cyan] "x "
+      | "x" -> print_string [default] "x "
       | "?" -> print_string [white; on_black] "? "
       | "O" -> print_string [white; on_black] "O "
       | "X" -> print_string [red] "X "
@@ -316,7 +316,7 @@ let rec get_name () : string = print_string "Player name?";
     single_continue_game player_board ai_board*)
 
 let ai_shoot player_board ai_board =
-  Ai_random.shoot_ship player_board;
+  ignore (Ai_random.shoot_ship player_board);
   if (Board.did_lose player_board) then 
     (display_win_message ai_board;
      exit 0 )
