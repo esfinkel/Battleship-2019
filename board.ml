@@ -343,7 +343,9 @@ let to_string_grid is_self b =
         ::(row_str self g t)
       )
     | (HitShip s)::t ->
-      (if is_dead s g then "#" else "X")::(row_str self g t) in
+      (if is_dead s g then "#" else (
+          if s.orientation=Some Vert then "X|" else "X-"
+        ))::(row_str self g t) in
   b.grid |> Array.to_list
   |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))
 

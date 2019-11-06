@@ -15,7 +15,7 @@ let print_grid grid =
       | "O" -> print_string [white; on_black] " o "
       | "-" -> print_string [white; on_yellow; Bold] "═══" (* "═══" or === *)
       | "|" -> print_string [white; on_yellow; Bold] " ║ " (* " ║ " *)
-      | "X" -> print_string [] "💥 "
+      | "X" | "X|" | "X-" -> print_string [on_red] "💥 "
       | "#" -> print_string [] "🔥 "
       | _ -> ()
     )
