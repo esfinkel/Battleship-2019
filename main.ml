@@ -1,3 +1,4 @@
+(** [single_difficulty] determines what type of ai to use for the computer. *)
 type single_difficulty = Easy | Medium 
 
 let clear_screen () =
@@ -277,7 +278,7 @@ let get_names () =  print_string "Player 1 name?";
   let p2_name = check_p2_name p1_name in 
   (p1_name, p2_name)
 
-(** [multiplayer ()] prompts for the game to play, then starts it. *)
+(** [multiplayer ()] prompts for the multiplayer game to play, then starts it.*)
 let multiplayer () = 
   let p1, p2 = get_names () in
   let p1_board = Board.init_board p1 in
@@ -354,7 +355,6 @@ let ai_shoot player_board ai_board single_dif=
        exit 0 )
     else ()
 
-
 let rec single_next_move player_board ai_board single_dif =
   display_board ai_board player_board; 
   ANSITerminal.(
@@ -369,6 +369,7 @@ let rec single_next_move player_board ai_board single_dif =
   ai_shoot player_board ai_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
+(** [choose_difficulty ()] prompts the player for the level of ai difficulty.*)
 let rec choose_difficulty () =
   print_string "\nChoose the game difficulty: easy or medium";
   match read_command () with
@@ -377,6 +378,8 @@ let rec choose_difficulty () =
   | _ -> ANSITerminal.(print_string [red] 
                          "\n\nEnter easy or medium."); choose_difficulty ()
 
+(** [singleplayer ()] prompts for the singleplayer game to play,
+    then starts it.*)
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
@@ -390,11 +393,6 @@ let singleplayer () =
     Ai_normal.place_all_ships ai_player;
     setup player_board; clear_screen ();
     single_next_move player_board (Ai_normal.get_board ai_player) single_dif
-
-
-(*let ai_player = Ai_random.init () in
-  let ai_board = Ai_random.get_board ai_player in *)
-
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
