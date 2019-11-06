@@ -40,12 +40,11 @@ let row_col (loc : Command.location) : (int*int) =
 
 (** [ordered l1 l2] is [(l1_x, l1_y), (l2_x, l2_y)], the coordinates of
     location [l1] and location [l2] respectively, except they are swapped
-    if given in the reverse order. *)
-let ordered l1 l2 = 
-  let pos1, pos2 = (row_col l1), (row_col l2) in
-  if fst pos1 < fst pos2 || snd pos1 < snd pos2
-  then pos1, pos2
-  else pos2, pos1
+    if given in the reverse order.
+    Precondition to comparability is that [l1] and [l2] are in either the
+    same row or the same column. *)
+let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
+  if pos1 < pos2 then pos1, pos2 else pos2, pos1
 
 (** AF: the record
     [{ grid = [
