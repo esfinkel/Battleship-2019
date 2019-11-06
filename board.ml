@@ -60,7 +60,6 @@ let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
     opponent missed their last shot, position A1 is water, position A2
     is water that has been shot, position B1 is a cell of ship s1, and
     position B2 is a cell of ship s2 (and that shell has been shot).
-
     RI : Once board setup has ended, every ship [s] in [t.ships] 
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
     [HitShip s]). The remaining cells are [Water] or [ShotWater]. 
