@@ -56,7 +56,7 @@ let new_off_limits ship_cells off_limits =
 let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
 
 (* Space the ships out so that they do not touch *)
-let rec place_ship_smartly (c:t) b name size off_limits : (int*int) list =
+let rec place_ship_smartly (c:t) b name size off_limits =
   (* pick a random coor, and a diff random at appropriate distance *)
   let new_coors = random_placement_coors size in
   (* order them *)
