@@ -6,12 +6,12 @@ let clear_screen () =
     (string list list) [grid]. *)
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
-      | "w" -> print_string [cyan] "w "
-      | "x" -> print_string [default] "x "
-      | "?" -> print_string [white; on_black] "? "
-      | "O" -> print_string [white; on_black] "O "
-      | "X" -> print_string [red] "X "
-      | "#" -> print_string [red] "# "
+      | "w" -> print_string [] "🌊 "
+      | "x" -> print_string [default] " x "
+      | "?" -> print_string [on_black] "❔ "
+      | "O" -> print_string [white; on_black] " o "
+      | "X" -> print_string [] "💥 "
+      | "#" -> print_string [black; on_red] " # "
       | _ -> ()
     )
   in
@@ -22,10 +22,13 @@ let print_grid grid =
     print_newline ()
   in
   let rec print_nums s e =
-    if s <= e then (print_string " "; print_int s; print_nums (s+1) e) else ()
+    if s <= e then ( print_int s;
+                     if s>=9 then print_string " " else print_string "  ";
+                     print_nums (s+1) e)
+    else ()
   in
   print_newline ();
-  print_string " ";
+  print_string "   ";
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ();
   List.iteri print_row grid
