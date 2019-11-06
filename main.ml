@@ -181,6 +181,13 @@ let display_win_message winner_board =
        ^(Board.player_name winner_board)
        ^": You won the game! Congratulations! \n\n"))
 
+let display_lose_message loser_board = 
+  ANSITerminal.(
+    print_string [yellow]
+      ("Player "
+       ^(Board.player_name loser_board)
+       ^": You lost! Better luck next time! \n\n"))
+
 (** [try_shooting shoot_phrase target_board my_board] attempts to shoot the spot 
     stated in [shoot_phrase] on target_board and checks to see if the player has 
     won. 
@@ -357,6 +364,7 @@ let ai_shoot player_board ai_board single_dif=
   | Medium -> ignore (Ai_normal.shoot_ship player_board);
     if (Board.did_lose player_board) then 
       (display_win_message ai_board;
+       display_lose_message player_board;
        exit 0 )
     else ()
 
