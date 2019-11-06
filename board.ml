@@ -23,8 +23,6 @@ type ship = {
 (** The abstract type of values representing a grid spot. *)
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship
 
-(** [row_col loc] is the [(row, column)] coordinate pair corresponding
-    to [loc]. *)
 let row_col (loc : Command.location) : (int*int) =
   let r = Str.regexp "\\([a-z]\\)\\([0-9]+\\)" in
   let pull_regex s =

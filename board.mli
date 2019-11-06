@@ -24,6 +24,10 @@ exception InvalidShipName
 (** The abstract type of values representing one player's battleship board. *)
 type t 
 
+(** [row_col loc] is the [(row, column)] coordinate pair corresponding
+    to [loc]. *)
+val row_col : Command.location -> int * int
+
 (** [init_board n] is a new [t], with all cells initialized to [Water] and
     player_name [n]. *)
 val init_board : string -> t 

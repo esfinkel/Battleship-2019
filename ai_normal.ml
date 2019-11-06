@@ -3,23 +3,6 @@ type t = {
   name: string;
 }
 
-(** [row_col loc] is the [(row, column)] coordinate pair corresponding
-    to [loc]. *)
-let row_col (loc : Command.location) : (int*int) =
-  let r = Str.regexp "\\([a-z]\\)\\([0-9]+\\)" in
-  let pull_regex s =
-    Str.global_replace r "\\1 \\2" (String.lowercase_ascii s)
-    |> String.split_on_char ' ' in
-  let index (c:char) : int = Char.code c - 97 in
-  let tup = function
-    | letter::number::[] -> (
-        String.get letter 0 |> index,
-        Stdlib.int_of_string number - 1
-      )
-    | _ -> raise (Failure "error")
-  in
-  loc |> pull_regex |> tup
-
 let alphalst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
 
 let rev_row_col loc : Command.location = 
@@ -66,26 +49,26 @@ let hit_history = init_history ()
 (** [up_coor loc] gives the coordinate directly above [loc]. If the coordinate
     above doesn't exist, it gives the coordinate directly below [loc]. *)
 let rec up_coor loc = 
-  let (x, y) = row_col loc in 
+  let (x, y) = Board.row_col loc in 
   try rev_row_col (x - 1, y)
   with exn -> down_coor loc 
 (** [down_coor loc] gives the coordinate directly below [loc]. If the coordinate
     above doesn't exist, it gives the coordinate directly above [loc]. *)
 and down_coor loc = 
-  let (x, y) = row_col loc in 
+  let (x, y) = Board.row_col loc in 
   try rev_row_col (x + 1, y)
   with exn -> up_coor loc 
 
 (** [right_coor loc] gives the coordinate directly right of [loc]. If the 
     coordinate doesn't exist, it gives the coordinate directly left of [loc]. *)
 let rec right_coor loc = 
-  let (x, y) = row_col loc in 
+  let (x, y) = Board.row_col loc in 
   try rev_row_col (x, y + 1)
   with exn -> left_coor loc 
 (** [left_coor loc] gives the coordinate directly left of [loc]. If the 
     coordinate doesn't exist, it gives the coordinate directly right of [loc].*)
 and left_coor loc = 
-  let (x, y) = row_col loc in 
+  let (x, y) = Board.row_col loc in 
   try rev_row_col (x, y - 1)
   with exn -> right_coor loc 
 
