@@ -80,14 +80,14 @@ let rec shoot_left b =
     match Board.shoot (left) b with 
     | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
     | msg -> hit_history.tried_left <- true; msg
-  with exn -> shoot_right b
+  with exn -> hit_history.tried_left <- true; shoot_right b
 and shoot_right b = 
   try 
     let right = right_coor hit_history.hit in
     match Board.shoot (right) b with 
     | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
     | msg -> hit_history.tried_right <- true; msg
-  with exn -> shoot_left b
+  with exn -> hit_history.tried_right <- true; shoot_left b
 
 let rec shoot_up b = 
   try 
@@ -95,14 +95,14 @@ let rec shoot_up b =
     match Board.shoot (up) b with 
     | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
     | msg -> hit_history.tried_up <- true; msg
-  with exn -> shoot_down b
+  with exn -> hit_history.tried_up <- true; shoot_down b
 and shoot_down b = 
   try 
     let down = down_coor hit_history.hit in
     match Board.shoot (down) b with 
     | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
     | msg -> hit_history.tried_down <- true; msg
-  with exn -> shoot_up b
+  with exn -> hit_history.tried_down <- true; shoot_up b
 
 let rec shoot_ship b = 
   if hit_history.hit = "" then 
