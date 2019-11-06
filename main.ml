@@ -2,7 +2,8 @@
 type single_difficulty = Easy | Medium 
 
 let clear_screen () =
-  ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen)
+  ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
+  Sys.command("clear") |> ignore
 
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
