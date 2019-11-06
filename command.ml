@@ -24,8 +24,10 @@ let parse str =
   | [] -> raise Empty
   | "place"::"default"::[] -> Place ["default"; ""; ""]
   | "place"::"random"::[] -> Place ["random"; ""; ""]
-  | "place"::boat::"on"::l1::l2::[] -> Place (boat::l1::l2::[])
-  | "shoot"::loc::[] -> Shoot (loc::[])
+  | "place"::boat::"on"::l1::l2::[]
+  | "place"::boat::l1::l2::[] -> Place (boat::l1::l2::[])
+  | "shoot"::loc::[] 
+  | "s"::loc::[] -> Shoot (loc::[])
   | "status"::[] -> Status
   | "help"::[] -> Help
   | "ready"::[] -> Ready
