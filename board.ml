@@ -13,10 +13,12 @@ exception InvalidShipName
 type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
 
 (** The abstract type of values representing a ship. *)
+type orn = Horz | Vert
 type ship = {
   name : ship_name;
   size : int;
   mutable on_board: bool;
+  mutable orientation: orn option;
   default : (Command.location * Command.location)
 }
 
@@ -105,40 +107,26 @@ let random_coordinates size : Command.location * Command.location =
       (((List.nth lst letter_num) ^ number), 
        ((List.nth lst (letter_num - size)) ^ number)) end
 
-(** [init_ships ()] is a list of all ships in gameplay, with the appropriate
-    names and sizes, [on_board] set to [false], and [default] location values
-    hardcoded. *)
-let init_ships () = [
-  {
-    name=Battleship;
-    size=4;
-    on_board=false;
-    default=("a1", "a4")
-  };
-  {
+(** [init_ship name size default] is an unplaced ship with the given [name],
+    [size], and [default]. *)
+let init_ship name size default = let ex = {
     name=Cruiser;
-    size=2;
+    size=0;
     on_board=false;
-    default=("b1", "b2")
-  };
-  {
-    name=Carrier;
-    size=5;
-    on_board=false;
-    default=("d2", "d6")
-  };
-  {
-    name=Destroyer;
-    size=3;
-    on_board=false;
-    default=("e2", "g2")
-  };
-  {
-    name=Submarine;
-    size=3;
-    on_board=false;
-    default=("f4", "f6")
-  };
+    orientation=None;
+    default=("", "")
+  } in 
+  {ex with name=name; size=size; default=default}
+
+(** [init_ships ()] is a list of all ships in gameplay, with the appropriate
+    names and sizes, [on_board] set to [false], no orientation, and [default]
+    location values hardcoded. *)
+let init_ships () = [
+  init_ship Battleship 4 ("a1", "a4");
+  init_ship Cruiser 2 ("b1", "b2");
+  init_ship Carrier 5 ("d2", "d6");
+  init_ship Destroyer 3 ("e2", "g2");
+  init_ship Submarine 3 ("f4", "f6");
 ]
 
 
@@ -233,9 +221,12 @@ let remove sh b =
     Array.iteri (fun j spot -> if (spot = Ship s) then 
                     r.(j) <- Water else ()) r in
   if sh.on_board 
-  then (sh.on_board <- false; 
+  then (sh.on_board <- false; sh.orientation <- None;
         Array.iter (fun r -> remove_from_row r sh) b.grid;)
   else raise NoShip
+
+(* I don't think this is right, but it works? *)
+let new_orientation (x1, y1) (x2, y2) = if x1 <> x2 then Some Vert else Some Horz
 
 let rec place s l1 l2 b =
   if s="default" then (
@@ -251,15 +242,16 @@ let rec place s l1 l2 b =
     with exn -> place "random" "" "" b
   else 
     let ship = get_ship s b in 
-    let ((x_1, y_1) as coors_1, (x_2, y_2) as coors_2) = ordered l1 l2 in 
+    let (((x_1, y_1) as coors_1), ((x_2, y_2) as coors_2)) = ordered l1 l2 in 
     on_board l1 b;
     on_board l2 b;
     check_alignment_and_length l1 l2 ship;
     if ship.on_board then remove ship b else ();
     overlapping_ship l1 l2 b.grid;
+    ship.on_board <- true;
+    ship.orientation <- new_orientation coors_1 coors_2;
     for x = x_1 to x_2 do
       for y = y_1 to y_2 do 
-        ship.on_board <- true;
         b.grid.(x).(y) <- Ship ship
       done
     done
@@ -346,7 +338,10 @@ let to_string_grid is_self b =
     | [] -> []
     | Water::t -> (if self then "w" else "?")::(row_str self g t)
     | ShotWater::t -> (if self then "x" else "x")::(row_str self g t)
-    | (Ship _)::t -> (if self then "O" else "?")::(row_str self g t)
+    | (Ship s)::t -> (
+        (if self then (if s.orientation=Some Vert then "|" else "-") else "?")
+        ::(row_str self g t)
+      )
     | (HitShip s)::t ->
       (if is_dead s g then "#" else "X")::(row_str self g t) in
   b.grid |> Array.to_list
