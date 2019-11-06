@@ -322,6 +322,11 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
     end
   | _ -> print_endline "\n parsing error"; false
 
+(** [single_continue_game player_board ai_board] reads in a command, parses it, 
+    and executes it.
+
+    Raises: [Command.Malformed] if the command is malformed. 
+    Raises: [Command.Empty] if the command is empty. *)
 let rec single_continue_game player_board ai_board =
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
