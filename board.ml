@@ -239,7 +239,12 @@ let rec place s l1 l2 b =
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
         place (string_of_ship sh.name) def1 def2 b) () b.ships 
-  ) else if s="random" then place_random b
+  ) else if s="random" then try 
+      List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+      List.fold_left
+        (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
+          place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
+    with exn -> place "random" "" "" b
   else 
     let ship = get_ship s b in 
     let ((x_1, y_1) as coors_1, (x_2, y_2) as coors_2) = ordered l1 l2 in 
@@ -254,13 +259,6 @@ let rec place s l1 l2 b =
         b.grid.(x).(y) <- Ship ship
       done
     done
-and place_random b = 
-  try 
-    List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
-    List.fold_left
-      (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
-        place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
-  with exn -> place_random b
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
     cells have been hit). *)
