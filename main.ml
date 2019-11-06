@@ -11,7 +11,7 @@ let print_grid grid =
       | "?" -> print_string [on_black] "❔ "
       | "O" -> print_string [white; on_black] " o "
       | "X" -> print_string [] "💥 "
-      | "#" -> print_string [black; on_red] " # "
+      | "#" -> print_string [black; on_black] " 🔥 "
       | _ -> ()
     )
   in
