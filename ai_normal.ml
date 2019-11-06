@@ -5,6 +5,8 @@ type t = {
 
 let alphalst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
 
+(** [rev_row_col loc] takes in a pair of ints in the range 0 to 9 and 
+    converts it to a string representing a location on the board. *)
 let rev_row_col loc : Command.location = 
   let (x, y) = loc in 
   List.nth alphalst x ^ string_of_int (y + 1)
@@ -36,6 +38,7 @@ type history = {
   mutable tried_up : bool;
 }
 
+(** [init_history ()] is a record of type history with no successful hits. *)
 let init_history () = 
   {
     hit = "";
@@ -74,53 +77,67 @@ let left_coor loc =
   try rev_row_col (x, y - 1)
   with exn -> rev_row_col (x, y)
 
-let rec shoot_left b = 
+let reset_history hist = 
+  hist.hit <- "";
+  hist.tried_down <- false;
+  hist.tried_left <- false;
+  hist.tried_up <- false;
+  hist.tried_right <- false
+
+let rec shoot_random b = 
+  try 
+    let coor = random_coors () in 
+    match Board.shoot (coor) b with
+    | "It's a hit!" -> hit_history.hit <- coor; "It's a hit!"
+    | msg -> msg
+  with | _ -> shoot_random b
+
+let shoot_left b = 
   try 
     let left = left_coor hit_history.hit in
     match Board.shoot (left) b with 
     | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
     | msg -> hit_history.tried_left <- true; msg
-  with exn -> hit_history.tried_left <- true; shoot_right b
-and shoot_right b = 
+  with exn -> hit_history.tried_left <- true; shoot_random b
+
+let shoot_right b = 
   try 
     let right = right_coor hit_history.hit in
     match Board.shoot (right) b with 
     | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
     | msg -> hit_history.tried_right <- true; msg
-  with exn -> hit_history.tried_right <- true; shoot_left b
+  with exn -> hit_history.tried_right <- true; shoot_random b
 
-let rec shoot_up b = 
+let shoot_up b = 
   try 
     let up = up_coor hit_history.hit in
     match Board.shoot (up) b with 
     | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
     | msg -> hit_history.tried_up <- true; msg
-  with exn -> hit_history.tried_up <- true; shoot_down b
-and shoot_down b = 
+  with exn -> hit_history.tried_up <- true; shoot_random b
+
+let shoot_down b = 
   try 
     let down = down_coor hit_history.hit in
     match Board.shoot (down) b with 
     | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
     | msg -> hit_history.tried_down <- true; msg
-  with exn -> hit_history.tried_down <- true; shoot_up b
+  with exn -> hit_history.tried_down <- true; shoot_random b
 
 let rec shoot_ship b = 
   if hit_history.hit = "" then 
-    try 
-      let coor = random_coors () in 
-      match Board.shoot (coor) b with
-      | "It's a hit!" -> hit_history.hit <- coor; "It's a hit!"
-      | msg -> msg
-    with | _ -> shoot_ship b
+    shoot_random b
   else begin
     if (hit_history.tried_left && hit_history.tried_down && 
-        hit_history.tried_right && hit_history.tried_left) then begin
-      hit_history.hit <- ""; hit_history.tried_down <- false; 
-      hit_history.tried_left <- false; hit_history.tried_up <- false; 
-      hit_history.tried_right <- false; 
+        hit_history.tried_up && hit_history.tried_right) then begin
+      reset_history hit_history;
       shoot_ship b end
-    else if hit_history.tried_right && hit_history.tried_left then
+    else if hit_history.tried_up = false then
       shoot_up b
+    else if hit_history.tried_down = false then 
+      shoot_down b
+    else if hit_history.tried_left = false then 
+      shoot_left b
     else
       shoot_right b
   end 
