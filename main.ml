@@ -363,8 +363,7 @@ let ai_shoot player_board ai_board single_dif=
   | Easy -> ignore (Ai_random.shoot_ship player_board);
   | Medium -> ignore (Ai_normal.shoot_ship player_board);
     if (Board.did_lose player_board) then 
-      (display_win_message ai_board;
-       display_lose_message player_board;
+      (display_lose_message player_board;
        exit 0 )
     else ()
 
