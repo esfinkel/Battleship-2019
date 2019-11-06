@@ -11,7 +11,7 @@ let print_grid grid =
       | "?" -> print_string [on_black] "❔ "
       | "O" -> print_string [white; on_black] " o "
       | "X" -> print_string [] "💥 "
-      | "#" -> print_string [black; on_black] " 🔥 "
+      | "#" -> print_string [(*black; on_black*)] "🔥 "
       | _ -> ()
     )
   in
@@ -308,7 +308,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | message -> display_board ai_board my_board; 
+      | message -> clear_screen ();
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
@@ -352,7 +352,6 @@ let ai_shoot player_board ai_board =
   else ()
 
 let rec single_next_move player_board ai_board =
-  clear_screen ();
   display_board ai_board player_board; 
   ANSITerminal.(
     print_string [cyan]
