@@ -40,12 +40,11 @@ let row_col (loc : Command.location) : (int*int) =
 
 (** [ordered l1 l2] is [(l1_x, l1_y), (l2_x, l2_y)], the coordinates of
     location [l1] and location [l2] respectively, except they are swapped
-    if given in the reverse order. *)
-let ordered l1 l2 = 
-  let pos1, pos2 = (row_col l1), (row_col l2) in
-  if fst pos1 < fst pos2 || snd pos1 < snd pos2
-  then pos1, pos2
-  else pos2, pos1
+    if given in the reverse order.
+    Precondition to comparability is that [l1] and [l2] are in either the
+    same row or the same column. *)
+let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
+  if pos1 < pos2 then pos1, pos2 else pos2, pos1
 
 (** AF: the record
     [{ grid = [
@@ -240,7 +239,12 @@ let rec place s l1 l2 b =
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
         place (string_of_ship sh.name) def1 def2 b) () b.ships 
-  ) else if s="random" then place_random b
+  ) else if s="random" then try 
+      List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+      List.fold_left
+        (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
+          place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
+    with exn -> place "random" "" "" b
   else 
     let ship = get_ship s b in 
     let ((x_1, y_1) as coors_1, (x_2, y_2) as coors_2) = ordered l1 l2 in 
@@ -255,13 +259,6 @@ let rec place s l1 l2 b =
         b.grid.(x).(y) <- Ship ship
       done
     done
-and place_random b = 
-  try 
-    List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
-    List.fold_left
-      (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
-        place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
-  with exn -> place_random b
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
     cells have been hit). *)

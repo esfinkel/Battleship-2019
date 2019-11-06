@@ -30,15 +30,19 @@ let random_coors () =
 (* To help AI keep track of guesses around a hit. *)
 type history = {
   mutable hit : Command.location; 
-  mutable tried_updown : bool;
-  mutable tried_rightleft : bool;
+  mutable tried_down : bool;
+  mutable tried_left : bool;
+  mutable tried_right : bool;
+  mutable tried_up : bool;
 }
 
 let init_history () = 
   {
     hit = "";
-    tried_updown = false; 
-    tried_rightleft = false; 
+    tried_up = false; 
+    tried_down = false; 
+    tried_left = false; 
+    tried_right = false; 
   }
 let hit_history = init_history () 
 
@@ -75,30 +79,30 @@ let rec shoot_left b =
     let left = left_coor hit_history.hit in
     match Board.shoot (left) b with 
     | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
-    | msg -> hit_history.tried_rightleft <- true; msg
-  with exn -> shoot_right b
+    | msg -> hit_history.tried_left <- true; msg
+  with exn -> hit_history.tried_left <- true; shoot_right b
 and shoot_right b = 
   try 
     let right = right_coor hit_history.hit in
     match Board.shoot (right) b with 
     | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
-    | msg -> hit_history.tried_rightleft <- true; msg
-  with exn -> shoot_left b
+    | msg -> hit_history.tried_right <- true; msg
+  with exn -> hit_history.tried_right <- true; shoot_left b
 
 let rec shoot_up b = 
   try 
     let up = up_coor hit_history.hit in
     match Board.shoot (up) b with 
     | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
-    | msg -> hit_history.tried_updown <- true; msg
-  with exn -> shoot_down b
+    | msg -> hit_history.tried_up <- true; msg
+  with exn -> hit_history.tried_up <- true; shoot_down b
 and shoot_down b = 
   try 
     let down = down_coor hit_history.hit in
     match Board.shoot (down) b with 
     | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
-    | msg -> hit_history.tried_updown <- true; msg
-  with exn -> shoot_up b
+    | msg -> hit_history.tried_down <- true; msg
+  with exn -> hit_history.tried_down <- true; shoot_up b
 
 let rec shoot_ship b = 
   if hit_history.hit = "" then 
@@ -109,11 +113,13 @@ let rec shoot_ship b =
       | msg -> msg
     with | _ -> shoot_ship b
   else begin
-    if hit_history.tried_rightleft && hit_history.tried_updown then begin
-      hit_history.hit <- ""; hit_history.tried_updown <- false; 
-      hit_history.tried_rightleft <- false; 
+    if (hit_history.tried_left && hit_history.tried_down && 
+        hit_history.tried_right && hit_history.tried_left) then begin
+      hit_history.hit <- ""; hit_history.tried_down <- false; 
+      hit_history.tried_left <- false; hit_history.tried_up <- false; 
+      hit_history.tried_right <- false; 
       shoot_ship b end
-    else if hit_history.tried_rightleft then
+    else if hit_history.tried_right && hit_history.tried_left then
       shoot_up b
     else
       shoot_right b
