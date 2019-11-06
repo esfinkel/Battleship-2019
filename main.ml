@@ -1,3 +1,4 @@
+type single_difficulty = Easy | Medium 
 
 let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen)
@@ -11,7 +12,7 @@ let print_grid grid =
       | "?" -> print_string [on_black] "❔ "
       | "O" -> print_string [white; on_black] " o "
       | "X" -> print_string [] "💥 "
-      | "#" -> print_string [(*black; on_black*)] "🔥 "
+      | "#" -> print_string [] "🔥 "
       | _ -> ()
     )
   in
@@ -344,14 +345,17 @@ let rec single_continue_game player_board ai_board =
     );
     single_continue_game player_board ai_board
 
-let ai_shoot player_board ai_board =
-  ignore (Ai_random.shoot_ship player_board);
-  if (Board.did_lose player_board) then 
-    (display_win_message ai_board;
-     exit 0 )
-  else ()
+let ai_shoot player_board ai_board single_dif=
+  match single_dif with
+  | Easy -> ignore (Ai_random.shoot_ship player_board);
+  | Medium -> ignore (Ai_normal.shoot_ship player_board);
+    if (Board.did_lose player_board) then 
+      (display_win_message ai_board;
+       exit 0 )
+    else ()
 
-let rec single_next_move player_board ai_board =
+
+let rec single_next_move player_board ai_board single_dif =
   display_board ai_board player_board; 
   ANSITerminal.(
     print_string [cyan]
@@ -362,17 +366,35 @@ let rec single_next_move player_board ai_board =
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
        ^ "\nUse 'status' to check your status."));
   single_continue_game player_board ai_board;
-  ai_shoot player_board ai_board;
-  single_next_move player_board ai_board (* boards are swapped! *)
+  ai_shoot player_board ai_board single_dif;
+  single_next_move player_board ai_board single_dif (* boards are swapped! *)
+
+let rec choose_difficulty () =
+  print_string "\nChoose the game difficulty: easy or medium";
+  match read_command () with
+  | "easy" -> Easy
+  | "medium" -> Medium
+  | _ -> ANSITerminal.(print_string [red] 
+                         "\n\nEnter easy or medium."); choose_difficulty ()
 
 let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
-  let ai_player = Ai_random.init () in
-  let ai_board = Ai_random.get_board ai_player in
-  setup player_board; clear_screen ();
-  Ai_random.place_all_ships ai_player;
-  single_next_move player_board ai_board
+  let single_dif = choose_difficulty () in
+  match single_dif with
+  | Easy -> let ai_player = Ai_random.init () in
+    Ai_random.place_all_ships ai_player;
+    setup player_board; clear_screen ();
+    single_next_move player_board (Ai_random.get_board ai_player) single_dif
+  | Medium -> let ai_player = Ai_normal.init () in
+    Ai_normal.place_all_ships ai_player;
+    setup player_board; clear_screen ();
+    single_next_move player_board (Ai_normal.get_board ai_player) single_dif
+
+
+(*let ai_player = Ai_random.init () in
+  let ai_board = Ai_random.get_board ai_player in *)
+
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
