@@ -7,7 +7,7 @@ let clear_screen () =
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
       | "w" -> print_string [] "🌊 "
-      | "x" -> print_string [default] " x "
+      | "x" -> print_string [default] "🌀 "
       | "?" -> print_string [on_black] "❔ "
       | "O" -> print_string [white; on_black] " o "
       | "X" -> print_string [] "💥 "
@@ -297,7 +297,30 @@ let rec get_name () : string = print_string "Player name?";
                      get_name ())
   else name
 
-(*let rec single_continue_game player_board ai_board =
+let rec single_try_shooting shoot_phrase ai_board my_board =
+  match shoot_phrase with 
+  | loc::[] -> begin 
+      match Board.shoot loc ai_board with 
+      | exception Board.DuplicateShot -> ANSITerminal.(
+          print_string [red] ("You've already shot there! Try shooting " 
+                              ^ "somewhere else!")
+        ); false
+      | exception Board.InvalidLoc -> ANSITerminal.(
+          print_string [red] "That's not on the board!"
+        ); false
+      | message -> display_board ai_board my_board; 
+        ANSITerminal.( 
+          print_string [cyan] ("You shot: " ^ loc ^ ".\n");
+          print_string [cyan] message; print_newline (););
+        if (Board.did_lose ai_board) then 
+          (display_win_message my_board;
+           exit 0 )
+        else 
+          true
+    end
+  | _ -> print_endline "\n parsing error"; false
+
+let rec single_continue_game player_board ai_board =
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
       print_string[red] "You can't move your ships during the game!");
@@ -309,7 +332,7 @@ let rec get_name () : string = print_string "Player name?";
       print_string [cyan] (Board.status player_board)
     );
     single_continue_game player_board ai_board
-  | Shoot shoot_phrase -> if try_shooting shoot_phrase ai_board player_board 
+  | Shoot shoot_phrase -> if single_try_shooting shoot_phrase ai_board player_board 
     then () 
     else single_continue_game player_board ai_board
   | exception Command.Malformed -> ANSITerminal.(
@@ -319,7 +342,7 @@ let rec get_name () : string = print_string "Player name?";
   | exception Command.Empty -> ANSITerminal.(
       print_string [red] "Please input a valid command."
     );
-    single_continue_game player_board ai_board*)
+    single_continue_game player_board ai_board
 
 let ai_shoot player_board ai_board =
   ignore (Ai_random.shoot_ship player_board);
@@ -339,7 +362,7 @@ let rec single_next_move player_board ai_board =
        ^": Please make your move." 
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
        ^ "\nUse 'status' to check your status."));
-  continue_game player_board ai_board;
+  single_continue_game player_board ai_board;
   ai_shoot player_board ai_board;
   single_next_move player_board ai_board (* boards are swapped! *)
 
