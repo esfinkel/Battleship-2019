@@ -7,7 +7,7 @@ let alphalst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
 
 let rev_row_col loc : Command.location = 
   let (x, y) = loc in 
-  List.nth alphalst x ^ string_of_int y
+  List.nth alphalst x ^ string_of_int (y + 1)
 
 let seed_random () = Unix.time () |> int_of_float |> Random.init
 
