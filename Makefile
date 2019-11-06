@@ -1,4 +1,4 @@
-MODULES=command main author board test ai_random
+MODULES=command main author board test ai_random ai_normal ai_smart
 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
