@@ -207,10 +207,9 @@ let check_alignment_and_length loc1 loc2 s =
     else raise WrongLength
   else raise Misaligned
 
-(** [overlapping_ship l1 l2 b] is true iff there are any ships present in
-    the span from [l1] to [l2] on [b]. *)
-let overlapping_ship l1 l2 b =
-  let ((x_1, y_1), (x_2, y_2)) = ordered l1 l2 in  
+(** [overlapping_ship_by_coors c1 c2 b] is true iff there are any ships
+    present in the span from [c1] to [c2] on [b]. *)
+let overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b =
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
       match b.(x).(y) with
@@ -218,6 +217,12 @@ let overlapping_ship l1 l2 b =
       | _ -> raise OverlappingShips 
     done
   done
+
+
+(** [overlapping_ship l1 l2 b] is true iff there are any ships present in
+    the span from [l1] to [l2] on [b]. *)
+let overlapping_ship l1 l2 b =
+  let c1, c2 = ordered l1 l2 in overlapping_ship_by_coors c1 c2 b
 
 
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
@@ -259,6 +264,19 @@ let rec place s l1 l2 b =
         b.grid.(x).(y) <- Ship ship
       done
     done
+
+
+let place_m_r s (x_1, y_1) (x_2, y_2) b =
+  let ship = get_ship s b in 
+  if ship.on_board then remove ship b else ();
+  overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b.grid;
+  for x = x_1 to x_2 do
+    for y = y_1 to y_2 do 
+      ship.on_board <- true;
+      b.grid.(x).(y) <- Ship ship
+    done
+  done
+
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
     cells have been hit). *)

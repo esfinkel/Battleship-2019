@@ -47,6 +47,18 @@ val player_name : t -> string
         present in [b]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
+(** [place_m_r n c1 c2 b] is [()]. If legal, [b] now has a ship with 
+    name [n], and its ends are in locations on t represented by
+    [c1] and [c2].
+    If that ship was already on [b], it is removed before being re-placed.
+    Raises:
+    - OffBoard if [c1] or [c2] is off the game board
+    - Misaligned if [c1] and [c2] are not in the same row or column
+    - WrongLength if [c1] and [c2] are the wrong distance apart
+    - OverlappingShips if the ship would overlap with a ship already
+        present in [b]. *)
+val place_m_r : string -> (int*int) -> (int*int) -> t -> unit
+
 (** [did_lose b] is true iff all ships have been destroyed in [b]. *)
 val did_lose : t -> bool
 
