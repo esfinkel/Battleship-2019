@@ -61,6 +61,12 @@ val shoot : Command.location -> t -> string
     [b] has not yet completed setup. *)
 val setup_status : t -> string
 
+(* i.e. setup status machine readable *)
+(** [setup_status_m_r b] is a list of tuples [(n, s)] representing all of
+    the ships that have not yet been placed, where each [n] is a ship's
+    string name and the adjacent [s] is the size of the corresponding ship. *)
+val setup_status_m_r : t -> (string * int) list
+
 (** [status b] is a string representing the status of [b]. *)
 val status : t -> string 
 

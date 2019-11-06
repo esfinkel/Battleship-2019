@@ -305,6 +305,15 @@ let setup_status b =
   ^ "\nOff the board: "
   ^ (long_string_of_ships off_board)
 
+let setup_status_m_r b =
+  (* let on_board = List.filter (fun s -> s.on_board) b.ships
+                 |> List.map (fun s -> (s.name |> string_of_ship, s.size))
+     in *)
+  let off_board = List.filter (fun s -> not s.on_board) b.ships
+                  |> List.map (fun s -> (s.name |> string_of_ship, s.size))
+  in
+  off_board
+
 let status b = 
   let update = match b.status with 
     | None -> ""
