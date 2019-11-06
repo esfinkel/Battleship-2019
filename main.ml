@@ -24,6 +24,7 @@ let print_grid grid =
     Char.chr (i+65) |> print_char;
     print_string " ";
     List.iter print_cell row;
+    Char.chr (i+65) |> print_char;
     print_newline ()
   in
   let rec print_nums s e =
@@ -36,7 +37,10 @@ let print_grid grid =
   print_string "   ";
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ();
-  List.iteri print_row grid
+  List.iteri print_row grid;
+  print_string "   ";
+  print_nums 1 (List.length (List.nth grid 0));
+  print_newline ()
 
 (** [print_self_board b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
