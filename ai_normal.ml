@@ -92,37 +92,35 @@ let rec shoot_random b =
     | msg -> msg
   with | _ -> shoot_random b
 
-let shoot_left b = 
-  try 
-    let left = left_coor hit_history.hit in
-    match Board.shoot (left) b with 
-    | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
-    | msg -> hit_history.tried_left <- true; msg
-  with exn -> hit_history.tried_left <- true; shoot_random b
+let rec shoot_left b = 
+  let left = left_coor hit_history.hit in
+  match Board.shoot (left) b with 
+  | exception Board.InvalidLoc -> hit_history.tried_left <- true; shoot_right b
+  | exception Board.DuplicateShot -> hit_history.tried_left <- true; shoot_random b
+  | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
+  | msg -> hit_history.tried_left <- true; msg
+and shoot_right b = 
+  let right = right_coor hit_history.hit in
+  match Board.shoot (right) b with 
+  | exception Board.InvalidLoc -> hit_history.tried_right <- true; shoot_left b
+  | exception Board.DuplicateShot -> hit_history.tried_right <- true; shoot_random b
+  | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
+  | msg -> hit_history.tried_right <- true; msg
 
-let shoot_right b = 
-  try 
-    let right = right_coor hit_history.hit in
-    match Board.shoot (right) b with 
-    | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
-    | msg -> hit_history.tried_right <- true; msg
-  with exn -> hit_history.tried_right <- true; shoot_random b
-
-let shoot_up b = 
-  try 
-    let up = up_coor hit_history.hit in
-    match Board.shoot (up) b with 
-    | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
-    | msg -> hit_history.tried_up <- true; msg
-  with exn -> hit_history.tried_up <- true; shoot_random b
-
-let shoot_down b = 
-  try 
-    let down = down_coor hit_history.hit in
-    match Board.shoot (down) b with 
-    | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
-    | msg -> hit_history.tried_down <- true; msg
-  with exn -> hit_history.tried_down <- true; shoot_random b
+let rec shoot_up b = 
+  let up = up_coor hit_history.hit in
+  match Board.shoot (up) b with 
+  | exception Board.InvalidLoc -> hit_history.tried_up <- true; shoot_down b
+  | exception Board.DuplicateShot -> hit_history.tried_up <- true; shoot_random b
+  | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
+  | msg -> hit_history.tried_up <- true; msg
+and shoot_down b = 
+  let down = down_coor hit_history.hit in
+  match Board.shoot (down) b with 
+  | exception Board.InvalidLoc -> hit_history.tried_down <- true; shoot_up b
+  | exception Board.DuplicateShot -> hit_history.tried_down <- true; shoot_random b
+  | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
+  | msg -> hit_history.tried_down <- true; msg
 
 let rec shoot_ship b = 
   if hit_history.hit = "" then 
