@@ -345,7 +345,7 @@ let to_string_grid is_self b =
   let rec row_str self g = function
     | [] -> []
     | Water::t -> (if self then "w" else "?")::(row_str self g t)
-    | ShotWater::t -> (if self then "x" else "w")::(row_str self g t)
+    | ShotWater::t -> (if self then "x" else "x")::(row_str self g t)
     | (Ship _)::t -> (if self then "O" else "?")::(row_str self g t)
     | (HitShip s)::t ->
       (if is_dead s g then "#" else "X")::(row_str self g t) in
