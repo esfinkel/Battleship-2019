@@ -109,14 +109,13 @@ let random_coordinates size : Command.location * Command.location =
 
 (** [init_ship name size default] is an unplaced ship with the given [name],
     [size], and [default]. *)
-let init_ship name size default = let ex = {
-    name=Cruiser;
-    size=0;
-    on_board=false;
-    orientation=None;
-    default=("", "")
-  } in 
-  {ex with name=name; size=size; default=default}
+let init_ship name size default = {
+  name=name;
+  size=size;
+  on_board=false;
+  orientation=None;
+  default=default;
+} 
 
 (** [init_ships ()] is a list of all ships in gameplay, with the appropriate
     names and sizes, [on_board] set to [false], no orientation, and [default]
