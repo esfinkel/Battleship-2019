@@ -260,9 +260,10 @@ let place_m_r s (x_1, y_1) (x_2, y_2) b =
   let ship = get_ship s b in 
   if ship.on_board then remove ship b else ();
   overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b.grid;
+  ship.on_board <- true;
+  ship.orientation <- new_orientation (x_1, y_1) (x_2, y_2);
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
-      ship.on_board <- true;
       b.grid.(x).(y) <- Ship ship
     done
   done
