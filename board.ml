@@ -335,11 +335,13 @@ let complete b =
   List.fold_left
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
-let is_part_of_dead_ship b (x, y) = 
+let is_part_of_living_ship b (x, y) = 
   let g = b.grid in
-  match g.(x).(y) with
-  | Ship s | HitShip s -> is_dead s g
-  | _ -> false
+  try
+    match g.(x).(y) with
+    | Ship s | HitShip s -> is_dead s g
+    | _ -> false
+  with | _ -> false
 
 
 (** [to_string_grid is_self b] is the grid (string list list) representation
@@ -365,6 +367,8 @@ let string_self (b:t) = to_string_grid true b
 
 let string_other b = to_string_grid false b
 
-
+let is_unshot b (x,y) = match (b.grid).(x).(y) with
+  | Ship _ | Water -> true
+  | _ -> false
 
 

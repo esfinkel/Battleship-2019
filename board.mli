@@ -93,9 +93,9 @@ val status : t -> string
     belong to [b]. *)
 val complete : t -> bool
 
-(** [is_part_of_dead_ship b (x, y)] is true iff there is a sunked ship
+(** [is_part_of_living_ship b (x, y)] is true iff there is a non-sunken ship
     on [b] at [(x, y)]. *)
-val is_part_of_dead_ship : t -> (int*int) -> bool 
+val is_part_of_living_ship : t -> (int*int) -> bool 
 
 (** [string_self b] is the grid (string list list) representation of
     board [b], as seen by the board's player. *)
@@ -104,3 +104,7 @@ val string_self : t -> string list list
 (** [string_other b] is the grid (string list list) representation of
     board [b], as seen by other players. *)
 val string_other : t -> string list list
+
+(** [is_unshot b (x,y)] is true iff the cell on [b] at [(x, y)] has
+    not been shot. *)
+val is_unshot : t -> int*int -> bool
