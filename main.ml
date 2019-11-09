@@ -123,6 +123,7 @@ let try_placing (ship_phrase: string list) board =
     )
   | _ -> print_endline "\n parsing error"
 
+(** [continue_setup board] reads in a command, parses it, and executes it. *)
 let rec continue_setup board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
@@ -171,7 +172,7 @@ let pause () =
   match read_command () with 
   | _ -> wait_next_move ()
 
-(** [setup board] starts the process of setting up [board].*)
+(** [setup board] starts the process of setting up [board]. *)
 let setup board  =
   print_self_board board;  Board.setup_status board |> print_endline;
   ANSITerminal.(
@@ -183,7 +184,7 @@ let setup board  =
   continue_setup board
 
 (** [display_win_message winner_board] displays that [winner_board.player_name] 
-    won. *)
+    won the game. *)
 let display_win_message winner_board = 
   ANSITerminal.(
     print_string [yellow]
@@ -191,6 +192,8 @@ let display_win_message winner_board =
        ^(Board.player_name winner_board)
        ^": You won the game! Congratulations! \n\n"))
 
+(** [display_win_message winner_board] displays that [loser_board.player_name] 
+    lost the game. *)
 let display_lose_message loser_board = 
   ANSITerminal.(
     print_string [yellow]
@@ -198,15 +201,11 @@ let display_lose_message loser_board =
        ^(Board.player_name loser_board)
        ^": You lost! Better luck next time! \n\n"))
 
-(** [try_shooting shoot_phrase target_board my_board] attempts to shoot the spot 
-    stated in [shoot_phrase] on target_board and checks to see if the player has 
-    won. 
-
-    Returns: [true] if the game should continue and [false] if there is a 
-    parsing error. 
-
-    Requires: [shoot_phrase] is a valid [command] of type [Shoot _]. 
-    Requires: [target_board] and [my_board] are valid boards of type [Board]. *)
+(** [try_shooting shoot_phrase target_board my_board] is [true] if the game 
+    should continue and [false] if there is a parsing error.  It attempts to 
+    shoot the spot stated in [shoot_phrase] on [target_board] and if a player 
+    has won, it displays the appropriate winning/losing message and exits 
+    the game. *)
 let rec try_shooting shoot_phrase target_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
@@ -232,10 +231,7 @@ let rec try_shooting shoot_phrase target_board my_board =
   | _ -> print_endline "\n parsing error"; false
 
 (** [continue_game board o_board] reads in a command, parses it, and 
-    executes it.
-
-    Raises: [Command.Malformed] if the command is malformed. 
-    Raises: [Command.Empty] if the command is empty. *)
+    executes it. *)
 let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
@@ -262,6 +258,8 @@ let rec continue_game board o_board =
     );
     continue_game board o_board
 
+(** [next_move board o_board] prompts the player for a gameplay command which
+    it then processes in [continue_game]. *)
 let rec next_move board o_board = 
   clear_screen ();
   display_board o_board board; 
@@ -316,6 +314,11 @@ let rec get_name () : string = print_string "Player name?";
                      get_name ())
   else name
 
+(** [single_try_shooting shoot_phrase ai_board my_board] is [true] if the game 
+    should continue and [false] if there is a parsing error.  It attempts to 
+    shoot the spot stated in [shoot_phrase] on [ai_board] and if the player 
+    has won or lost, it displays the appropriate winning/losing message and 
+    exits the game. *)
 let rec single_try_shooting shoot_phrase ai_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
@@ -340,10 +343,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
   | _ -> print_endline "\n parsing error"; false
 
 (** [single_continue_game player_board ai_board] reads in a command, parses it, 
-    and executes it.
-
-    Raises: [Command.Malformed] if the command is malformed. 
-    Raises: [Command.Empty] if the command is empty. *)
+    and executes it. (Same as [next_move] except the other player is the AI.) *)
 let rec single_continue_game player_board ai_board =
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
@@ -356,8 +356,8 @@ let rec single_continue_game player_board ai_board =
       print_string [cyan] (Board.status player_board)
     );
     single_continue_game player_board ai_board
-  | Shoot shoot_phrase -> if single_try_shooting shoot_phrase ai_board player_board 
-    then () 
+  | Shoot shoot_phrase -> 
+    if single_try_shooting shoot_phrase ai_board player_board then () 
     else single_continue_game player_board ai_board
   | exception Command.Malformed -> ANSITerminal.(
       print_string [red] "Please input a valid command."
@@ -368,6 +368,8 @@ let rec single_continue_game player_board ai_board =
     );
     single_continue_game player_board ai_board
 
+(** [ai_shoot player_board single_dif] shoots the [player_board] based
+    on the level of [single_dif]. *)
 let ai_shoot player_board single_dif=
   match single_dif with
   | Easy ai_board -> ignore (Ai_random.shoot_ship ai_board player_board);
@@ -378,6 +380,9 @@ let ai_shoot player_board single_dif=
        exit 0 )
     else ()
 
+(** [single_next_move player_board ai_board single_dif] prompts the player 
+    for a gameplay command which it then processes in [single_continue_game].
+    (Same as [next_move] except the other player is the AI.) *)
 let rec single_next_move player_board ai_board single_dif =
   display_board ai_board player_board; 
   ANSITerminal.(
@@ -392,7 +397,8 @@ let rec single_next_move player_board ai_board single_dif =
   ai_shoot player_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
-(** [choose_difficulty ()] prompts the player for the level of ai difficulty.*)
+(** [choose_difficulty ()] prompts the player to choose the level 
+    of ai difficulty.*)
 let rec choose_difficulty () =
   print_string "\nChoose the game difficulty: easy, medium, or hard.";
   match read_command () with
@@ -400,7 +406,8 @@ let rec choose_difficulty () =
   | "medium" -> Medium (Ai_normal.init())
   | "hard" -> Hard (Ai_smart.init())
   | _ -> ANSITerminal.(print_string [red] 
-                         "\n\nEnter 'easy', 'medium', or 'hard'."); choose_difficulty ()
+                         "\n\nEnter 'easy', 'medium', or 'hard'."); 
+    choose_difficulty ()
 
 (** [singleplayer ()] prompts for the singleplayer game to play,
     then starts it.*)
