@@ -21,40 +21,6 @@ let make_parse_exn_test
   name >:: (fun _ -> 
       assert_raises expected_exn (fun () -> parse str_input))
 
-(** [make_board_op_exn_test name f board expected_exn] constructs an OUnit test 
-    named [name] that asserts [f board] raises the [expected_exn]. *)
-let make_board_op_exn_test
-    (name : string)
-    (f : Board.t -> 'a)
-    (board : Board.t)
-    (expected_exn : exn) : test = 
-  name >:: (fun _ -> 
-      assert_raises expected_exn (fun () -> f board))
-
-(** [make_no_exn_raised_test name f board] constructs an OUnit test
-    named [name] that asserts the quality of [()] with 
-    [f board]. *)
-let make_no_exn_raised_test
-    (name : string)
-    (f : Board.t -> 'a)
-    (board : Board.t) = 
-  name >:: (fun _ -> 
-      assert_equal true ( try (f board |> ignore; true)
-                          with | _ -> false )
-    )
-
-(** [make_equal_test name f board exp] constructs an OUnit test
-    named [name] that asserts the quality of [exp] with [f board]. *)
-let make_equal_test
-    (name : string)
-    (f : Board.t -> 'a)
-    (board : Board.t)
-    (expected_output : 'a) = 
-  name >:: (fun _ -> 
-      assert_equal expected_output (f board)
-    )
-
-
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
     (Place ["ship"; "shot"; "ship"]);
@@ -92,6 +58,48 @@ let command_tests = [
     Malformed;  
 ]
 
+(** [make_board_op_exn_test name f board expected_exn] constructs an OUnit test 
+    named [name] that asserts [f board] raises the [expected_exn]. *)
+let make_board_op_exn_test
+    (name : string)
+    (f : Board.t -> 'a)
+    (board : Board.t)
+    (expected_exn : exn) : test = 
+  name >:: (fun _ -> 
+      assert_raises expected_exn (fun () -> f board))
+
+(** [make_no_exn_raised_test name f board] constructs an OUnit test
+    named [name] that asserts the quality of [()] with 
+    [f board]. *)
+let make_no_exn_raised_test
+    (name : string)
+    (f : Board.t -> 'a)
+    (board : Board.t) = 
+  name >:: (fun _ -> 
+      assert_equal true ( try (f board |> ignore; true)
+                          with | _ -> false )
+    )
+
+(** [make_equal_test name f board exp] constructs an OUnit test
+    named [name] that asserts the quality of [exp] with [f board]. *)
+let make_equal_test
+    (name : string)
+    (f : Board.t -> 'a)
+    (board : Board.t)
+    (expected_output : 'a) = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (f board)
+    )
+
+(** [make_row_col_test name loc expected_output] constructs an OUnit test
+    named [name] that asserts the quality of [expected_value] with 
+    [Board.row_col loc]. *)
+let make_row_col_test
+    (name : string)
+    (loc : Command.location)
+    (expected_output : int*int) = 
+  name >:: (fun _ ->
+      assert_equal expected_output (Board.row_col loc))
 
 (* Some of these tests make Board.t break the "all ships have been placed"
    invariant. This couldn't happen during gameplay. *)
@@ -119,12 +127,29 @@ let () = shoot_locs bd_lose [
     "e1"; "e2"; "e3"
   ] 
 
+let bd3 = Board.init_board "fake name"
+let () = Board.place_m_r "battleship" (1,1) (4,1) bd3
+
+let bd4 = Board.init_board "fake name"
+let () = Board.place "battleship" "b2" "e2" bd4
+
 let bd_full = Board.init_board "all ships placed"
 let () = Board.place "default" "" "" bd_full
 
 let board_tests = [
-  make_equal_test "board player name" Board.player_name bd1 "fake name";
+  (* Board.row_col *)
+  make_row_col_test "a5 is (0, 4)" "a5" (0, 4);
+  make_row_col_test "h6 is (7, 7)" "h6" (7, 5);
+  make_row_col_test "j10 is (9, 9)" "j10" (9, 9);
+  make_row_col_test "a1 is (0, 0)" "a1" (0, 0);
 
+  (* Board.init_board and Board.player_name *)
+  make_equal_test "board player name" Board.player_name bd1 "fake name";
+  make_equal_test "board player name" Board.player_name bd2 "fake name 2";
+  make_equal_test "board player name" Board.player_name bd_lose 
+    "this player will lose";
+
+  (* Board.place *)
   make_board_op_exn_test "OverlappingShips"
     (Board.place "destroyer" "b1" "b3") bd1 Board.OverlappingShips;
   make_board_op_exn_test "InvalidLoc"
@@ -135,13 +160,22 @@ let board_tests = [
     (Board.place "destroyer" "b2" "b9") bd1 Board.WrongLength;
   make_board_op_exn_test "Misaligned"
     (Board.place "destroyer" "b2" "c7") bd1 Board.Misaligned;
-
   make_no_exn_raised_test "insertion indices are reversed"
     (Board.place "cruiser" "h5" "h4") bd2;
 
-  make_equal_test "incomplete" Board.complete bd1 false;
-  make_equal_test "complete" Board.complete bd_full true;
+  (* Board.place_m_r *)
+  make_board_op_exn_test "OverlappingShips (place_m_r)"
+    (Board.place_m_r "destroyer" (1, 0) (1, 2)) bd3 Board.OverlappingShips;
+  make_board_op_exn_test "InvalidShipName (place_m_r)"
+    (Board.place_m_r "destroyor" (1, 8) (1, 11)) bd3 Board.InvalidShipName;
+  make_no_exn_raised_test "insertion indices are reversed (place_m_r)"
+    (Board.place_m_r "cruiser" (7, 4) (7, 3)) bd3;
 
+  (* Board.did_lose *)
+  make_equal_test "bd_lose has lost" Board.did_lose bd_lose true;
+  make_equal_test "bd2 has not lost" Board.did_lose bd2 false;
+
+  (* Board.shoot *)
   make_no_exn_raised_test "can shoot without error"
     (Board.shoot "a3") bd1; 
   make_board_op_exn_test "shoot shot location" (Board.shoot "a3")
@@ -149,14 +183,42 @@ let board_tests = [
   make_board_op_exn_test "invalid shot location"
     (Board.shoot "a99") bd1 Board.InvalidLoc;
 
-  make_equal_test "bd_lose has lost" Board.did_lose bd_lose true;
-  make_equal_test "bd2 has not lost" Board.did_lose bd2 false;
+  (* Board.shoot_m_r *)
+  make_no_exn_raised_test "can shoot without error"
+    (Board.shoot_m_r (2, 5)) bd1; 
+  make_board_op_exn_test "shoot shot location" (Board.shoot_m_r (0, 2))
+    bd2 Board.DuplicateShot;
+  make_board_op_exn_test "invalid shot location"
+    (Board.shoot_m_r (3, 98)) bd1 Board.InvalidLoc;
+
+  (* Board.setup_status *)
+  make_equal_test "fully set up board" Board.setup_status bd_full (
+    "On the board: battleship (length 4); cruiser (length 2); carrier " ^
+    "(length 5); destroyer (length 3); submarine (length 3)
+Off the board: None");
+  make_equal_test "partially set up board" Board.setup_status bd4 (
+    "On the board: battleship (length 4)
+Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
+    "submarine (length 3)");
+
+  (* Board.setup_status_m_r *)
+  make_equal_test "fully set up board" Board.setup_status_m_r bd_full [];
+  make_equal_test "partially set up board" Board.setup_status_m_r bd4 
+    [("cruiser", 2); ("carrier", 5); ("destroyer", 3); ("submarine", 3)];
+
+  (* Board.status *)
+  make_equal_test "no shots taken" Board.status bd_full 
+    "You still have ships left. ";
+
+  (* Board.complete *)
+  make_equal_test "incomplete" Board.complete bd1 false;
+  make_equal_test "complete" Board.complete bd_full true;
 
 ]
 
 
 let suite =
-  "test suite for A2"  >::: List.flatten [
+  "test suite for game engine"  >::: List.flatten [
     command_tests;
     board_tests
   ]
