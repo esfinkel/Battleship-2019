@@ -74,7 +74,7 @@ val shoot : Command.location -> t -> string
     that location on [b] has been updated to reflect this information.
     Raises:
     - DuplicateShot if that location has already been shot. *)
-val shoot_m_r : (int*int) -> t -> string
+val shoot_m_r : (int*int) -> t -> bool*bool
 
 (** [setup_status b] is a string representing the status of [b], where
     [b] has not yet completed setup. *)
@@ -92,6 +92,10 @@ val status : t -> string
 (** [complete b] is true iff [b] holds one of each of the ships that 
     belong to [b]. *)
 val complete : t -> bool
+
+(** [is_part_of_dead_ship b (x, y)] is true iff there is a sunked ship
+    on [b] at [(x, y)]. *)
+val is_part_of_dead_ship : t -> (int*int) -> bool 
 
 (** [string_self b] is the grid (string list list) representation of
     board [b], as seen by the board's player. *)

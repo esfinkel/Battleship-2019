@@ -282,28 +282,30 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
-
-let shoot_m_r (x, y) b =
+let shoot_helper (x, y) b =
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater;
     b.status <- Some "Your opponent missed.";
-    "It's a miss!"
+    "It's a miss!", false, false
   | Ship s -> b.grid.(x).(y) <- HitShip s;
     let sh_name = string_of_ship s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
-      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!")
+      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), true, true
     ) 
     else  (
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
-      "It's a hit!"
+      "It's a hit!", true, false
     )
   | _ -> raise DuplicateShot
 
 
+let shoot_m_r (x, y) b =
+  let _, success, killed = shoot_helper (x, y) b in success, killed
+
 let shoot l b = 
-  shoot_m_r (row_col l) b
+  let message, _, _ = shoot_helper (row_col l) b in message
 
 
 let setup_status b = 
@@ -332,6 +334,13 @@ let status b =
 let complete b = 
   List.fold_left
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
+
+let is_part_of_dead_ship b (x, y) = 
+  let g = b.grid in
+  match g.(x).(y) with
+  | Ship s | HitShip s -> is_dead s g
+  | _ -> false
+
 
 (** [to_string_grid is_self b] is the grid (string list list) representation
     of board [b]. Represented as seen by the board's player if [is_self] is
