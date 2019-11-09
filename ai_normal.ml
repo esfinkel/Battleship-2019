@@ -122,14 +122,14 @@ and shoot_down b =
   | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
   | msg -> hit_history.tried_down <- true; msg
 
-let rec shoot_ship b = 
+let rec shoot_ship c b = 
   if hit_history.hit = "" then 
     shoot_random b
   else begin
     if (hit_history.tried_left && hit_history.tried_down && 
         hit_history.tried_up && hit_history.tried_right) then begin
       reset_history hit_history;
-      shoot_ship b end
+      shoot_ship c b end
     else if hit_history.tried_up = false then
       shoot_up b
     else if hit_history.tried_down = false then 

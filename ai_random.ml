@@ -21,5 +21,5 @@ let random_coors () =
   yaxis ^ xaxis
 
 
-let rec shoot_ship b = try Board.shoot (random_coors ()) b with
-  | _ -> shoot_ship b
+let rec shoot_ship c b = try Board.shoot (random_coors ()) b with
+  | _ -> shoot_ship c b

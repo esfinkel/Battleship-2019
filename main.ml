@@ -1,5 +1,8 @@
 (** [single_difficulty] determines what type of ai to use for the computer. *)
-type single_difficulty = Easy | Medium | Hard
+type single_difficulty = 
+  | Easy of Ai_random.t 
+  | Medium of Ai_normal.t
+  | Hard of Ai_smart.t
 
 let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
@@ -365,11 +368,11 @@ let rec single_continue_game player_board ai_board =
     );
     single_continue_game player_board ai_board
 
-let ai_shoot player_board ai_board single_dif=
+let ai_shoot player_board single_dif=
   match single_dif with
-  | Easy -> ignore (Ai_random.shoot_ship player_board);
-  | Medium -> ignore (Ai_normal.shoot_ship player_board);
-  | Hard -> ignore (Ai_smart.shoot_ship player_board);
+  | Easy ai_board -> ignore (Ai_random.shoot_ship ai_board player_board);
+  | Medium ai_board -> ignore (Ai_normal.shoot_ship ai_board player_board);
+  | Hard ai_board-> ignore (Ai_smart.shoot_ship ai_board player_board);
     if (Board.did_lose player_board) then 
       (display_lose_message player_board;
        exit 0 )
@@ -386,16 +389,16 @@ let rec single_next_move player_board ai_board single_dif =
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
        ^ "\nUse 'status' to check your status."));
   single_continue_game player_board ai_board;
-  ai_shoot player_board ai_board single_dif;
+  ai_shoot player_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
 (** [choose_difficulty ()] prompts the player for the level of ai difficulty.*)
 let rec choose_difficulty () =
   print_string "\nChoose the game difficulty: easy, medium, or hard.";
   match read_command () with
-  | "easy" -> Easy
-  | "medium" -> Medium
-  | "hard" -> Hard
+  | "easy" -> Easy (Ai_random.init())
+  | "medium" -> Medium (Ai_normal.init())
+  | "hard" -> Hard (Ai_smart.init())
   | _ -> ANSITerminal.(print_string [red] 
                          "\n\nEnter 'easy', 'medium', or 'hard'."); choose_difficulty ()
 
@@ -406,15 +409,15 @@ let singleplayer () =
   let player_board = Board.init_board player in
   let single_dif = choose_difficulty () in
   match single_dif with
-  | Easy -> let ai_player = Ai_random.init () in
+  | Easy ai_player -> 
     Ai_random.place_all_ships ai_player;
     setup player_board; clear_screen ();
     single_next_move player_board (Ai_random.get_board ai_player) single_dif
-  | Medium -> let ai_player = Ai_normal.init () in
+  | Medium ai_player-> 
     Ai_normal.place_all_ships ai_player;
     setup player_board; clear_screen ();
     single_next_move player_board (Ai_normal.get_board ai_player) single_dif
-  | Hard -> let ai_player = Ai_smart.init () in
+  | Hard ai_player ->
     Ai_smart.place_all_ships ai_player;
     setup player_board; clear_screen ();
     single_next_move player_board (Ai_smart.get_board ai_player) single_dif
