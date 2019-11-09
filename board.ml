@@ -1,5 +1,7 @@
+open Helpers
+
 (* For generating actual random numbers. *)
-Random.self_init();
+let () = Random.self_init ();
 exception OffBoard
 exception Misaligned
 exception WrongLength
@@ -286,7 +288,9 @@ let shoot_helper (x, y) b =
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater;
-    b.status <- Some "Your opponent missed.";
+    b.status <- Some ("Your opponent shot "
+                      ^(rev_row_col (x, y) |> String.uppercase_ascii)
+                      ^" and missed.");
     "It's a miss!", false, false
   | Ship s -> b.grid.(x).(y) <- HitShip s;
     let sh_name = string_of_ship s.name in

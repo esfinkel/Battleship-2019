@@ -141,25 +141,30 @@ let rec coors_adjacent_to_this
   List.filter (is_adjacent) coor_list
   |> List.map (fun (c2, b) -> (coor, c2))
 
+let shoot c b coor =
+  match Board.shoot_m_r (coor) b with
+  | true, is_dead -> c.hit_history <- (coor, is_dead)::c.hit_history; ""
+  | _ -> ""
+
 let rec shoot_random c b = 
-  try 
-    let coor = random_coors () in 
-    match Board.shoot_m_r (coor) b with
-    | true, is_dead -> c.hit_history <- (coor, is_dead)::c.hit_history; ""
-    | _ -> ""
+  try () |> random_coors |> shoot c b
   with | _ -> shoot_random c b
+
+let shoot_from c b targets =
+  let len = List.length targets in
+  if len = 0 then shoot_random c b
+  else let target = List.nth targets (Random.int len) in
+    shoot c b target
 
 let rec find_adjacent_xs ls = function
   | [] -> ls
   | (c, is_alive)::t -> find_adjacent_xs (ls @ (coors_adjacent_to_this c t)) t
 
-let shoot_find_unknown_nearby b adjx = 
-
+let shoot_find_unknown_on_ends b adjx = 
   let ends ((x1, y1), (x2, y2)) = if x1 = x2
     then (* horiz *) [(x1, y1-1); (x2, y2+1)]
     else (* vert *) [(x1-1, y1); (x2+1, y2)] in
   let is_unknown = Board.is_unshot b in
-
   List.fold_left (fun ls coors -> ls @ (coors |> ordered |> ends)) [] adjx
   |> List.filter coor_on_board
   |> List.filter is_unknown
@@ -172,24 +177,25 @@ let update_history c =
   )
 
 let rec shoot_find_nearby c b = 
-  update_history c;
   (* update all the is_dead values in this hit_history *)
-  let grid = Board.string_other b in
+  update_history c;
   (* look for adjacent X's in history *)
   let adjx = find_adjacent_xs [] c.hit_history in
-  shoot_find_unknown_nearby b adjx
+  let targets = shoot_find_unknown_on_ends b adjx in
+  let num_targets = List.length targets in
+  if num_targets > 0
+  (* if you find adjacent x's with ? on at least one end; shoot that ? *)
+  then shoot_from c b targets
 
-
-  |> ignore; ""
-(* if you find adjacent x's with ? on at least one end; shoot that ? *)
-
-
-(* otherwise, shoot a ? next to any X *)
-
-(* if you don't find one, shoot randomly *)
-
-(* finally, update all the is_dead values in this hit_history *)
-
+  (* otherwise, shoot a ? next to any X *)
+  (* if you don't find one, shoot randomly *)
+  else 
+    let adj_questions = new_off_limits targets [] 
+                        |> List.filter coor_on_board
+                        |> List.filter (Board.is_unshot b)
+    in let res = shoot_from c b adj_questions in
+    (* finally, update all the is_dead values in this hit_history *)
+    update_history c; res
 
 
 let rec shoot_ship c b = 
