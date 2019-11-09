@@ -1,5 +1,5 @@
 (** [single_difficulty] determines what type of ai to use for the computer. *)
-type single_difficulty = Easy | Medium 
+type single_difficulty = Easy | Medium | Hard
 
 let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
@@ -369,6 +369,7 @@ let ai_shoot player_board ai_board single_dif=
   match single_dif with
   | Easy -> ignore (Ai_random.shoot_ship player_board);
   | Medium -> ignore (Ai_normal.shoot_ship player_board);
+  | Hard -> ignore (Ai_smart.shoot_ship player_board);
     if (Board.did_lose player_board) then 
       (display_lose_message player_board;
        exit 0 )
@@ -390,12 +391,13 @@ let rec single_next_move player_board ai_board single_dif =
 
 (** [choose_difficulty ()] prompts the player for the level of ai difficulty.*)
 let rec choose_difficulty () =
-  print_string "\nChoose the game difficulty: easy or medium";
+  print_string "\nChoose the game difficulty: easy, medium, or hard.";
   match read_command () with
   | "easy" -> Easy
   | "medium" -> Medium
+  | "hard" -> Hard
   | _ -> ANSITerminal.(print_string [red] 
-                         "\n\nEnter easy or medium."); choose_difficulty ()
+                         "\n\nEnter 'easy', 'medium', or 'hard'."); choose_difficulty ()
 
 (** [singleplayer ()] prompts for the singleplayer game to play,
     then starts it.*)
@@ -412,6 +414,10 @@ let singleplayer () =
     Ai_normal.place_all_ships ai_player;
     setup player_board; clear_screen ();
     single_next_move player_board (Ai_normal.get_board ai_player) single_dif
+  | Hard -> let ai_player = Ai_smart.init () in
+    Ai_smart.place_all_ships ai_player;
+    setup player_board; clear_screen ();
+    single_next_move player_board (Ai_smart.get_board ai_player) single_dif
 
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
