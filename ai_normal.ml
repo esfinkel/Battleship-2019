@@ -24,6 +24,7 @@ let get_board c = c.board
 
 let place_all_ships c = Board.place "random" "" "" c.board
 
+(** [random_coors() is a random coordinate on the board. *)
 let random_coors () =
   let yaxis = Char.chr ((Random.int 10) + 65) |> String.make 1 in
   let xaxis = string_of_int ((Random.int 10) + 1) in
@@ -49,34 +50,28 @@ let init_history () =
   }
 let hit_history = init_history () 
 
-(** [up_coor loc] gives the coordinate directly above [loc]. If the coordinate
-    above doesn't exist, it gives the original [loc]. *)
+(** [up_coor loc] gives the coordinate pair directly above [loc]. *)
 let up_coor loc = 
   let (x, y) = Board.row_col loc in 
-  try rev_row_col (x - 1, y)
-  with exn -> rev_row_col (x, y)
+  (x - 1, y)
 
-(** [down_coor loc] gives the coordinate directly below [loc]. If the coordinate
-    above doesn't exist, it gives the original [loc]. *)
+(** [down_coor loc] gives the coordinate pair directly below [loc]. *)
 let down_coor loc = 
   let (x, y) = Board.row_col loc in 
-  try rev_row_col (x + 1, y)
-  with exn -> rev_row_col (x, y)
+  (x + 1, y)
 
-(** [right_coor loc] gives the coordinate directly right of [loc]. If the 
-    coordinate doesn't exist, it gives the original [loc]. *)
+(** [right_coor loc] gives the coordinate pair directly to the right of [loc].*)
 let right_coor loc = 
   let (x, y) = Board.row_col loc in 
-  try rev_row_col (x, y + 1)
-  with exn -> rev_row_col (x, y)
+  (x, y + 1)
 
-(** [left_coor loc] gives the coordinate directly left of [loc]. If the 
-    coordinate doesn't exist, it gives the original [loc].*)
+(** [left_coor loc] gives the coordinate pair directly to the left of [loc]. *)
 let left_coor loc = 
   let (x, y) = Board.row_col loc in 
-  try rev_row_col (x, y - 1)
-  with exn -> rev_row_col (x, y)
+  (x, y - 1)
 
+(** [reset_history hist] resets [hist] to have no successful hits and no
+    attempted directions. *)
 let reset_history hist = 
   hist.hit <- "";
   hist.tried_down <- false;
@@ -84,6 +79,7 @@ let reset_history hist =
   hist.tried_up <- false;
   hist.tried_right <- false
 
+(** [shoot_random b] shoots a random spot on board [b]. *)
 let rec shoot_random b = 
   try 
     let coor = random_coors () in 
@@ -92,35 +88,61 @@ let rec shoot_random b =
     | msg -> msg
   with | _ -> shoot_random b
 
+(** [shoot_left b] shoots the spot to the left of the hit in [hit_history] and 
+    updates [hit_history] accordingly.
+    If the spot is off the board, it attempts to shoot right of the spot.
+    If the spot is a duplicate shot, it shoots randomly again.  *)
 let rec shoot_left b = 
   let left = left_coor hit_history.hit in
-  match Board.shoot (left) b with 
+  match Board.shoot_m_r (left) b with 
   | exception Board.InvalidLoc -> hit_history.tried_left <- true; shoot_right b
   | exception Board.DuplicateShot -> hit_history.tried_left <- true; shoot_random b
-  | "It's a hit!" -> hit_history.hit <- left; "It's a hit!"
-  | msg -> hit_history.tried_left <- true; msg
+  | true, false -> hit_history.hit <- rev_row_col left; ""
+  | false, false -> hit_history.tried_left <- true; ""
+  | true, true -> reset_history hit_history; ""
+  | _ -> failwith "impossible"
+
+(** [shoot_right b] shoots the spot to the right of the hit in [hit_history] and 
+    updates [hit_history] accordingly.
+    If the spot is off the board, it attempts to shoot left of the spot.
+    If the spot is a duplicate shot, it shoots randomly again.  *)
 and shoot_right b = 
   let right = right_coor hit_history.hit in
-  match Board.shoot (right) b with 
+  match Board.shoot_m_r (right) b with 
   | exception Board.InvalidLoc -> hit_history.tried_right <- true; shoot_left b
   | exception Board.DuplicateShot -> hit_history.tried_right <- true; shoot_random b
-  | "It's a hit!" -> hit_history.hit <- right; "It's a hit!"
-  | msg -> hit_history.tried_right <- true; msg
+  | true, false -> hit_history.hit <- rev_row_col right; ""
+  | false, false -> hit_history.tried_right <- true; ""
+  | true, true -> reset_history hit_history; ""
+  | _ -> failwith "impossible"
 
+(** [shoot_up b] shoots the spot above of the hit in [hit_history] and 
+    updates [hit_history] accordingly.
+    If the spot is off the board, it attempts to shoot below the spot.
+    If the spot is a duplicate shot, it shoots randomly again.  *)
 let rec shoot_up b = 
   let up = up_coor hit_history.hit in
-  match Board.shoot (up) b with 
+  match Board.shoot_m_r (up) b with 
   | exception Board.InvalidLoc -> hit_history.tried_up <- true; shoot_down b
   | exception Board.DuplicateShot -> hit_history.tried_up <- true; shoot_random b
-  | "It's a hit!" -> hit_history.hit <- up; "It's a hit!"
-  | msg -> hit_history.tried_up <- true; msg
+  | true, false -> hit_history.hit <- rev_row_col up; ""
+  | false, false -> hit_history.tried_up <- true; ""
+  | true, true -> reset_history hit_history; ""
+  | _ -> failwith "impossible"
+
+(** [shoot_down b] shoots the spot below of the hit in [hit_history] and 
+    updates [hit_history] accordingly.
+    If the spot is off the board, it attempts to shoot above of the spot.
+    If the spot is a duplicate shot, it shoots randomly again.  *)
 and shoot_down b = 
   let down = down_coor hit_history.hit in
-  match Board.shoot (down) b with 
+  match Board.shoot_m_r (down) b with 
   | exception Board.InvalidLoc -> hit_history.tried_down <- true; shoot_up b
   | exception Board.DuplicateShot -> hit_history.tried_down <- true; shoot_random b
-  | "It's a hit!" -> hit_history.hit <- down; "It's a hit!"
-  | msg -> hit_history.tried_down <- true; msg
+  | true, false -> hit_history.hit <- rev_row_col down; ""
+  | false, false -> hit_history.tried_down <- true; ""
+  | true, true -> reset_history hit_history; ""
+  | _ -> failwith "impossible"
 
 let rec shoot_ship c b = 
   if hit_history.hit = "" then 
