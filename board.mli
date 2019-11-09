@@ -69,6 +69,13 @@ val did_lose : t -> bool
     - DuplicateShot if that location has already been shot. *)
 val shoot : Command.location -> t -> string
 
+(** [shoot (x,y) b] is a string message explaining the result of the shot.
+    The location on [b] reprented by [(x,y)] has now been shot;
+    that location on [b] has been updated to reflect this information.
+    Raises:
+    - DuplicateShot if that location has already been shot. *)
+val shoot_m_r : (int*int) -> t -> string
+
 (** [setup_status b] is a string representing the status of [b], where
     [b] has not yet completed setup. *)
 val setup_status : t -> string

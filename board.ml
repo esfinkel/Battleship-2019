@@ -283,8 +283,7 @@ let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
 
-let shoot l b = 
-  let x, y = row_col l in 
+let shoot_m_r (x, y) b =
   match b.grid.(x).(y) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
   | Water -> b.grid.(x).(y) <- ShotWater;
@@ -301,6 +300,10 @@ let shoot l b =
       "It's a hit!"
     )
   | _ -> raise DuplicateShot
+
+
+let shoot l b = 
+  shoot_m_r (row_col l) b
 
 
 let setup_status b = 
