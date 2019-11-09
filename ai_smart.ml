@@ -1,6 +1,7 @@
 
 type t = {
   board: Board.t;
+  mutable history: (Command.location list)
 }
 
 let seed_random () = Unix.time () |> int_of_float |> Random.init
@@ -9,6 +10,7 @@ let init () =
   let () = seed_random () in
   {
     board = Board.init_board "💻";
+    history = [];
   }
 
 let get_board c = c.board
@@ -72,7 +74,7 @@ let rec place_ship_smartly (c:t) b name size off_limits =
     then place_ship_smartly c b name size off_limits
     (* otherwise add to off_limits and return new off_limits *)
     else
-      (Board.place_m_r name c1 c2 b;
+      (place b name c1 c2;
        new_off_limits ship_cells off_limits)
 
 
@@ -83,6 +85,8 @@ let place_all_ships c =
     [] to_place
   |> ignore
 
+
+let rec shoot c op = ()
 
 (* **************************** *)
 
@@ -109,5 +113,5 @@ let random_coors () =
   yaxis ^ xaxis
 
 
-let rec shoot_ship b = try Board.shoot (random_coors ()) b with
-  | _ -> shoot_ship b
+let rec shoot_ship c b = try Board.shoot (random_coors ()) b with
+  | _ -> shoot_ship c b
