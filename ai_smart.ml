@@ -66,9 +66,10 @@ let no_overlap ship_cells off_limits =
     or vertically adjacent to [coor]. *)
 let adjacent_cells (x, y) = (x+1,y)::(x-1,y)::(x,y-1)::(x,y+1)::[]
 
-(** [new_off_limits ship_cells off_limits] is [off_limits] with the
-    addition of the cells that are adjacent to any cell in [ship_cells]. *)
-let new_off_limits ship_cells off_limits =
+(** [all_cells_adjacent_to_next_ship ship_cells off_limits] is [off_limits]
+    with the addition of the cells that are adjacent to any cell in
+    [ship_cells]. *)
+let all_cells_adjacent_to_next_ship ship_cells off_limits =
   List.fold_left (fun sofar coor ->
       coor::(adjacent_cells coor) @ sofar
     ) off_limits ship_cells |> List.sort_uniq Stdlib.compare
@@ -100,7 +101,7 @@ let rec place_ship_smartly b name size off_limits =
     (* otherwise add to off_limits and return new off_limits *)
     else
       (place b name c1 c2;
-       new_off_limits ship_cells off_limits)
+       all_cells_adjacent_to_next_ship ship_cells off_limits)
 
 (** [place_all_ships c] is [()]. All ships have been placed on the
     board belonging to [c], such that no ships are touching. *)
@@ -147,14 +148,18 @@ let shoot c b coor =
   | _ -> ""
 
 let rec shoot_random c b = 
+  print_endline "shooting randomly";
   try () |> random_coors |> shoot c b
   with | _ -> shoot_random c b
 
-let shoot_from c b targets =
-  let len = List.length targets in
-  if len = 0 then shoot_random c b
-  else let target = List.nth targets (Random.int len) in
+let rec shoot_from c b targets =
+  print_endline "shooting from list";
+  try
+    let len = List.length targets in
+    let target = List.nth targets (Random.int len) in
     shoot c b target
+  with 
+  | _ -> shoot_from c b targets
 
 let rec find_adjacent_xs ls = function
   | [] -> ls
@@ -185,15 +190,20 @@ let rec shoot_find_nearby c b =
   let num_targets = List.length targets in
   if num_targets > 0
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
-  then shoot_from c b targets
+  then ((print_endline "looking at ends"); let res = shoot_from c b targets in update_history c; res)
 
   (* otherwise, shoot a ? next to any X *)
   (* if you don't find one, shoot randomly *)
   else 
-    let adj_questions = new_off_limits targets [] 
+    let adj_questions = all_cells_adjacent_to_next_ship targets [] 
                         |> List.filter coor_on_board
                         |> List.filter (Board.is_unshot b)
-    in let res = shoot_from c b adj_questions in
+
+    in 
+    let res = (
+      if List.length adj_questions > 0 then ((print_endline "looking at all adjacent"); shoot_from c b adj_questions)
+      else shoot_random c b
+    ) in
     (* finally, update all the is_dead values in this hit_history *)
     update_history c; res
 
