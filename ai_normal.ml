@@ -91,7 +91,8 @@ let rec shoot_random b =
 (** [shoot_left b] shoots the spot to the left of the hit in [hit_history] and 
     updates [hit_history] accordingly.
     If the spot is off the board, it attempts to shoot right of the spot.
-    If the spot is a duplicate shot, it shoots randomly again.  *)
+    If the spot is a duplicate shot or if it successfully sinks a ship, 
+    it starts to shoot randomly again. *)
 let rec shoot_left b = 
   let left = left_coor hit_history.hit in
   match Board.shoot_m_r (left) b with 
@@ -105,7 +106,8 @@ let rec shoot_left b =
 (** [shoot_right b] shoots the spot to the right of the hit in [hit_history] and 
     updates [hit_history] accordingly.
     If the spot is off the board, it attempts to shoot left of the spot.
-    If the spot is a duplicate shot, it shoots randomly again.  *)
+    If the spot is a duplicate shot or if it successfully sinks a ship, 
+    it starts to shoot randomly again.  *)
 and shoot_right b = 
   let right = right_coor hit_history.hit in
   match Board.shoot_m_r (right) b with 
@@ -119,7 +121,8 @@ and shoot_right b =
 (** [shoot_up b] shoots the spot above of the hit in [hit_history] and 
     updates [hit_history] accordingly.
     If the spot is off the board, it attempts to shoot below the spot.
-    If the spot is a duplicate shot, it shoots randomly again.  *)
+    If the spot is a duplicate shot or if it successfully sinks a ship, 
+    it starts to shoot randomly again.  *)
 let rec shoot_up b = 
   let up = up_coor hit_history.hit in
   match Board.shoot_m_r (up) b with 
@@ -133,7 +136,8 @@ let rec shoot_up b =
 (** [shoot_down b] shoots the spot below of the hit in [hit_history] and 
     updates [hit_history] accordingly.
     If the spot is off the board, it attempts to shoot above of the spot.
-    If the spot is a duplicate shot, it shoots randomly again.  *)
+    If the spot is a duplicate shot or if it successfully sinks a ship, 
+    it starts to shoot randomly again. *)
 and shoot_down b = 
   let down = down_coor hit_history.hit in
   match Board.shoot_m_r (down) b with 
