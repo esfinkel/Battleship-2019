@@ -95,7 +95,7 @@ val complete : t -> bool
 
 (** [is_part_of_living_ship b (x, y)] is true iff there is a non-sunken ship
     on [b] at [(x, y)]. *)
-val is_part_of_living_ship : t -> (int*int) -> bool 
+val is_part_of_living_ship : (int*int)-> t -> bool 
 
 (** [string_self b] is the grid (string list list) representation of
     board [b], as seen by the board's player. *)

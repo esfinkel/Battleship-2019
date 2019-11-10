@@ -149,7 +149,7 @@ let shoot c b coor =
 
 let rec shoot_random c b = 
   print_endline "shooting randomly";
-  try () |> random_coors |> shoot c b
+  try shoot c b (random_coors ())
   with | _ -> shoot_random c b
 
 let rec shoot_from c b targets =
@@ -177,7 +177,7 @@ let shoot_find_unknown_on_ends b adjx =
 let update_history c =
   c.hit_history <- (
     List.map (fun (coor, _) ->
-        (coor, Board.is_part_of_living_ship c.board coor)
+        (coor, Board.is_part_of_living_ship coor c.board)
       ) c.hit_history
   )
 
