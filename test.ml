@@ -239,7 +239,9 @@ Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
   make_equal_test "complete" Board.complete bd_full true;
 
   (* Board.is_part_of_living_ship *)
-
+  make_equal_test "alive ship" (Board.is_part_of_living_ship (1, 1)) bd_full true;
+  make_equal_test "dead ship" (Board.is_part_of_living_ship (1, 0)) bd_full4 false;
+  make_equal_test "no ship" (Board.is_part_of_living_ship (9, 9)) bd_full5 false;
 ]
 
 
