@@ -183,9 +183,10 @@ let setup board  =
   );
   continue_setup board
 
-(** [display_win_message winner_board] displays that [winner_board.player_name] 
-    won the game. *)
-let display_win_message winner_board = 
+(** [display_win_message winner_board loser_board] displays that 
+    [winner_board.player_name] won the game. *)
+let display_win_message loser_board winner_board = 
+  display_board loser_board winner_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
@@ -194,7 +195,8 @@ let display_win_message winner_board =
 
 (** [display_win_message winner_board] displays that [loser_board.player_name] 
     lost the game. *)
-let display_lose_message loser_board = 
+let display_lose_message winner_board loser_board = 
+  display_board winner_board loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
@@ -222,7 +224,7 @@ let rec try_shooting shoot_phrase target_board my_board =
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
         if (Board.did_lose target_board) then 
-          (display_win_message my_board;
+          (display_win_message target_board my_board;
            exit 0 )
         else 
           pause ();
@@ -335,7 +337,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
         if (Board.did_lose ai_board) then 
-          (display_win_message my_board;
+          (display_win_message ai_board my_board;
            exit 0 )
         else 
           true
@@ -370,13 +372,13 @@ let rec single_continue_game player_board ai_board =
 
 (** [ai_shoot player_board single_dif] shoots the [player_board] based
     on the level of [single_dif]. *)
-let ai_shoot player_board single_dif=
+let ai_shoot player_board ai_player single_dif=
   match single_dif with
   | Easy ai_board -> ignore (Ai_random.shoot_ship ai_board player_board);
   | Medium ai_board -> ignore (Ai_normal.shoot_ship ai_board player_board);
   | Hard ai_board-> ignore (Ai_smart.shoot_ship ai_board player_board);
     if (Board.did_lose player_board) then 
-      (display_lose_message player_board;
+      (display_lose_message ai_player player_board;
        exit 0 )
     else ()
 
@@ -394,7 +396,7 @@ let rec single_next_move player_board ai_board single_dif =
        ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
        ^ "\nUse 'status' to check your status."));
   single_continue_game player_board ai_board;
-  ai_shoot player_board single_dif;
+  ai_shoot player_board ai_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
 (** [choose_difficulty ()] prompts the player to choose the level 
