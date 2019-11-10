@@ -80,15 +80,15 @@ let make_no_exn_raised_test
                           with | _ -> false )
     )
 
-(** [make_equal_test name f board exp] constructs an OUnit test
-    named [name] that asserts the quality of [exp] with [f board]. *)
+(** [make_equal_test name f v exp] constructs an OUnit test
+    named [name] that asserts the quality of [exp] with [f v]. *)
 let make_equal_test
     (name : string)
-    (f : Board.t -> 'a)
-    (board : Board.t)
+    (f : 'b -> 'a)
+    (v : 'b)
     (expected_output : 'a) = 
   name >:: (fun _ -> 
-      assert_equal expected_output (f board)
+      assert_equal expected_output (f v)
     )
 
 (** [make_row_col_test name loc expected_output] constructs an OUnit test
@@ -239,9 +239,9 @@ Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
   make_equal_test "complete" Board.complete bd_full true;
 
   (* Board.is_part_of_living_ship *)
-  make_equal_test "alive ship" (Board.is_part_of_living_ship (1, 1)) bd_full true;
-  make_equal_test "dead ship" (Board.is_part_of_living_ship (1, 0)) bd_full4 false;
-  make_equal_test "no ship" (Board.is_part_of_living_ship (9, 9)) bd_full5 false;
+  make_equal_test "alive ship" (Board.is_part_of_living_ship bd_full) (1, 1) true;
+  make_equal_test "dead ship" (Board.is_part_of_living_ship bd_full4) (1, 0) false;
+  make_equal_test "no ship" (Board.is_part_of_living_ship bd_full5 ) (9, 9) false;
 ]
 
 

@@ -232,9 +232,9 @@ let rec shoot_find_nearby c b =
   else 
     let hits =
       (* List.filter (fun (_, b) -> b) *)
-      c.hit_history
-      |> List.map (fun (coor, _) -> coor)
-      |> List.filter (Board.is_part_of_living_ship b)
+      let coors = c.hit_history
+                  |> List.map (fun (coor, _) -> coor) in
+      List.filter (Board.is_part_of_living_ship b) coors
     in   
     (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls) [] c.hit_history in *)
     (* (print_string "\nliving hits: "; print_coor_list hits; print_newline () ); *)

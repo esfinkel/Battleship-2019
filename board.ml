@@ -339,7 +339,7 @@ let complete b =
   List.fold_left
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
-let is_part_of_living_ship (x, y) b = 
+let is_part_of_living_ship b (x, y) = 
   let g = b.grid in
   try
     match g.(x).(y) with
