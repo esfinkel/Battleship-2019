@@ -153,7 +153,7 @@ let shoot c b coor =
 
 let rec shoot_random c b = 
   (* print_endline "shooting randomly"; *)
-  try () |> random_coors |> shoot c b
+  try shoot c b (random_coors ())
   with | _ -> shoot_random c b
 
 let rec shoot_from c b targets =
