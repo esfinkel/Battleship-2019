@@ -136,6 +136,23 @@ let () = Board.place "battleship" "b2" "e2" bd4
 let bd_full = Board.init_board "all ships placed"
 let () = Board.place "default" "" "" bd_full
 
+let bd_full2 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full2
+let _ = Board.shoot "j10" bd_full2
+
+let bd_full3 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full3
+let _ = Board.shoot "b1" bd_full3
+
+let bd_full4 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full4
+let _ = Board.shoot "b1" bd_full4
+let _ = Board.shoot "b2" bd_full4
+
+let bd_full5 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full5
+let _ = Board.shoot "b1" bd_full5
+
 let board_tests = [
   (* Board.row_col *)
   make_row_col_test "a5 is (0, 4)" "a5" (0, 4);
@@ -190,6 +207,7 @@ let board_tests = [
     bd2 Board.DuplicateShot;
   make_board_op_exn_test "invalid shot location"
     (Board.shoot_m_r (3, 98)) bd1 Board.InvalidLoc;
+  make_equal_test "successful sunk ship" (Board.shoot_m_r (1, 1)) bd_full5 (true, true);
 
   (* Board.setup_status *)
   make_equal_test "fully set up board" Board.setup_status bd_full (
@@ -209,10 +227,18 @@ Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
   (* Board.status *)
   make_equal_test "no shots taken" Board.status bd_full 
     "You still have ships left. ";
+  make_equal_test "shot taken, opponent missed" Board.status bd_full2 
+    "You still have ships left. Your opponent shot J10 and missed.";
+  make_equal_test "shot taken, opponent hit cruiser" Board.status bd_full3 
+    "You still have ships left. Your opponent shot your cruiser.";
+  make_equal_test "shot taken, opponent sunk cruiser" Board.status bd_full4 
+    "You still have ships left. Your opponent sank your cruiser.";
 
   (* Board.complete *)
   make_equal_test "incomplete" Board.complete bd1 false;
   make_equal_test "complete" Board.complete bd_full true;
+
+  (* Board.is_part_of_living_ship *)
 
 ]
 
