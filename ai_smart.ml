@@ -135,12 +135,16 @@ let random_coors () =
 (* when shooting with history, keep track of direction -
    otherwise the same as ai_normal *)
 
-let rec coors_adjacent_to_this
+(** [living_coors_adjacent_to_this coor coor_list] is a list of pairs
+    [(coor, c2)] where the [c2] come from all of the coordinates in
+    [coor_list] that are adjacent to [coor]. Pairs where either coordinate
+    is dead are excluded. *)
+let rec living_coors_adjacent_to_this
     (coor : coor_type)
-    (coor_list : (coor_type*bool) list) =
-  let is_adjacent (c,b) = (List.mem c (adjacent_cells coor) && b) in
+    (coor_list : (coor_type) list) =
+  let is_adjacent (c2) = (List.mem c2 (adjacent_cells coor)) in
   List.filter (is_adjacent) coor_list
-  |> List.map (fun (c2, b) -> (coor, c2))
+  |> List.map (fun (c2) -> (coor, c2))
 
 let shoot c b coor =
   match Board.shoot_m_r (coor) b with
@@ -148,12 +152,11 @@ let shoot c b coor =
   | _ -> ""
 
 let rec shoot_random c b = 
-  print_endline "shooting randomly";
+  (* print_endline "shooting randomly"; *)
   try () |> random_coors |> shoot c b
   with | _ -> shoot_random c b
 
 let rec shoot_from c b targets =
-  print_endline "shooting from list";
   try
     let len = List.length targets in
     let target = List.nth targets (Random.int len) in
@@ -161,16 +164,20 @@ let rec shoot_from c b targets =
   with 
   | _ -> shoot_from c b targets
 
-let rec find_adjacent_xs ls = function
-  | [] -> ls
-  | (c, is_alive)::t -> find_adjacent_xs (ls @ (coors_adjacent_to_this c t)) t
+let rec find_adjacent_xs b xs =
+  let xs = xs
+           |> List.filter (fun (coor, _) -> Board.is_part_of_living_ship b coor)
+           |> List.map (fun (coor, _) -> coor) in
+  List.fold_left (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs)) [] xs
+  |> List.map ordered |> List.sort_uniq Stdlib.compare
 
 let shoot_find_unknown_on_ends b adjx = 
   let ends ((x1, y1), (x2, y2)) = if x1 = x2
     then (* horiz *) [(x1, y1-1); (x2, y2+1)]
     else (* vert *) [(x1-1, y1); (x2+1, y2)] in
   let is_unknown = Board.is_unshot b in
-  List.fold_left (fun ls coors -> ls @ (coors |> ordered |> ends)) [] adjx
+  List.map (fun coors ->  coors |> ordered |> ends) adjx
+  |> List.flatten
   |> List.filter coor_on_board
   |> List.filter is_unknown
 
@@ -181,27 +188,66 @@ let update_history c =
       ) c.hit_history
   )
 
+let nearby coors =
+  List.map (fun coor -> adjacent_cells coor) coors
+  |> List.flatten
+  |> List.filter coor_on_board
+
+
+(* let print_coor (x, y) = Helpers.rev_row_col (x,y) |> print_string *)
+
+
+(* let print_coor_list ls = 
+   let rec print_l_h = function
+    | [] -> ()
+    | coor::t -> print_coor coor; print_string "; "; print_l_h t
+   in print_string "[ "; print_l_h ls; print_endline "]" *)
+
+(* let print_coor_bool_list ls =
+   List.map (fun (c, b) -> c) ls |> print_coor_list *)
+
+(* let print_coor_pair_lst ls =
+   let rec print_l_h = function
+    | [] -> ()
+    | (c1, c2)::t -> print_string "("; print_coor c1; print_string ", "; print_coor c2; print_string ")"; print_string "; "; print_l_h t
+   in print_string "[ "; print_l_h ls; print_endline "]" *)
+
 let rec shoot_find_nearby c b = 
   (* update all the is_dead values in this hit_history *)
   update_history c;
+  (* (print_string "hit history: "; print_coor_bool_list c.hit_history ; print_newline () ); *)
   (* look for adjacent X's in history *)
-  let adjx = find_adjacent_xs [] c.hit_history in
+  let adjx = find_adjacent_xs b c.hit_history in
+  (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
   let targets = shoot_find_unknown_on_ends b adjx in
+  (* (print_string "end targets: ";print_coor_list targets); *)
   let num_targets = List.length targets in
   if num_targets > 0
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
-  then ((print_endline "looking at ends"); let res = shoot_from c b targets in update_history c; res)
+  then (
+    (* (print_endline "looking at ends"); *)
+    let res = shoot_from c b targets in update_history c; res)
 
   (* otherwise, shoot a ? next to any X *)
-  (* if you don't find one, shoot randomly *)
   else 
-    let adj_questions = all_cells_adjacent_to_next_ship targets [] 
-                        |> List.filter coor_on_board
-                        |> List.filter (Board.is_unshot b)
-
+    let hits =
+      (* List.filter (fun (_, b) -> b) *)
+      c.hit_history
+      |> List.map (fun (coor, _) -> coor)
+      |> List.filter (Board.is_part_of_living_ship b)
+    in   
+    (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls) [] c.hit_history in *)
+    (* (print_string "\nliving hits: "; print_coor_list hits; print_newline () ); *)
+    let adj = nearby hits in
+    (* (print_string "adj: "; List.length adj |> print_int; print_newline () ); *)
+    let adj_questions = adj |> List.filter (Board.is_unshot b)
     in 
+    (* (print_string "adjq: "; List.length adj_questions |> print_int; print_newline () ); *)
     let res = (
-      if List.length adj_questions > 0 then ((print_endline "looking at all adjacent"); shoot_from c b adj_questions)
+      if List.length adj_questions > 0 then (
+        (* (print_endline "looking at all adjacent"); *)
+        shoot_from c b adj_questions)
+      (* if you don't find one, shoot randomly *)
       else shoot_random c b
     ) in
     (* finally, update all the is_dead values in this hit_history *)

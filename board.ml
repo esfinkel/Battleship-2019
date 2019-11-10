@@ -343,7 +343,7 @@ let is_part_of_living_ship b (x, y) =
   let g = b.grid in
   try
     match g.(x).(y) with
-    | Ship s | HitShip s -> is_dead s g
+    | Ship s | HitShip s -> is_dead s g |> not
     | _ -> false
   with | _ -> false
 
@@ -371,8 +371,10 @@ let string_self (b:t) = to_string_grid true b
 
 let string_other b = to_string_grid false b
 
-let is_unshot b (x,y) = match (b.grid).(x).(y) with
-  | Ship _ | Water -> true
-  | _ -> false
+let is_unshot b (x,y) = try
+    match (b.grid).(x).(y) with
+    | Ship _ | Water -> true
+    | _ -> false
+  with | _ -> false
 
 
