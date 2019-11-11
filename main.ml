@@ -127,7 +127,6 @@ let try_placing (ship_phrase: string list) board =
 let rec continue_setup board  = 
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
-    (* display_board board; *)
     if Board.complete board then
       print_endline "All ships placed.\nType 'ready' to continue." else ();
     continue_setup board 
@@ -183,25 +182,38 @@ let setup board  =
   );
   continue_setup board
 
-(** [display_win_message winner_board loser_board] displays that 
-    [winner_board.player_name] won the game. *)
-let display_win_message loser_board winner_board = 
-  display_board loser_board winner_board;
-  ANSITerminal.(
-    print_string [yellow]
-      ("Player "
-       ^(Board.player_name winner_board)
-       ^": You won the game! Congratulations! \n\n"))
+let win_message = ": You won the game! Congratulations! \n\n"
+let lose_message = ": You lost! Better luck next time! \n\n"
 
-(** [display_win_message winner_board] displays that [loser_board.player_name] 
-    lost the game. *)
-let display_lose_message winner_board loser_board = 
-  display_board winner_board loser_board;
+(** [display_two_player_end_message winner_board loser_board] displays that 
+    [winner_board.player_name] won the game and [loser_board.player_name]
+    lost. *)
+let display_two_player_end_message loser_board winner_board = 
+  print_string "\n\n\n\n";
+  print_self_board loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
        ^(Board.player_name loser_board)
-       ^": You lost! Better luck next time! \n\n"))
+       ^lose_message));
+  print_self_board winner_board;
+  ANSITerminal.(
+    print_string [yellow]
+      ("Player "
+       ^(Board.player_name winner_board)
+       ^win_message))
+
+(** [display_win_message winner_board] displays that [loser_board.player_name] 
+    won the game iff [won], or that they lost otherwise. *)
+let display_one_player_end_message won winner_board loser_board = 
+  print_string "\n\n\n\n";
+  print_self_board winner_board;
+  print_self_board loser_board;
+  ANSITerminal.(
+    print_string [yellow]
+      ("Player "
+       ^(Board.player_name loser_board)
+       ^(if won then win_message else lose_message)))
 
 (** [try_shooting shoot_phrase target_board my_board] is [true] if the game 
     should continue and [false] if there is a parsing error.  It attempts to 
@@ -224,7 +236,7 @@ let rec try_shooting shoot_phrase target_board my_board =
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
         if (Board.did_lose target_board) then 
-          (display_win_message target_board my_board;
+          (display_two_player_end_message target_board my_board;
            exit 0 )
         else 
           pause ();
@@ -337,7 +349,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
         if (Board.did_lose ai_board) then 
-          (display_win_message ai_board my_board;
+          (display_one_player_end_message true ai_board my_board;
            exit 0 )
         else 
           true
@@ -378,7 +390,7 @@ let ai_shoot player_board ai_player single_dif=
   | Medium ai_board -> ignore (Ai_normal.shoot_ship ai_board player_board);
   | Hard ai_board-> ignore (Ai_smart.shoot_ship ai_board player_board);
     if (Board.did_lose player_board) then 
-      (display_lose_message ai_player player_board;
+      (display_one_player_end_message false ai_player player_board;
        exit 0 )
     else ()
 
