@@ -161,7 +161,10 @@ let string_of_ship = function
     of [shp_lst]. *)
 let long_string_of_ships shp_lst = 
   let to_string sh = 
-    (string_of_ship sh.name)^" (length "^(sh.size |> string_of_int)^")" in
+    (string_of_ship sh.name)
+    ^" (length "
+    ^(sh.size |> string_of_int)
+    ^")" in
   if List.length shp_lst = 0 then "None" else
     String.concat "; " (List.map to_string shp_lst) 
 
@@ -227,35 +230,47 @@ let remove sh b =
   else raise NoShip
 
 (* I don't think this is right, but it works? *)
-let new_orientation (x1, y1) (x2, y2) = if x1 <> x2 then Some Vert else Some Horz
+let new_orientation (x1, y1) (x2, y2) =
+  if x1 <> x2 then Some Vert else Some Horz
+
+(* todo document *)
+let place_single_ship s l1 l2 b =
+  let sh = get_ship s b in
+  let (((x_1, y_1) as coors_1), ((x_2, y_2) as coors_2)) = ordered l1 l2 in 
+  on_board l1 b;
+  on_board l2 b;
+  check_alignment_and_length l1 l2 sh;
+  if sh.on_board then remove sh b else ();
+  overlapping_ship l1 l2 b.grid;
+  sh.on_board <- true;
+  sh.orientation <- new_orientation coors_1 coors_2;
+  for x = x_1 to x_2 do
+    for y = y_1 to y_2 do 
+      b.grid.(x).(y) <- Ship sh
+    done
+  done
+
 
 let rec place s l1 l2 b =
   if s="default" then (
-    List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+    List.fold_left
+      (fun _ sh -> try remove sh b with | _ -> ())
+      () b.ships;
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
-        place (string_of_ship sh.name) def1 def2 b) () b.ships 
+        place_single_ship (string_of_ship sh.name) def1 def2 b)
+      () b.ships 
   ) else if s="random" then try 
-      List.fold_left (fun _ sh -> try remove sh b with | _ -> ()) () b.ships;
+      List.fold_left (fun _ sh -> try remove sh b with | _ -> ())
+        () b.ships;
       List.fold_left
-        (fun _ sh -> let rand1, rand2 = random_coordinates (sh.size -1) in
-          place (string_of_ship sh.name) rand1 rand2 b) () b.ships 
+        (fun _ sh ->
+           let rand1, rand2 = random_coordinates (sh.size -1) in
+           place_single_ship (string_of_ship sh.name) rand1 rand2 b)
+        () b.ships 
     with exn -> place "random" "" "" b
   else 
-    let ship = get_ship s b in 
-    let (((x_1, y_1) as coors_1), ((x_2, y_2) as coors_2)) = ordered l1 l2 in 
-    on_board l1 b;
-    on_board l2 b;
-    check_alignment_and_length l1 l2 ship;
-    if ship.on_board then remove ship b else ();
-    overlapping_ship l1 l2 b.grid;
-    ship.on_board <- true;
-    ship.orientation <- new_orientation coors_1 coors_2;
-    for x = x_1 to x_2 do
-      for y = y_1 to y_2 do 
-        b.grid.(x).(y) <- Ship ship
-      done
-    done
+    place_single_ship s l1 l2 b
 
 
 let place_m_r s (x_1, y_1) (x_2, y_2) b =
@@ -357,8 +372,10 @@ let to_string_grid is_self b =
     | Water::t -> (if self then "w" else "?")::(row_str self g t)
     | ShotWater::t -> (if self then "x" else "x")::(row_str self g t)
     | (Ship s)::t -> (
-        (if self then (if s.orientation=Some Vert then "|" else "-") else "?")
-        ::(row_str self g t)
+        (
+          if self then (if s.orientation=Some Vert then "|" else "-")
+          else "?"
+        )::(row_str self g t)
       )
     | (HitShip s)::t ->
       (if is_dead s g then "#" else (

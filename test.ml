@@ -58,8 +58,8 @@ let command_tests = [
     Malformed;  
 ]
 
-(** [make_board_op_exn_test name f board expected_exn] constructs an OUnit test 
-    named [name] that asserts [f board] raises the [expected_exn]. *)
+(** [make_board_op_exn_test name f board expected_exn] constructs an OUnit
+    test named [name] that asserts [f board] raises the [expected_exn]. *)
 let make_board_op_exn_test
     (name : string)
     (f : Board.t -> 'a)
@@ -207,16 +207,17 @@ let board_tests = [
     bd2 Board.DuplicateShot;
   make_board_op_exn_test "invalid shot location"
     (Board.shoot_m_r (3, 98)) bd1 Board.InvalidLoc;
-  make_equal_test "successful sunk ship" (Board.shoot_m_r (1, 1)) bd_full5 (true, true);
+  make_equal_test "successful sunk ship" (Board.shoot_m_r (1, 1))
+    bd_full5 (true, true);
 
   (* Board.setup_status *)
   make_equal_test "fully set up board" Board.setup_status bd_full (
     "On the board: battleship (length 4); cruiser (length 2); carrier " ^
-    "(length 5); destroyer (length 3); submarine (length 3)
-Off the board: None");
+    "(length 5); destroyer (length 3); submarine (length 3)\nOff "^
+    "the board: None");
   make_equal_test "partially set up board" Board.setup_status bd4 (
-    "On the board: battleship (length 4)
-Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
+    "On the board: battleship (length 4)\nOff the board: "^
+    "cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
     "submarine (length 3)");
 
   (* Board.setup_status_m_r *)
@@ -239,9 +240,12 @@ Off the board: cruiser (length 2); carrier (length 5); destroyer (length 3); " ^
   make_equal_test "complete" Board.complete bd_full true;
 
   (* Board.is_part_of_living_ship *)
-  make_equal_test "alive ship" (Board.is_part_of_living_ship bd_full) (1, 1) true;
-  make_equal_test "dead ship" (Board.is_part_of_living_ship bd_full4) (1, 0) false;
-  make_equal_test "no ship" (Board.is_part_of_living_ship bd_full5 ) (9, 9) false;
+  make_equal_test "alive ship" (Board.is_part_of_living_ship bd_full)
+    (1, 1) true;
+  make_equal_test "dead ship" (Board.is_part_of_living_ship bd_full4)
+    (1, 0) false;
+  make_equal_test "no ship" (Board.is_part_of_living_ship bd_full5 )
+    (9, 9) false;
 ]
 
 

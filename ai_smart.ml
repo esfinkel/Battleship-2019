@@ -70,9 +70,11 @@ let adjacent_cells (x, y) = (x+1,y)::(x-1,y)::(x,y-1)::(x,y+1)::[]
     with the addition of the cells that are adjacent to any cell in
     [ship_cells]. *)
 let all_cells_adjacent_to_next_ship ship_cells off_limits =
-  List.fold_left (fun sofar coor ->
+  ship_cells
+  |> List.fold_left (fun sofar coor ->
       coor::(adjacent_cells coor) @ sofar
-    ) off_limits ship_cells |> List.sort_uniq Stdlib.compare
+    ) off_limits
+  |> List.sort_uniq Stdlib.compare
 
 (** [place b sh c1 c2] is [()]; the ship named [sh] has been placed
     on [b] with its ends on [c1] and [c2]. *)
@@ -166,10 +168,14 @@ let rec shoot_from c b targets =
 
 let rec find_adjacent_xs b xs =
   let xs = xs
-           |> List.filter (fun (coor, _) -> Board.is_part_of_living_ship b coor)
+           |> List.filter
+             (fun (coor, _) -> Board.is_part_of_living_ship b coor)
            |> List.map (fun (coor, _) -> coor) in
-  List.fold_left (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs)) [] xs
-  |> List.map ordered |> List.sort_uniq Stdlib.compare
+  List.fold_left
+    (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs))
+    [] xs
+  |> List.map ordered
+  |> List.sort_uniq Stdlib.compare
 
 let shoot_find_unknown_on_ends b adjx = 
   let ends ((x1, y1), (x2, y2)) = if x1 = x2
@@ -183,9 +189,10 @@ let shoot_find_unknown_on_ends b adjx =
 
 let update_history c =
   c.hit_history <- (
-    List.map (fun (coor, _) ->
-        (coor, Board.is_part_of_living_ship c.board coor)
-      ) c.hit_history
+    List.map
+      (fun (coor, _) ->
+         (coor, Board.is_part_of_living_ship c.board coor))
+      c.hit_history
   )
 
 let nearby coors =
@@ -209,13 +216,15 @@ let nearby coors =
 (* let print_coor_pair_lst ls =
    let rec print_l_h = function
     | [] -> ()
-    | (c1, c2)::t -> print_string "("; print_coor c1; print_string ", "; print_coor c2; print_string ")"; print_string "; "; print_l_h t
+    | (c1, c2)::t -> print_string "("; print_coor c1; print_string ", ";
+    print_coor c2; print_string ")"; print_string "; "; print_l_h t
    in print_string "[ "; print_l_h ls; print_endline "]" *)
 
 let rec shoot_find_nearby c b = 
   (* update all the is_dead values in this hit_history *)
   update_history c;
-  (* (print_string "hit history: "; print_coor_bool_list c.hit_history ; print_newline () ); *)
+  (* (print_string "hit history: "; print_coor_bool_list c.hit_history ;
+     print_newline () ); *)
   (* look for adjacent X's in history *)
   let adjx = find_adjacent_xs b c.hit_history in
   (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
@@ -236,13 +245,17 @@ let rec shoot_find_nearby c b =
                   |> List.map (fun (coor, _) -> coor) in
       List.filter (Board.is_part_of_living_ship b) coors
     in   
-    (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls) [] c.hit_history in *)
-    (* (print_string "\nliving hits: "; print_coor_list hits; print_newline () ); *)
+    (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls)
+       [] c.hit_history in *)
+    (* (print_string "\nliving hits: "; print_coor_list hits;
+       print_newline () ); *)
     let adj = nearby hits in
-    (* (print_string "adj: "; List.length adj |> print_int; print_newline () ); *)
+    (* (print_string "adj: "; List.length adj |> print_int;
+       print_newline () ); *)
     let adj_questions = adj |> List.filter (Board.is_unshot b)
     in 
-    (* (print_string "adjq: "; List.length adj_questions |> print_int; print_newline () ); *)
+    (* (print_string "adjq: "; List.length adj_questions |> print_int;
+       print_newline () ); *)
     let res = (
       if List.length adj_questions > 0 then (
         (* (print_endline "looking at all adjacent"); *)

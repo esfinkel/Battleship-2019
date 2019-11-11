@@ -155,8 +155,8 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
-(**  [wait_next_move] clears the terminal screen and waits for the next player 
-     to press enter to start their turn. *)
+(**  [wait_next_move] clears the terminal screen and waits for the next
+     player to press enter to start their turn. *)
 let wait_next_move () = 
   clear_screen ();
   ANSITerminal.(
@@ -307,7 +307,8 @@ let get_names () =  print_string "Player 1 name?";
   let p2_name = check_p2_name p1_name in 
   (p1_name, p2_name)
 
-(** [multiplayer ()] prompts for the multiplayer game to play, then starts it.*)
+(** [multiplayer ()] prompts for the multiplayer game to play, then
+    starts it.*)
 let multiplayer () = 
   let p1, p2 = get_names () in
   let p1_board = Board.init_board p1 in
@@ -328,11 +329,11 @@ let rec get_name () : string = print_string "Player name?";
                      get_name ())
   else name
 
-(** [single_try_shooting shoot_phrase ai_board my_board] is [true] if the game 
-    should continue and [false] if there is a parsing error.  It attempts to 
-    shoot the spot stated in [shoot_phrase] on [ai_board] and if the player 
-    has won or lost, it displays the appropriate winning/losing message and 
-    exits the game. *)
+(** [single_try_shooting shoot_phrase ai_board my_board] is [true] if the
+    game should continue and [false] if there is a parsing error. It
+    attempts to shoot the spot stated in [shoot_phrase] on [ai_board] and
+    if the player has won or lost, it displays the appropriate winning/losing
+    message and exits the game. *)
 let rec single_try_shooting shoot_phrase ai_board my_board =
   match shoot_phrase with 
   | loc::[] -> begin 
@@ -356,8 +357,9 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
     end
   | _ -> print_endline "\n parsing error"; false
 
-(** [single_continue_game player_board ai_board] reads in a command, parses it, 
-    and executes it. (Same as [next_move] except the other player is the AI.) *)
+(** [single_continue_game player_board ai_board] reads in a command, parses
+    it, and executes it. (Same as [next_move] except the other player is
+    the AI.) *)
 let rec single_continue_game player_board ai_board =
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
@@ -452,7 +454,8 @@ let rec main () =
   | "2" -> multiplayer ()
   | "2 players" -> multiplayer ()
   | _ -> ANSITerminal.(print_string [red] 
-                         "\n\nEnter the number of players: 1 or 2."); main ()
+                         "\n\nEnter the number of players: 1 or 2.");
+    main ()
 
 (* Execute the game engine. *)
 let () = clear_screen ();

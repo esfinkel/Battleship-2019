@@ -19,9 +19,9 @@ exception Empty
 (** Raised when a malformed command is encountered. *)
 exception Malformed
 
-(** [parse str] parses a player's input into a [command], as follows. The first
-    word (i.e., consecutive sequence of non-space characters) of [str] becomes 
-    the verb. The rest of the words, if any, become the object phrase. 
+(** [parse str] parses a player's input into a [command], as follows. The
+    first word (i.e., consecutive sequence of non-space characters) of [str]
+    becomes the verb. The rest of the words, if any, become the object phrase. 
 
     Requires: [str] contains only alphanumeric (A-Z, a-z, 0-9) and space 
     characters.
