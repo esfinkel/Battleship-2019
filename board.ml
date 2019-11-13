@@ -40,13 +40,20 @@ let row_col (loc : Command.location) : (int*int) =
   in
   loc |> pull_regex |> tup
 
+(** [ordered_coors c1 c2] is [(c1, c2)], except they are swapped
+    if given in the reverse order.
+    Precondition to comparability is that [l1] and [l2] are in either the
+    same row or the same column. *)
+let ordered_coors c1 c2 = if c1 < c2 then c1, c2 else c2, c1
+
 (** [ordered l1 l2] is [(l1_x, l1_y), (l2_x, l2_y)], the coordinates of
     location [l1] and location [l2] respectively, except they are swapped
     if given in the reverse order.
     Precondition to comparability is that [l1] and [l2] are in either the
     same row or the same column. *)
 let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
-  if pos1 < pos2 then pos1, pos2 else pos2, pos1
+  ordered_coors pos1 pos2
+
 
 (** AF: the record
     [{ grid = [
@@ -208,7 +215,6 @@ let overlapping_ship_by_coors sh (x_1, y_1) (x_2, y_2) b =
     done
   done
 
-
 (** [overlapping_ship l1 l2 b] is true iff there are any ships present in
     the span from [l1] to [l2] on [b]. *)
 let overlapping_ship sh l1 l2 b =
@@ -228,18 +234,17 @@ let remove sh b =
         Array.iter (fun r -> remove_from_row r sh) b.grid;)
   else raise NoShip
 
-(* I don't think this is right, but it works? *)
-let new_orientation (x1, y1) (x2, y2) =
-  if x1 <> x2 then Some Vert else Some Horz
+let new_orientation (i1, j1) (i2, j2) =
+  if i1 = i2 then Some Horz else Some Vert
 
 (* todo document *)
-let place_single_ship s l1 l2 b =
-  let sh = get_ship s b in
+let place_single_ship sh l1 l2 b =
+  (* let sh = get_ship s b in *)
   let (((x_1, y_1) as coors_1), ((x_2, y_2) as coors_2)) = ordered l1 l2 in 
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;
-  overlapping_ship sh l1 l2 b.grid;
+  overlapping_ship_by_coors sh coors_1 coors_2 b.grid;
   if sh.on_board then remove sh b else ();
   sh.on_board <- true;
   sh.orientation <- new_orientation coors_1 coors_2;
@@ -257,32 +262,24 @@ let rec place s l1 l2 b =
       () b.ships;
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
-        place_single_ship (string_of_ship sh.name) def1 def2 b)
+        place_single_ship sh def1 def2 b)
       () b.ships 
   ) else if s="random" then try 
       List.fold_left (fun _ sh -> try remove sh b with | _ -> ())
         () b.ships;
       List.fold_left
         (fun _ sh ->
-           let rand1, rand2 = random_coordinates (sh.size -1) in
-           place_single_ship (string_of_ship sh.name) rand1 rand2 b)
+           let rand1, rand2 = random_coordinates (sh.size - 1) in
+           place_single_ship sh rand1 rand2 b)
         () b.ships 
     with exn -> place "random" "" "" b
   else 
-    place_single_ship s l1 l2 b
+    place_single_ship (get_ship s b) l1 l2 b
 
 
-let place_m_r s (x_1, y_1) (x_2, y_2) b =
-  let ship = get_ship s b in 
-  overlapping_ship_by_coors ship (x_1, y_1) (x_2, y_2) b.grid;
-  if ship.on_board then remove ship b else ();
-  ship.on_board <- true;
-  ship.orientation <- new_orientation (x_1, y_1) (x_2, y_2);
-  for x = x_1 to x_2 do
-    for y = y_1 to y_2 do 
-      b.grid.(x).(y) <- Ship ship
-    done
-  done
+let place_m_r s ((x_1, y_1) as l1) ((x_2, y_2) as l2) b =
+  let sh = get_ship s b in 
+  place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
 
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
