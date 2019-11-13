@@ -101,6 +101,17 @@ let make_row_col_test
   name >:: (fun _ ->
       assert_equal expected_output (Board.row_col loc))
 
+(** [[make_is_unshot_test name board loc] constructs an OUnit test
+    named [name] that asserts the quality of [expected_value] with 
+    [Board.is_unshot board loc]. *)
+let make_is_unshot_test 
+    (name : string)
+    (board : Board.t)
+    (loc : (int*int))
+    (expected_output : bool) = 
+  name >:: (fun _ ->
+      assert_equal expected_output (Board.is_unshot board loc))
+
 (* Some of these tests make Board.t break the "all ships have been placed"
    invariant. This couldn't happen during gameplay. *)
 let bd1 = Board.init_board "fake name"
@@ -246,6 +257,13 @@ let board_tests = [
     (1, 0) false;
   make_equal_test "no ship" (Board.is_part_of_living_ship bd_full5 )
     (9, 9) false;
+
+  (* Board.is_unshot*)
+  make_is_unshot_test "not shot water" bd_full2 (9,8) true;
+  make_is_unshot_test "not shot ship" bd_full2 (1,0) true;
+  make_is_unshot_test "shot water" bd_full2 (9,9) false;
+  make_is_unshot_test "shot water" bd_full5 (1,0) false;
+
 ]
 
 
