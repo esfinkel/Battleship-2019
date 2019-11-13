@@ -128,7 +128,7 @@ let rec continue_setup board  =
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
     if Board.complete board then
-      print_endline "All ships placed.\nType 'ready' to continue." else ();
+      print_endline "\nAll ships placed.\nType 'ready' to continue." else ();
     continue_setup board 
   | Help -> print_help (); 
     continue_setup board 

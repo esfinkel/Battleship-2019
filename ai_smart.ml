@@ -2,8 +2,7 @@ type coor_type = int * int
 
 type t = {
   board: Board.t;
-  mutable hit_history: (coor_type*bool) list (* bool represents
-                                                whether ship is alive *)
+  mutable hit_history: coor_type list 
 }
 
 
@@ -150,7 +149,7 @@ let rec living_coors_adjacent_to_this
 
 let shoot c b coor =
   match Board.shoot_m_r (coor) b with
-  | true, is_dead -> c.hit_history <- (coor, is_dead)::c.hit_history; ""
+  | true, is_dead -> c.hit_history <- coor::c.hit_history; ""
   | _ -> ""
 
 let rec shoot_random c b = 
@@ -169,8 +168,7 @@ let rec shoot_from c b targets =
 let rec find_adjacent_xs b xs =
   let xs = xs
            |> List.filter
-             (fun (coor, _) -> Board.is_part_of_living_ship b coor)
-           |> List.map (fun (coor, _) -> coor) in
+             (fun coor -> Board.is_part_of_living_ship b coor) in
   List.fold_left
     (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs))
     [] xs
@@ -187,14 +185,6 @@ let shoot_find_unknown_on_ends b adjx =
   |> List.filter coor_on_board
   |> List.filter is_unknown
 
-let update_history c =
-  c.hit_history <- (
-    List.map
-      (fun (coor, _) ->
-         (coor, Board.is_part_of_living_ship c.board coor))
-      c.hit_history
-  )
-
 let nearby coors =
   List.map (fun coor -> adjacent_cells coor) coors
   |> List.flatten
@@ -210,9 +200,6 @@ let nearby coors =
     | coor::t -> print_coor coor; print_string "; "; print_l_h t
    in print_string "[ "; print_l_h ls; print_endline "]" *)
 
-(* let print_coor_bool_list ls =
-   List.map (fun (c, b) -> c) ls |> print_coor_list *)
-
 (* let print_coor_pair_lst ls =
    let rec print_l_h = function
     | [] -> ()
@@ -221,8 +208,6 @@ let nearby coors =
    in print_string "[ "; print_l_h ls; print_endline "]" *)
 
 let rec shoot_find_nearby c b = 
-  (* update all the is_dead values in this hit_history *)
-  update_history c;
   (* (print_string "hit history: "; print_coor_bool_list c.hit_history ;
      print_newline () ); *)
   (* look for adjacent X's in history *)
@@ -235,15 +220,14 @@ let rec shoot_find_nearby c b =
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
   then (
     (* (print_endline "looking at ends"); *)
-    let res = shoot_from c b targets in update_history c; res)
+    shoot_from c b targets)
 
   (* otherwise, shoot a ? next to any X *)
   else 
     let hits =
       (* List.filter (fun (_, b) -> b) *)
-      let coors = c.hit_history
-                  |> List.map (fun (coor, _) -> coor) in
-      List.filter (Board.is_part_of_living_ship b) coors
+      c.hit_history
+      |> List.filter (Board.is_part_of_living_ship b) 
     in   
     (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls)
        [] c.hit_history in *)
@@ -256,15 +240,11 @@ let rec shoot_find_nearby c b =
     in 
     (* (print_string "adjq: "; List.length adj_questions |> print_int;
        print_newline () ); *)
-    let res = (
-      if List.length adj_questions > 0 then (
-        (* (print_endline "looking at all adjacent"); *)
-        shoot_from c b adj_questions)
-      (* if you don't find one, shoot randomly *)
-      else shoot_random c b
-    ) in
-    (* finally, update all the is_dead values in this hit_history *)
-    update_history c; res
+    if List.length adj_questions > 0 then (
+      (* (print_endline "looking at all adjacent"); *)
+      shoot_from c b adj_questions)
+    (* if you don't find one, shoot randomly *)
+    else shoot_random c b
 
 
 let rec shoot_ship c b = 

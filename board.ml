@@ -200,11 +200,12 @@ let check_alignment_and_length loc1 loc2 s =
 
 (** [overlapping_ship_by_coors c1 c2 b] is true iff there are any ships
     present in the span from [c1] to [c2] on [b]. *)
-let overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b =
+let overlapping_ship_by_coors sh (x_1, y_1) (x_2, y_2) b =
   for x = x_1 to x_2 do
     for y = y_1 to y_2 do 
       match b.(x).(y) with
       | Water -> ()
+      | Ship sh' when sh' = sh -> ()
       | _ -> raise OverlappingShips 
     done
   done
@@ -212,8 +213,8 @@ let overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b =
 
 (** [overlapping_ship l1 l2 b] is true iff there are any ships present in
     the span from [l1] to [l2] on [b]. *)
-let overlapping_ship l1 l2 b =
-  let c1, c2 = ordered l1 l2 in overlapping_ship_by_coors c1 c2 b
+let overlapping_ship sh l1 l2 b =
+  let c1, c2 = ordered l1 l2 in overlapping_ship_by_coors sh c1 c2 b
 
 
 (** [remove n b] is [()]. If a ship with name [n] was present in [b], it
@@ -240,8 +241,8 @@ let place_single_ship s l1 l2 b =
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;
+  overlapping_ship sh l1 l2 b.grid;
   if sh.on_board then remove sh b else ();
-  overlapping_ship l1 l2 b.grid;
   sh.on_board <- true;
   sh.orientation <- new_orientation coors_1 coors_2;
   for x = x_1 to x_2 do
@@ -275,8 +276,8 @@ let rec place s l1 l2 b =
 
 let place_m_r s (x_1, y_1) (x_2, y_2) b =
   let ship = get_ship s b in 
+  overlapping_ship_by_coors ship (x_1, y_1) (x_2, y_2) b.grid;
   if ship.on_board then remove ship b else ();
-  overlapping_ship_by_coors (x_1, y_1) (x_2, y_2) b.grid;
   ship.on_board <- true;
   ship.orientation <- new_orientation (x_1, y_1) (x_2, y_2);
   for x = x_1 to x_2 do
