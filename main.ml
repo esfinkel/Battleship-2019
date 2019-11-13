@@ -1,12 +1,13 @@
 (* For generating actual random numbers. *)
-let () = Random.self_init ();
+let () = Random.self_init ()
 
-  (** [single_difficulty] determines what type of ai to use for the computer. *)
+(** [single_difficulty] represents the type of ai to use for the computer. *)
 type single_difficulty = 
   | Easy of Ai_random.t 
   | Medium of Ai_normal.t
   | Hard of Ai_smart.t
 
+(** [clear_screen ()] clears the terminal window. *)
 let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
   Sys.command("clear") |> ignore
@@ -158,8 +159,8 @@ let rec continue_setup board  =
     );
     continue_setup board 
 
-(**  [wait_next_move] clears the terminal screen and waits for the next
-     player to press enter to start their turn. *)
+(**  [wait_next_move ()] clears the terminal screen and waits
+     for the next player to press enter to start their turn. *)
 let wait_next_move () = 
   clear_screen ();
   ANSITerminal.(
@@ -167,7 +168,8 @@ let wait_next_move () =
   match read_command () with 
   | _ -> ()
 
-(** [pause] waits for the current player to press enter after their turn. *)
+(** [pause ()] waits for the current player to press enter
+    after their turn. *)
 let pause () =
   ANSITerminal.(
     print_string [cyan] "Please press enter, then switch players!");
@@ -275,8 +277,8 @@ let rec continue_game board o_board =
     );
     continue_game board o_board
 
-(** [next_move board o_board] prompts the player for a gameplay command which
-    it then processes in [continue_game]. *)
+(** [next_move board o_board] prompts the player for a gameplay
+    command, which it then processes. *)
 let rec next_move board o_board = 
   clear_screen ();
   display_board o_board board; 
@@ -291,8 +293,8 @@ let rec next_move board o_board =
   continue_game board o_board;
   next_move o_board board (* boards are swapped! *)
 
-(** [check_p2_name p1_name] checks the name each player inputs is not empty 
-    and is different than [p1_name]. *)
+(** [check_p2_name p1_name] is [s], where [s] is a new player's name.
+    The function recurses if [s] is blank, or the same as [p1_name]. *)
 let rec check_p2_name p1_name =
   let x = read_command () in 
   if (x = p1_name) || (
@@ -303,7 +305,8 @@ let rec check_p2_name p1_name =
   then (print_endline "Please enter a valid name."; 
         check_p2_name p1_name) else x
 
-(** [get_names] asks each player for their name. *)
+(** [get_names ()] is [(n1, n2)]; it asks each player for their names,
+    and [n1] and [n2] are those names. *)
 let get_names () =  print_string "Player 1 name?";
   let p1_name = check_p2_name "" in
   print_string "Player 2 name?";
@@ -416,8 +419,8 @@ let rec single_next_move player_board ai_board single_dif =
   ai_shoot player_board ai_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
-(** [choose_difficulty ()] prompts the player to choose the level 
-    of ai difficulty.*)
+(** [choose_difficulty ()] is the level of ai difficulty that the player
+    chooses upon prompting. *)
 let rec choose_difficulty () =
   print_string "\nChoose the game difficulty: easy, medium, or hard.";
   match read_command () with
