@@ -277,8 +277,8 @@ let rec shoot_find_nearby c b =
     part of a ship; if there is no likely location, it shoots randomly. 
     It then updates the hit history of [c]. *)
 let rec shoot_ship c b = 
-  if c.hit_history = [] then
-    shoot_random c b else
-    shoot_find_nearby c b
+  (if c.hit_history = [] then
+     shoot_random c b else
+     shoot_find_nearby c b); ""
 
 (* **************************** *)
