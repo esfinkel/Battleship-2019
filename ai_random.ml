@@ -3,13 +3,10 @@ type t = {
   board: Board.t;
 }
 
-let seed_random () = Unix.time () |> int_of_float |> Random.init
 
-let init () =
-  let () = seed_random () in
-  {
-    board = Board.init_board "💻";
-  }
+let init () = {
+  board = Board.init_board "💻";
+}
 
 let get_board c = c.board
 

@@ -297,14 +297,87 @@ let board_tests = [
   make_is_unshot_test "shot water" bd_full5 (1,0) false;
 ]
 
+(** [make_no_exn_raised_test name f ai_board] constructs an OUnit test
+    named [name] that asserts the quality of [()] with 
+    [f ai_board]. *)
+let make_no_exn_raised_ai_place_test 
+    (name : string)
+    (f : 'a -> 'b)
+    (ai_board : 'a) = 
+  name >:: (fun _ ->
+      assert_equal true ( try (f ai_board |> ignore; true)
+                          with | _ -> false ))
+
+(** [make_shoot_ship_ai_test name shoot_funct player_board expected_output] 
+    constructs an OUnit test named [name] constructs an OUnit test
+    named [name] that asserts the quality of [()] with 
+    [shoot_funct player_board]. *)
+let make_no_exn_raised_ai_shoot_test
+    (name : string)
+    (shoot_funct : Board.t -> string)
+    (player_board : Board.t) = 
+  name >:: (fun _ ->
+      assert_equal true ( try (shoot_funct player_board |> ignore; true)
+                          with | _ -> false ))
+
+(** [make_shoot_ship_ai_test name shoot_funct player_board expected_output] 
+    constructs an OUnit test named [name] that asserts the quality of 
+    [expected_output] with [shoot_funct player_board]. *)
+let make_ai_get_board_test
+    (name : string)
+    (get_board_funct : 'a -> Board.t)
+    (ai_board : 'a)
+    (expected_output : Board.t) = 
+  name >:: (fun _ ->
+      assert_equal expected_output (get_board_funct ai_board))
+
+let ai_rand1 = Ai_random.init()
+let ai_norm1 = Ai_normal.init()
+let ai_smart1 = Ai_smart.init()
+
+let ai_rand2 = Ai_random.init()
+let p_rand2 = Board.init_board "💻"
+
+let ai_norm2 = Ai_normal.init()
+let p_norm2 = Board.init_board "💻"
+
+let ai_smart2 = Ai_smart.init()
+let p_smart2 = Board.init_board "💻"
+
+let p1 = Board.init_board "player 1"
+
 let ai_tests = [
+  (* Ai.init and Ai.place_all_ships *)
+  make_no_exn_raised_ai_place_test "place all ships ai random" 
+    (Ai_random.place_all_ships) ai_rand1;
+  make_no_exn_raised_ai_place_test "place all ships ai random" 
+    (Ai_normal.place_all_ships) ai_norm1;
+  make_no_exn_raised_ai_place_test "place all ships ai random" 
+    (Ai_smart.place_all_ships) ai_smart1;
+
+  (* Ai.shoot_ship *)
+  make_no_exn_raised_ai_shoot_test "shoot ai random" 
+    (Ai_random.shoot_ship ai_rand1) p1;
+  make_no_exn_raised_ai_shoot_test "shoot ai normal" 
+    (Ai_normal.shoot_ship ai_norm1) p1;
+  make_no_exn_raised_ai_shoot_test "shoot ai smart" 
+    (Ai_smart.shoot_ship ai_smart1) p1;
+
+  (* Ai.get_board *)
+  make_ai_get_board_test "get board ai random" 
+    (Ai_random.get_board) ai_rand2 p_rand2;
+  make_ai_get_board_test "get board ai random" 
+    (Ai_normal.get_board) ai_norm2 p_norm2;
+  make_ai_get_board_test "get board ai random" 
+    (Ai_smart.get_board) ai_smart2 p_smart2  
 
 ]
 
 let suite =
   "test suite for game engine"  >::: List.flatten [
     command_tests;
-    board_tests
+    board_tests;
+    ai_tests
   ]
 
 let _ = run_test_tt_main suite
