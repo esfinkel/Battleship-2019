@@ -21,7 +21,6 @@ exception InvalidLoc
 (** Raised when a player attempts to place a ship that has an invalid name. *)
 exception InvalidShipName
 
-(** The abstract type of values representing one player's battleship board. *)
 type t 
 
 (** [row_col loc] is the [(row, column)] coordinate pair corresponding
@@ -36,7 +35,7 @@ val init_board : string -> t
 val player_name : t -> string
 
 (** [place n l1 l2 b] is [()]. If legal, [b] now has a ship with 
-    name [n], and its ends are in locations on t represented by
+    name [n], and its ends are in locations represented by
     [l1] and [l2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
@@ -47,8 +46,9 @@ val player_name : t -> string
         present in [b]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
+(* i.e. place machine readable *)
 (** [place_m_r n c1 c2 b] is [()]. If legal, [b] now has a ship with 
-    name [n], and its ends are in locations on t represented by
+    name [n], and its ends are in locations represented by
     [c1] and [c2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
@@ -62,18 +62,23 @@ val place_m_r : string -> (int*int) -> (int*int) -> t -> unit
 (** [did_lose b] is true iff all ships have been destroyed in [b]. *)
 val did_lose : t -> bool
 
-(** [shoot l b] is a string message explaining the result of the shot.
-    The location on [b] reprented by [l] has now been shot;
-    that location on [b] has been updated to reflect this information.
+(** [shoot l b] is a string message explaining the result of shooting
+    location [l] on [b].
+    The location on [b] represented by [l] has now been shot; that
+    location on [b] has been updated to reflect this information.
     Raises:
-    - DuplicateShot if that location has already been shot. *)
+    - DuplicateShot if that location has already been shot.
+    - InvalidLoc if that location is not on the board. *)
 val shoot : Command.location -> t -> string
 
-(** [shoot (x,y) b] is a string message explaining the result of the shot.
-    The location on [b] reprented by [(x,y)] has now been shot;
+(* i.e. shoot machine readable *)
+(** [shoot_m_r coor b] is is (m, n). [m] is [true] iff a ship has been shot.
+    [n] is true iff a ship has been shot and is now "dead".
+    The location on [b] represented by [coor] has now been shot;
     that location on [b] has been updated to reflect this information.
     Raises:
-    - DuplicateShot if that location has already been shot. *)
+    - DuplicateShot if that location has already been shot.
+    - InvalidLoc if that location is not on the board.*)
 val shoot_m_r : (int*int) -> t -> bool*bool
 
 (** [setup_status b] is a string representing the status of [b], where
@@ -97,12 +102,12 @@ val complete : t -> bool
     on [b] at [(x, y)]. *)
 val is_part_of_living_ship : t -> (int*int) -> bool 
 
-(** [string_self b] is the grid (string list list) representation of
-    board [b], as seen by the board's player. *)
+(** [string_self b] is the grid representation of board [b], as seen by
+    the board's player. *)
 val string_self : t -> string list list
 
-(** [string_other b] is the grid (string list list) representation of
-    board [b], as seen by other players. *)
+(** [string_other b] is the grid representation of board [b], as seen by
+    other players. *)
 val string_other : t -> string list list
 
 (** [is_unshot b (x,y)] is true iff the cell on [b] at [(x, y)] has
