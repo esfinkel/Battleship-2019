@@ -1,6 +1,7 @@
 open OUnit2
 open Command
 open Board
+open Ai
 
 (** [make_parse_test name str_input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with 
