@@ -223,8 +223,8 @@ let overlapping_ship sh l1 l2 b =
   let c1, c2 = ordered l1 l2 in overlapping_ship_by_coors sh c1 c2 b
 
 
-(** [remove sh b] is [()]. If [sh] was present in [b], it has been removed,
-    and its grid cells are replaced with Water. *)
+(** [remove sh b] removes [sh] from [b] and replaces its grid cells with
+    Water. If [sh] was not present on [b], it does nothing. *)
 let remove sh b = 
   let remove_from_row r s = 
     Array.iteri (fun j spot -> if (spot = Ship s) then 
@@ -238,7 +238,7 @@ let remove sh b =
 let new_orientation (i1, j1) (i2, j2) =
   if i1 = i2 then Some Horz else Some Vert
 
-(** [place_single_ship sh l1 l2 b] is [()]. If legal, [sh] is now on [b],
+(** [place_single_ship sh l1 l2 b] places [sh] on [b],
     with its ends on the locations represented by [c1] and [c2].
     If [sh] was already on [b], it is removed before being re-placed.
     Raises:
