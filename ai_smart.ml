@@ -2,7 +2,8 @@ type coor_type = int * int
 
 type t = {
   board: Board.t;
-  mutable hit_history: coor_type list 
+  mutable hit_history: coor_type list;
+  parity : int option; (* None if you're not using the parity trick *)
 }
 
 
@@ -13,6 +14,7 @@ let init () =
   {
     board = Board.init_board "💻";
     hit_history = [];
+    parity = Some (Random.int 2);
   }
 
 let get_board c = c.board
@@ -119,15 +121,20 @@ let place_all_ships c =
 
 (* shooting *)
 
-(* when shooting randomly *)
-(* Fire at the center of the board *)
-(* Use parity to up your chances *)
-(* Move away when you have two misses in the same segment *)
 
-let random_coors () =
+(* when shooting randomly *)
+let random_coors c =
   let x = (Random.int board_size) in 
   let y = (Random.int board_size) in 
-  (x, y)
+  (* Use parity to up your chances *)
+  match c.parity with
+  | None -> (x, y)
+  | Some i -> let y = if (x + y) mod 2 = i
+                then y
+                else (y+1) mod board_size in (x, y)
+(* may not implement: *)
+(* Fire at the center of the board *)
+(* Move away when you have two misses in the same segment *)
 
 
 
@@ -154,7 +161,7 @@ let shoot c b coor =
 
 let rec shoot_random c b = 
   (* print_endline "shooting randomly"; *)
-  try shoot c b (random_coors ())
+  try shoot c b (random_coors c)
   with | _ -> shoot_random c b
 
 let rec shoot_from c b targets =
