@@ -34,9 +34,8 @@ val init_board : string -> t
 (** [player_name b] is the name of the owner of [b]. *)
 val player_name : t -> string
 
-(** [place n l1 l2 b] is [()]. If legal, [b] now has a ship with 
-    name [n], and its ends are in locations represented by
-    [l1] and [l2].
+(** [place n l1 l2 b] places the ship with name [n] on [b], with its
+    ends on locations represented by [l1] and [l2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
     - OffBoard if [l1] or [l2] is off the game board
@@ -47,9 +46,8 @@ val player_name : t -> string
 val place : string -> Command.location -> Command.location -> t -> unit 
 
 (* i.e. place machine readable *)
-(** [place_m_r n c1 c2 b] is [()]. If legal, [b] now has a ship with 
-    name [n], and its ends are in locations represented by
-    [c1] and [c2].
+(** [place_m_r n c1 c2 b] places the ship with name [n] on [b], with its
+    ends are on locations represented by [c1] and [c2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
     - OffBoard if [c1] or [c2] is off the game board

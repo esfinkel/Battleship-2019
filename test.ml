@@ -70,8 +70,7 @@ let make_board_op_exn_test
       assert_raises expected_exn (fun () -> f board))
 
 (** [make_no_exn_raised_test name f board] constructs an OUnit test
-    named [name] that asserts the quality of [()] with 
-    [f board]. *)
+    named [name] that asserts that [f board] raises no exceptions. *)
 let make_no_exn_raised_test
     (name : string)
     (f : Board.t -> 'a)
@@ -299,8 +298,7 @@ let board_tests = [
 ]
 
 (** [make_no_exn_raised_test name f ai_board] constructs an OUnit test
-    named [name] that asserts the quality of [()] with 
-    [f ai_board]. *)
+    named [name] that asserts that [f ai_board] raises no exceptions. *)
 let make_no_exn_raised_ai_place_test 
     (name : string)
     (f : 'a -> 'b)
@@ -311,8 +309,8 @@ let make_no_exn_raised_ai_place_test
 
 (** [make_shoot_ship_ai_test name shoot_funct player_board expected_output] 
     constructs an OUnit test named [name] constructs an OUnit test
-    named [name] that asserts the quality of [()] with 
-    [shoot_funct player_board]. *)
+    named [name] that asserts that [shoot_funct player_board] raises
+    no exceptions. *)
 let make_no_exn_raised_ai_shoot_test
     (name : string)
     (shoot_funct : Board.t -> string)
