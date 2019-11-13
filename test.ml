@@ -164,6 +164,12 @@ let bd_full5 = Board.init_board "all ships placed"
 let () = Board.place "default" "" "" bd_full5
 let _ = Board.shoot "b1" bd_full5
 
+let bd_full6 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full6
+let _ = Board.shoot "b1" bd_full6
+let _ = Board.shoot "b2" bd_full6
+let _ = Board.shoot "f5" bd_full6
+
 let board_tests = [
   (* Board.row_col *)
   make_row_col_test "a5 is (0, 4)" "a5" (0, 4);
@@ -258,6 +264,32 @@ let board_tests = [
   make_equal_test "no ship" (Board.is_part_of_living_ship bd_full5 )
     (9, 9) false;
 
+  (* Board.string_self *)
+  make_equal_test "every type of spot" (Board.string_self) bd_full6
+    [["-"; "-"; "-"; "-"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["#"; "#"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "-"; "-"; "-"; "-"; "-"; "w"; "w"; "w"; "w"];
+     ["w"; "|"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "|"; "w"; "-"; "X-"; "-"; "w"; "w"; "w"; "w"];
+     ["w"; "|"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
+     ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"]];
+
+  (* Board.string_other *)
+  make_equal_test "every type of spot" (Board.string_other) bd_full6
+    [["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["#"; "#"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "X-"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"]];
+
   (* Board.is_unshot*)
   make_is_unshot_test "not shot water" bd_full2 (9,8) true;
   make_is_unshot_test "not shot ship" bd_full2 (1,0) true;
@@ -266,6 +298,9 @@ let board_tests = [
 
 ]
 
+let ai_tests = [
+
+]
 
 let suite =
   "test suite for game engine"  >::: List.flatten [
