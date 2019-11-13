@@ -5,16 +5,10 @@ type t = {
   name: string;
 }
 
-let seed_random () = Unix.time ()
-                     |> int_of_float
-                     |> Random.init
-
-let init () =
-  let () = seed_random () in
-  {
-    board = Board.init_board "";
-    name = ""
-  }
+let init () = {
+  board = Board.init_board "";
+  name = ""
+}
 
 let get_board c = c.board
 

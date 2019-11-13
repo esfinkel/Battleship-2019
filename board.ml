@@ -1,7 +1,5 @@
 open Helpers
 
-(* For generating actual random numbers. *)
-let () = Random.self_init ();
 exception OffBoard
 exception Misaligned
 exception WrongLength

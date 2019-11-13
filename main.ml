@@ -1,4 +1,7 @@
-(** [single_difficulty] determines what type of ai to use for the computer. *)
+(* For generating actual random numbers. *)
+let () = Random.self_init ();
+
+  (** [single_difficulty] determines what type of ai to use for the computer. *)
 type single_difficulty = 
   | Easy of Ai_random.t 
   | Medium of Ai_normal.t

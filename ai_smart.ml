@@ -7,15 +7,11 @@ type t = {
 }
 
 
-let seed_random () = Unix.time () |> int_of_float |> Random.init
-
-let init () =
-  let () = seed_random () in
-  {
-    board = Board.init_board "💻";
-    hit_history = [];
-    parity = Some (Random.int 2);
-  }
+let init () = {
+  board = Board.init_board "💻";
+  hit_history = [];
+  parity = Some (Random.int 2);
+}
 
 let get_board c = c.board
 
