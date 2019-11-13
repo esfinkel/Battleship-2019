@@ -1,6 +1,7 @@
 open OUnit2
 open Command
 open Board
+open Ai
 
 (** [make_parse_test name str_input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with 
@@ -366,9 +367,9 @@ let ai_tests = [
   (* Ai.get_board *)
   make_ai_get_board_test "get board ai random" 
     (Ai_random.get_board) ai_rand2 p_rand2;
-  make_ai_get_board_test "get board ai random" 
+  make_ai_get_board_test "get board ai normal" 
     (Ai_normal.get_board) ai_norm2 p_norm2;
-  make_ai_get_board_test "get board ai random" 
+  make_ai_get_board_test "get board ai smart" 
     (Ai_smart.get_board) ai_smart2 p_smart2  
 
 ]
