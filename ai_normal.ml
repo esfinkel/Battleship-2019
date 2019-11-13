@@ -13,7 +13,7 @@ let init () =
   let () = seed_random () in
   {
     board = Board.init_board "";
-    name = ""
+    name = "💻"
   }
 
 let get_board c = c.board
