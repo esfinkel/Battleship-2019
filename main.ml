@@ -24,6 +24,8 @@ let print_grid grid =
       | "|" -> print_string [white; on_cyan; Bold] "🚢 " (* " ║ " *)
       | "X" | "X|" | "X-" -> print_string [on_red] "💥 "
       | "#" -> print_string [] "🔥 "
+      | "b" -> print_string [] "💣 "
+      | "B" -> print_string [] "💥 "
       | _ -> ()
     )
   in
@@ -313,15 +315,31 @@ let get_names () =  print_string "Player 1 name?";
   let p2_name = check_p2_name p1_name in 
   (p1_name, p2_name)
 
+(** [choose_mines] prompts the player to enter a number of mines to place on
+    each board. Both boards should have an equal number of bombs. *)
+let rec choose_mines () =
+  print_string "\nHow many mines would you like to put in the boards: 0 to 10";
+  try
+    match read_command () with
+    | num -> let n = int_of_string num in 
+      if (int_of_string num ) >=0 && (int_of_string num) <= 10 then n else begin
+        ANSITerminal.(print_string [red]
+                        "\n\nEnter a number of mines from 0 to 10"); 
+        choose_mines () end
+  with _ -> ANSITerminal.(print_string [red]
+                            "\n\nEnter a number of mines from 0 to 10"); 
+    choose_mines ()
+
 (** [multiplayer ()] prompts for the multiplayer game to play, then
     starts it.*)
-let multiplayer () = 
+let multiplayer () =
   let p1, p2 = get_names () in
   let p1_board = Board.init_board p1 in
   let p2_board = Board.init_board p2 in
+  let mine_count = choose_mines () in
   clear_screen ();
-  setup p1_board; clear_screen ();
-  setup p2_board; clear_screen ();
+  setup p1_board; Board.place_mine p1_board mine_count; clear_screen ();
+  setup p2_board; Board.place_mine p2_board mine_count; clear_screen ();
   ANSITerminal.(print_string [cyan]
                   ("Player "^(Board.player_name p1_board)^
                    ": Please take control, then press enter!\n"));
@@ -437,18 +455,25 @@ let singleplayer () =
   let player = get_name () in
   let player_board = Board.init_board player in
   let single_dif = choose_difficulty () in
+  let mine_count = choose_mines () in
   match single_dif with
   | Easy ai_player -> 
     Ai_random.place_all_ships ai_player;
-    setup player_board; clear_screen ();
+    setup player_board; Board.place_mine player_board mine_count;
+    Board.place_mine (Ai_random.get_board ai_player) mine_count;
+    clear_screen ();
     single_next_move player_board (Ai_random.get_board ai_player) single_dif
   | Medium ai_player-> 
     Ai_normal.place_all_ships ai_player;
-    setup player_board; clear_screen ();
+    setup player_board; Board.place_mine player_board mine_count; 
+    Board.place_mine (Ai_normal.get_board ai_player) mine_count;
+    clear_screen ();
     single_next_move player_board (Ai_normal.get_board ai_player) single_dif
   | Hard ai_player ->
     Ai_smart.place_all_ships ai_player;
-    setup player_board; clear_screen ();
+    setup player_board; Board.place_mine player_board mine_count;
+    Board.place_mine (Ai_smart.get_board ai_player) mine_count;
+    clear_screen ();
     single_next_move player_board (Ai_smart.get_board ai_player) single_dif
 
 (** [main ()] prompts for the game to play, then starts it. *)

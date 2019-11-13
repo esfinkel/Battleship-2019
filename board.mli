@@ -113,3 +113,7 @@ val string_other : t -> string list list
 (** [is_unshot b (x,y)] is true iff the cell on [b] at [(x, y)] has
     not been shot. *)
 val is_unshot : t -> int*int -> bool
+
+(** [place_mine b] places a mine on the board randomly if playing 
+    mine game mode. *)
+val place_mine : t -> int -> unit

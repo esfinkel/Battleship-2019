@@ -21,11 +21,11 @@ type ship = {
   size : int;
   mutable on_board: bool;
   mutable orientation: orn option;
-  default : (Command.location * Command.location)
+  default : (Command.location * Command.location);
 }
 
 (** The abstract type of values representing a grid spot. *)
-type spot =  Water | ShotWater | Ship of ship | HitShip of ship
+type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
 
 (** AF: the record
     [{ grid = [
@@ -395,7 +395,9 @@ let to_string_grid is_self b =
     | (HitShip s)::t ->
       (if is_dead s g then "#" else (
           if s.orientation=Some Vert then "X|" else "X-"
-        ))::(row_str self g t) in
+        ))::(row_str self g t) 
+    | Bomb::t -> (if self then "b" else "?")::(row_str self g t) 
+    | HitBomb::t -> (if self then "B" else "?")::(row_str self g t) in
   b.grid |> Array.to_list
   |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))
 
@@ -408,5 +410,17 @@ let is_unshot b (x,y) = try
     | Ship _ | Water -> true
     | _ -> false
   with | _ -> false
+
+let rec place_mine b num = 
+  if num > 0 then
+    let x = (Random.int 10) in if x >=0 && x <= 10 then
+      let y = (Random.int 10) in if y >=0 && y <= 10 then
+        if b.grid.(x).(y) = Water then 
+          (b.grid.(x).(y) <- Bomb; place_mine b (num - 1))
+        else place_mine b num
+      else place_mine b num
+    else place_mine b num
+  else ()
+
 
 
