@@ -295,7 +295,6 @@ let board_tests = [
   make_is_unshot_test "not shot ship" bd_full2 (1,0) true;
   make_is_unshot_test "shot water" bd_full2 (9,9) false;
   make_is_unshot_test "shot water" bd_full5 (1,0) false;
-
 ]
 
 let ai_tests = [
