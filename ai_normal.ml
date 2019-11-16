@@ -76,8 +76,8 @@ let rec shoot_random b =
   try 
     let coor = random_coors () in 
     match Board.shoot (coor) b with
-    | "It's a hit!" -> hit_history.hit <- coor; "It's a hit!"
-    | msg -> msg
+    | _, true -> hit_history.hit <- coor; "It's a hit!"
+    | _ -> ""
   with | _ -> shoot_random b
 
 (** [shoot_left b] shoots the spot to the left of the hit in [hit_history] and 

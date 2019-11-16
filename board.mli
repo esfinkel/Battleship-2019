@@ -60,14 +60,15 @@ val place_m_r : string -> (int*int) -> (int*int) -> t -> unit
 (** [did_lose b] is true iff all ships have been destroyed in [b]. *)
 val did_lose : t -> bool
 
-(** [shoot l b] is a string message explaining the result of shooting
-    location [l] on [b].
+(** [shoot l b] is [(m, suc)]. [m] is a string message explaining the
+    result of shooting location [l] on [b]. [suc] is true iff a ship
+    has been shot.
     The location on [b] represented by [l] has now been shot; that
     location on [b] has been updated to reflect this information.
     Raises:
     - DuplicateShot if that location has already been shot.
     - InvalidLoc if that location is not on the board. *)
-val shoot : Command.location -> t -> string
+val shoot : Command.location -> t -> string * bool
 
 (* i.e. shoot machine readable *)
 (** [shoot_m_r coor b] is is (m, n). [m] is [true] iff a ship has been shot.

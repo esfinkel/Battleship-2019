@@ -84,7 +84,7 @@ let splash_sound () =
   try Sys.command "afplay audio/splash_midlength.m4a & :" |> ignore
   with | _ -> ()
 
-let shoot_sound () = hit_sound ()
+let shoot_sound suc = if suc then hit_sound () else splash_sound ()
 
 (** [read_command] returns a user string input from the command line. *)
 let read_command unit : string =
@@ -248,8 +248,8 @@ let rec try_shooting shoot_phrase target_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | message -> display_board target_board my_board; 
-        shoot_sound ();
+      | message, success -> display_board target_board my_board; 
+        shoot_sound success;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
@@ -380,7 +380,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | message -> clear_screen (); shoot_sound ();
+      | message, success -> clear_screen (); shoot_sound success;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););

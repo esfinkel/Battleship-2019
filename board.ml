@@ -377,7 +377,7 @@ let shoot_helper (x, y) b =
 
 
 let shoot l b = 
-  let message, _, _ = shoot_helper (row_col l) b in message
+  let message, success, _ = shoot_helper (row_col l) b in message, success
 
 
 let shoot_m_r (x, y) b =
