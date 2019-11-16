@@ -16,8 +16,23 @@ build:
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
 
+
+# $(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+# ((while :; do afplay audio/boom1.mp3; done) || echo "(end music)") & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)
+# what does "test -something afplay file" do?
+play_h: build
+	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "")
+	
+# play music                 (if exception vv)   & in parallel,     build + run         stop music after ocaml program ends 
+#  ((afplay audio/s1.m4a || echo "")             & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)) || (killall afplay || echo "")
+# I think afplay is Mac-only?
+# maybe I could write a Python script that is system-independent, and call it from here
+
+
+# -s silence command printing
+# -k ignore errors
 play: build
-	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
+	make -s -k play_h
 
 zip:
 	zip battleship.zip *.txt *.ml* _tags Makefile
