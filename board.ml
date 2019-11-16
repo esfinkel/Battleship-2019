@@ -368,7 +368,10 @@ let shoot_helper (x, y) b =
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!", true, false
     )
-  | Bomb -> bomb_hit (x, y) b; ("You hit a mine!", false, false)
+  | Bomb -> bomb_hit (x, y) b;  
+    (b.status <- Some ("Your opponent hit a mine and may have " ^ 
+                       "damaged some of your ships!"));
+    ("You hit a mine!", false, false)
   | HitBomb -> raise DuplicateShot
   | _ -> raise DuplicateShot
 
