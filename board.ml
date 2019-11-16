@@ -304,6 +304,43 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
+(** [is_on_board loc] is true if [(x, y)] is on the board. False otherwise. *)
+let is_on_board (x, y) = 
+  (0 <= x && x < 10) && (0 <= y && y < 10)
+
+(** [make_bomb_shot (x, y) b] updates board to have the (x, y) coordinate 
+    counted as a shot. (Used for bomb damage.) *)
+let rec make_bomb_shot (x, y) b =
+  if is_on_board (x, y) then 
+    match b.grid.(x).(y) with 
+    | Water -> b.grid.(x).(y) <- ShotWater;
+    | Ship s -> b.grid.(x).(y) <- HitShip s;
+    | Bomb -> b.grid.(x).(y) <- ShotWater; bomb_hit (x, y) b
+    | _ -> ()
+  else ()
+(** [bomb_hit (x, y) b] updates the board to have damage from the bomb/mine. 
+    (ie. All existing, non-hit spaces around the mine are now hit and any new 
+    mines that get hit trigger another bomb explosion.) *)
+and bomb_hit (x, y) b = 
+  let top_left = (x-1, y-1) in 
+  let mid_left = (x, y-1) in 
+  let bot_left = (x+1, y-1) in 
+  let top_mid = (x-1, y) in 
+  let center = (x, y) in  
+  let bot_mid = (x+1, y) in 
+  let top_right = (x-1, y+1) in 
+  let mid_right = (x, y+1) in 
+  let bot_right = (x+1, y+1) in 
+  make_bomb_shot top_left b;
+  make_bomb_shot mid_left b;
+  make_bomb_shot bot_left b;
+  make_bomb_shot top_mid b;
+  make_bomb_shot center b;
+  make_bomb_shot bot_mid b;
+  make_bomb_shot top_right b;
+  make_bomb_shot mid_right b;
+  make_bomb_shot bot_right b
+
 (** [shoot_helper coor b] is (s, m, n). [s] is a string message explaining
     the result of shooting location [coor] on [b]. [m] is [true] iff a
     ship has been shot. [n] is true iff a ship has been shot and is now
@@ -331,6 +368,8 @@ let shoot_helper (x, y) b =
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!", true, false
     )
+  | Bomb -> bomb_hit (x, y) b; ("You hit a mine!", false, false)
+  | HitBomb -> raise DuplicateShot
   | _ -> raise DuplicateShot
 
 
