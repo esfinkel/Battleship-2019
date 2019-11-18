@@ -21,7 +21,7 @@ test:
 # ((while :; do afplay audio/boom1.mp3; done) || echo "(end music)") & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)
 # what does "test -something afplay file" do?
 play_h: build
-	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "")
+	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "") && echo "log in during your next war!\n"
 	
 # play music                 (if exception vv)   & in parallel,     build + run         stop music after ocaml program ends 
 #  ((afplay audio/s1.m4a || echo "")             & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)) || (killall afplay || echo "")
@@ -31,8 +31,11 @@ play_h: build
 
 # -s silence command printing
 # -k ignore errors
-play: build
+play-music play_music: build
 	make -s -k play_h
+
+play: build
+	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
 zip:
 	zip battleship.zip *.txt *.ml* _tags Makefile
