@@ -27,7 +27,7 @@ let ordered ((pos1, pos2) : coor_type * coor_type)
 
 let board_size = 10
 
-(** [on_board a] is true iff a coordinate with x=[a] would be on a square
+(** [on_board a] is true iff a coordinate with i=[a] would be on a square
     grid with size [board_size]. *)
 let on_board a = 0 <= a && a < board_size
 
@@ -38,25 +38,25 @@ let coor_on_board (a, b) = on_board a && on_board b
 (** [all_cells_between c1 c2] is all the grid cells (inclusive) between [c1]
     and [c2]. *)
 let rec all_cells_between c1 c2 = 
-  let (x_1, y_1), (x_2, y_2) = ordered (c1, c2) in
-  match (x_1 < x_2, y_1 < y_2) with
-  | true, false -> (x_1, y_1)::(all_cells_between (x_1+1, y_1) (x_2, y_2))
-  | false, true -> (x_1, y_1)::(all_cells_between (x_1, y_1+1) (x_2, y_2))
-  | false, false -> [(x_1, y_1)]
+  let (i_1, j_1), (i_2, j_2) = ordered (c1, c2) in
+  match (i_1 < i_2, j_1 < j_2) with
+  | true, false -> (i_1, j_1)::(all_cells_between (i_1+1, j_1) (i_2, j_2))
+  | false, true -> (i_1, j_1)::(all_cells_between (i_1, j_1+1) (i_2, j_2))
+  | false, false -> [(i_1, j_1)]
   | true, true -> failwith "something has gone very wrong"
 
 (** [random_placement_coors size] is a random pair of coordinates that span
     [size] grid cells. *)
 let random_placement_coors size =
-  let c1_x = (Random.int board_size) in 
-  let c1_y = (Random.int board_size) in 
-  let c1 = (c1_x, c1_y) in
+  let c1_i = (Random.int board_size) in 
+  let c1_j = (Random.int board_size) in 
+  let c1 = (c1_i, c1_j) in
   let dir = Random.int 4 in
   match dir with
-  | 0 -> c1, (c1_x, c1_y+size-1) (* up *)
-  | 1 -> c1, (c1_x+size-1, c1_y) (* right *)
-  | 2 -> c1, (c1_x, c1_y-size+1) (* down *)
-  | _ -> c1, (c1_x-size+1, c1_y) (* left *)
+  | 0 -> c1, (c1_i, c1_j+size-1) (* up *)
+  | 1 -> c1, (c1_i+size-1, c1_j) (* right *)
+  | 2 -> c1, (c1_i, c1_j-size+1) (* down *)
+  | _ -> c1, (c1_i-size+1, c1_j) (* left *)
 
 (** [no_overlap ship_cells off_limits] is [true] iff there is no overlap
     between [ship_cells] and [off_limits]. *)
@@ -67,7 +67,7 @@ let no_overlap ship_cells off_limits =
 
 (** [adjacent_cells coor] is a list of the coordinates that are horizontally
     or vertically adjacent to [coor]. *)
-let adjacent_cells (x, y) = (x+1,y)::(x-1,y)::(x,y-1)::(x,y+1)::[]
+let adjacent_cells (i, j) = (i+1,j)::(i-1,j)::(i,j-1)::(i,j+1)::[]
 
 (** [all_cells_adjacent_to_next_ship ship_cells off_limits] is [off_limits]
     with the addition of all cells that are adjacent to any cell in
@@ -126,17 +126,17 @@ let place_all_ships c =
 
 
 (* when shooting randomly *)
-(** [random_coors c] is a tuple [(x, y)] where (x, y) is on the board
+(** [random_coors c] is a tuple [(i, j)] where (i, j) is on the board
     belonging to [c], and has parity corresponding to [c.parity]. *)
 let random_coors c =
-  let x = (Random.int board_size) in 
-  let y = (Random.int board_size) in 
+  let i = (Random.int board_size) in 
+  let j = (Random.int board_size) in 
   (* Use parity to up your chances *)
   match c.parity with
-  | None -> (x, y)
-  | Some i -> let y = if (x + y) mod 2 = i
-                then y
-                else (y+1) mod board_size in (x, y)
+  | None -> (i, j)
+  | Some n -> let j = if (i + j) mod 2 = n
+                then j
+                else (j+1) mod board_size in (i, j)
 (* may not implement: *)
 (* Fire at the center of the board *)
 (* Move away when you have two misses in the same segment *)
@@ -199,9 +199,9 @@ let find_adjacent_xs b xs =
     [b] such [c] forms a three-point line with the members of one
     of the pairs belonging to [adjx].  *)
 let shoot_find_unknown_on_ends b adjx = 
-  let ends ((x1, y1), (x2, y2)) = if x1 = x2
-    then (* horiz *) [(x1, y1-1); (x2, y2+1)]
-    else (* vert *) [(x1-1, y1); (x2+1, y2)] in
+  let ends ((i1, j1), (i2, j2)) = if i1 = i2
+    then (* horiz *) [(i1, j1-1); (i2, j2+1)]
+    else (* vert *) [(i1-1, j1); (i2+1, j2)] in
   let is_unknown = Board.is_unshot b in
   List.map (fun coors ->  coors |> ordered |> ends) adjx
   |> List.flatten

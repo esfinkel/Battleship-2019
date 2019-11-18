@@ -74,7 +74,7 @@ let row_col (loc : Command.location) : (int*int) =
     same row or the same column. *)
 let ordered_coors c1 c2 = if c1 < c2 then c1, c2 else c2, c1
 
-(** [ordered l1 l2] is [(l1_x, l1_y), (l2_x, l2_y)], the coordinates of
+(** [ordered l1 l2] is [(l1_i, l1_j), (l2_i, l2_j)], the coordinates of
     location [l1] and location [l2] respectively, except they are swapped
     if given in the reverse order.
     Precondition to comparability is that [l1] and [l2] are in either the
@@ -207,10 +207,10 @@ let check_alignment_and_length loc1 loc2 s =
 
 (** [overlapping_ship_by_coors sh c1 c2 b] is true iff there are any ships
     (excepting [sh]) present in the span from [c1] to [c2] on [b]. *)
-let overlapping_ship_by_coors sh (x_1, y_1) (x_2, y_2) b =
-  for x = x_1 to x_2 do
-    for y = y_1 to y_2 do 
-      match b.(x).(y) with
+let overlapping_ship_by_coors sh (i_1, j_1) (i_2, j_2) b =
+  for i = i_1 to i_2 do
+    for j = j_1 to j_2 do 
+      match b.(i).(j) with
       | Water -> ()
       | Ship sh' when sh' = sh -> ()
       | _ -> raise OverlappingShips 
@@ -249,7 +249,7 @@ let new_orientation (i1, j1) (i2, j2) =
         present on [b]. *)
 let place_single_ship sh l1 l2 b =
   (* let sh = get_ship s b in *)
-  let (((x_1, y_1) as coors_1), ((x_2, y_2) as coors_2)) = ordered l1 l2 in 
+  let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = ordered l1 l2 in 
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;
@@ -257,9 +257,9 @@ let place_single_ship sh l1 l2 b =
   if sh.on_board then remove sh b else ();
   sh.on_board <- true;
   sh.orientation <- new_orientation coors_1 coors_2;
-  for x = x_1 to x_2 do
-    for y = y_1 to y_2 do 
-      b.grid.(x).(y) <- Ship sh
+  for i = i_1 to i_2 do
+    for j = j_1 to j_2 do 
+      b.grid.(i).(j) <- Ship sh
     done
   done
 
@@ -286,7 +286,7 @@ let rec place s l1 l2 b =
     place_single_ship (get_ship s b) l1 l2 b
 
 
-let place_m_r s ((x_1, y_1) as l1) ((x_2, y_2) as l2) b =
+let place_m_r s ((i_1, j_1) as l1) ((i_2, j_2) as l2) b =
   let sh = get_ship s b in 
   place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
 
@@ -304,33 +304,33 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
-(** [is_on_board loc] is true if [(x, y)] is on the board. False otherwise. *)
-let is_on_board (x, y) = 
-  (0 <= x && x < 10) && (0 <= y && y < 10)
+(** [is_on_board loc] is true if [(i, j)] is on the board. False otherwise. *)
+let is_on_board (i, j) = 
+  (0 <= i && i < 10) && (0 <= j && j < 10)
 
-(** [make_bomb_shot (x, y) b] updates board to have the (x, y) coordinate 
+(** [make_bomb_shot (i, j) b] updates board to have the (i, j) coordinate 
     counted as a shot. (Used for bomb damage.) *)
-let rec make_bomb_shot (x, y) b =
-  if is_on_board (x, y) then 
-    match b.grid.(x).(y) with 
-    | Water -> b.grid.(x).(y) <- ShotWater;
-    | Ship s -> b.grid.(x).(y) <- HitShip s;
-    | Bomb -> b.grid.(x).(y) <- ShotWater; bomb_hit (x, y) b
+let rec make_bomb_shot (i, j) b =
+  if is_on_board (i, j) then 
+    match b.grid.(i).(j) with 
+    | Water -> b.grid.(i).(j) <- ShotWater;
+    | Ship s -> b.grid.(i).(j) <- HitShip s;
+    | Bomb -> b.grid.(i).(j) <- ShotWater; bomb_hit (i, j) b
     | _ -> ()
   else ()
-(** [bomb_hit (x, y) b] updates the board to have damage from the bomb/mine. 
+(** [bomb_hit (i, j) b] updates the board to have damage from the bomb/mine. 
     (ie. All existing, non-hit spaces around the mine are now hit and any new 
     mines that get hit trigger another bomb explosion.) *)
-and bomb_hit (x, y) b = 
-  let top_left = (x-1, y-1) in 
-  let mid_left = (x, y-1) in 
-  let bot_left = (x+1, y-1) in 
-  let top_mid = (x-1, y) in 
-  let center = (x, y) in  
-  let bot_mid = (x+1, y) in 
-  let top_right = (x-1, y+1) in 
-  let mid_right = (x, y+1) in 
-  let bot_right = (x+1, y+1) in 
+and bomb_hit (i, j) b = 
+  let top_left = (i-1, j-1) in 
+  let mid_left = (i, j-1) in 
+  let bot_left = (i+1, j-1) in 
+  let top_mid = (i-1, j) in 
+  let center = (i, j) in  
+  let bot_mid = (i+1, j) in 
+  let top_right = (i-1, j+1) in 
+  let mid_right = (i, j+1) in 
+  let bot_right = (i+1, j+1) in 
   make_bomb_shot top_left b;
   make_bomb_shot mid_left b;
   make_bomb_shot bot_left b;
@@ -350,15 +350,15 @@ and bomb_hit (x, y) b =
     Raises:
     - DuplicateShot if that location has already been shot.
     - InvalidLoc if that location is not on the board. *)
-let shoot_helper (x, y) b =
-  match b.grid.(x).(y) with 
+let shoot_helper (i, j) b =
+  match b.grid.(i).(j) with 
   | exception Invalid_argument(_)  -> raise InvalidLoc
-  | Water -> b.grid.(x).(y) <- ShotWater;
+  | Water -> b.grid.(i).(j) <- ShotWater;
     b.status <- Some ("Your opponent shot "
-                      ^(rev_row_col (x, y) |> String.uppercase_ascii)
+                      ^(rev_row_col (i, j) |> String.uppercase_ascii)
                       ^" and missed.");
     "It's a miss!", false, false
-  | Ship s -> b.grid.(x).(y) <- HitShip s;
+  | Ship s -> b.grid.(i).(j) <- HitShip s;
     let sh_name = string_of_ship s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
@@ -368,7 +368,7 @@ let shoot_helper (x, y) b =
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!", true, false
     )
-  | Bomb -> bomb_hit (x, y) b;  
+  | Bomb -> bomb_hit (i, j) b;  
     (b.status <- Some ("Your opponent hit a mine and may have " ^ 
                        "damaged some of your ships!"));
     ("You hit a mine!", false, false)
@@ -380,8 +380,8 @@ let shoot l b =
   let message, success, _ = shoot_helper (row_col l) b in message, success
 
 
-let shoot_m_r (x, y) b =
-  let _, success, killed = shoot_helper (x, y) b in success, killed
+let shoot_m_r (i, j) b =
+  let _, success, killed = shoot_helper (i, j) b in success, killed
 
 
 let setup_status b = 
@@ -411,10 +411,10 @@ let complete b =
   List.fold_left
     (fun true_so_far s -> true_so_far && s.on_board) true b.ships
 
-let is_part_of_living_ship b (x, y) = 
+let is_part_of_living_ship b (i, j) = 
   let g = b.grid in
   try
-    match g.(x).(y) with
+    match g.(i).(j) with
     | Ship s | HitShip s -> not (is_dead s g)
     | _ -> false
   with | _ -> false
@@ -447,18 +447,18 @@ let string_self (b:t) = to_string_grid true b
 
 let string_other b = to_string_grid false b
 
-let is_unshot b (x,y) = try
-    match (b.grid).(x).(y) with
+let is_unshot b (i, j) = try
+    match (b.grid).(i).(j) with
     | Ship _ | Water -> true
     | _ -> false
   with | _ -> false
 
 let rec place_mine b num = 
   if num > 0 then
-    let x = (Random.int 10) in if x >=0 && x <= 10 then
-      let y = (Random.int 10) in if y >=0 && y <= 10 then
-        if b.grid.(x).(y) = Water then 
-          (b.grid.(x).(y) <- Bomb; place_mine b (num - 1))
+    let i = (Random.int 10) in if i >=0 && i <= 10 then
+      let j = (Random.int 10) in if j >=0 && j <= 10 then
+        if b.grid.(i).(j) = Water then 
+          (b.grid.(i).(j) <- Bomb; place_mine b (num - 1))
         else place_mine b num
       else place_mine b num
     else place_mine b num
