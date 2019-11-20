@@ -16,16 +16,16 @@ let clear_screen () =
     (string list list) [grid]. *)
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
-      | "w" -> print_string [] "🌊 "
-      | "x" -> print_string [default] "🌀 "
-      | "?" -> print_string [on_black] "❔ "
+      | "w" -> print_string [white; on_blue] "🌊 "
+      | "x" -> print_string [white; on_blue] "🌀 "
+      | "?" -> print_string [on_blue] "❔ "
       | "O" -> print_string [white; on_black] " o "
-      | "-" -> print_string [white; on_cyan; Bold] "🚢 " (* "═══" or === *)
-      | "|" -> print_string [white; on_cyan; Bold] "🚢 " (* " ║ " *)
+      | "-" -> print_string [white; on_black; Bold] "🚢 " (* "═══" or === *)
+      | "|" -> print_string [white; on_black; Bold] "🚢 " (* " ║ " *)
       | "X" | "X|" | "X-" -> print_string [on_red] "💥 "
-      | "#" -> print_string [] "🔥 "
-      | "b" -> print_string [] "💣 "
-      | "B" -> print_string [] "💥 "
+      | "#" -> print_string [on_blue] "🔥 "
+      | "b" -> print_string [on_blue] "💣 "
+      | "B" -> print_string [on_blue] "💥 "
       | _ -> ()
     )
   in
