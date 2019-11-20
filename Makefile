@@ -5,7 +5,8 @@ MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
-OCAMLBUILD=ocamlbuild -use-ocamlfind
+OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag 'package(bisect_ppx-ocamlbuild)'
+PKGS=unix,oUnit,str,qcheck
 
 default: build
 	utop
@@ -14,8 +15,7 @@ build:
 	$(OCAMLBUILD) $(OBJECTS)
 
 test:
-	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST)
-
+	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 # $(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 # ((while :; do afplay audio/boom1.mp3; done) || echo "(end music)") & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)
@@ -37,8 +37,11 @@ play-music play_music: build
 play: build
 	$(OCAMLBUILD) $(MAIN) && ./$(MAIN)
 
-zip:
-	zip battleship.zip *.txt *.ml* _tags Makefile
+bisect: clean test
+	bisect-ppx-report -I _build -html report bisect0001.out
+
+zip: bisect
+	zip battleship.zip *.txt *.ml* _tags Makefile report/*
 	
 docs: docs-public docs-private
 	
@@ -55,4 +58,4 @@ docs-private: build
 
 clean:
 	ocamlbuild -clean
-	rm -rf doc.public doc.private battleship.zip
+	rm -rf doc.public doc.private report battleship.zip bisect*.out
