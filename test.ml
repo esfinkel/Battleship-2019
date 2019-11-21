@@ -1,3 +1,37 @@
+(* Overall, our test suite encompasses all things that could reasonably be 
+   tested without gameplay. For everything else, (such as AI shooting in single
+   player mode) we tested the functionality through playing our game, and by
+   making sure everything proceeded as expected while we played. To do this, we 
+   tested that all of the error messages for invalid inputs worked as we hoped 
+   and that everything involving game setup, two-player and one-player modes, 
+   and all expected functionality with our game worked as planned. For more 
+   details on what we tested in each file, how we tested it, and why we may 
+   or may not have left it out of the test suite, we explain all of the relevant
+   files below:
+
+   We tested all of the functions in command.mli, board.mli, ai_normal.mli, 
+   ai_smart.mli, and ai_random.mli. 
+
+   For command.ml, our bisect gave us a code coverage of 100 percent. This is 
+   because command.ml only has to do with parsing which it is very easy to 
+   test all of the outcomes and situations for. Also, we've played the game
+   through fully enough while paying attention/testing parsing details to 
+   tell that everything is working properly. 
+
+   For board.ml, our bisect gave us a code coverage of 76.70 percent.
+
+   For ai_random.ml, our bisect gave us a code coverage of 91.67 percent. The
+   only parts of the easiest/random AI we couldn't put into the test file 
+   were the cases where there was a successful shot. Since the AI fires shots 
+   randomly, we found it better to test this function with gameplay to make 
+   sure it always functioned properly and as expected. 
+
+   For ai_normal.ml, our bisect gave us a relatively low code coverage. The main
+   reason for this is
+
+   For ai_smart.ml, our bisect once again gave us a relatively low code 
+   coverage. The main reason for this is *)
+
 open OUnit2
 open Command
 open Board
