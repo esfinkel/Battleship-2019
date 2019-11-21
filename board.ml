@@ -313,15 +313,16 @@ let is_on_board (i, j) =
 let rec make_bomb_shot (i, j) b =
   if is_on_board (i, j) then 
     match b.grid.(i).(j) with 
-    | Water -> b.grid.(i).(j) <- ShotWater;
-    | Ship s -> b.grid.(i).(j) <- HitShip s;
+    | Water -> b.grid.(i).(j) <- ShotWater; false
+    | Ship s -> b.grid.(i).(j) <- HitShip s; true
     | Bomb -> b.grid.(i).(j) <- ShotWater; bomb_hit (i, j) b
-    | _ -> ()
-  else ()
+    | _ -> false
+  else false
 (** [bomb_hit (i, j) b] updates the board to have damage from the bomb/mine. 
     (ie. All existing, non-hit spaces around the mine are now hit and any new 
     mines that get hit trigger another bomb explosion.) *)
 and bomb_hit (i, j) b = 
+  let hit_ship = ref false in
   let top_left = (i-1, j-1) in 
   let mid_left = (i, j-1) in 
   let bot_left = (i+1, j-1) in 
@@ -331,15 +332,24 @@ and bomb_hit (i, j) b =
   let top_right = (i-1, j+1) in 
   let mid_right = (i, j+1) in 
   let bot_right = (i+1, j+1) in 
-  make_bomb_shot top_left b;
-  make_bomb_shot mid_left b;
-  make_bomb_shot bot_left b;
-  make_bomb_shot top_mid b;
-  make_bomb_shot center b;
-  make_bomb_shot bot_mid b;
-  make_bomb_shot top_right b;
-  make_bomb_shot mid_right b;
-  make_bomb_shot bot_right b
+  if make_bomb_shot top_left b then hit_ship := true;
+  if make_bomb_shot mid_left b then hit_ship := true;
+  if make_bomb_shot bot_left b then hit_ship := true;
+  if make_bomb_shot top_mid b then hit_ship := true;
+  if make_bomb_shot center b then hit_ship := true;
+  if make_bomb_shot bot_mid b then hit_ship := true;
+  if make_bomb_shot top_right b then hit_ship := true;
+  if make_bomb_shot mid_right b then hit_ship := true;
+  if make_bomb_shot bot_right b then hit_ship := true;
+  !hit_ship
+
+let mine_hit_your_ship boolean =
+  if boolean then "\nThe mine damaged some of your ships."
+  else "\nThe mine didn't damage anything."
+
+let mine_hit_op_ship boolean =
+  if boolean then " The mine damaged some of you opponents ships."
+  else "\nThe mine didn't damage anything."
 
 (** [shoot_helper coor b] is (s, m, n). [s] is a string message explaining
     the result of shooting location [coor] on [b]. [m] is [true] iff a
@@ -368,13 +378,13 @@ let shoot_helper (i, j) b =
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!", true, false
     )
-  | Bomb -> bomb_hit (i, j) b;  
-    (b.status <- Some ("Your opponent hit a mine at location " ^ 
-                       (String.make 1 (Char.chr (i + 65))) ^ 
-                       (string_of_int (j + 1)) ^
-                       " and may have damaged some of your ships!"));
-    ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
-     (string_of_int (j + 1)) ^ "!", false, false)
+  | Bomb -> let hit_ship = ref (bomb_hit (i, j) b) in
+    (b.status <- Some ("\nYour opponent hit a mine at location " 
+                       ^  (String.make 1 (Char.chr (i + 65))) 
+                       ^  (string_of_int (j + 1)) ^ "." 
+                       ^ (mine_hit_your_ship !hit_ship));
+     ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
+      (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false)
   | HitBomb -> raise DuplicateShot
   | _ -> raise DuplicateShot
 
