@@ -28,7 +28,7 @@ type ship = {
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
 
 (** AF: the record
-    [{ grid = [
+    [{ grid = 
         [|
           [|Water; ShotWater|];
           [|Ship s1; HitShip s2|]
@@ -41,10 +41,10 @@ type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
     opponent missed their last shot, position A1 is water, position A2
     is water that has been shot, position B1 is a cell of ship s1, and
     position B2 is a cell of ship s2 (and that shell has been shot).
+
     RI : Once board setup has ended, every ship [s] in [t.ships] 
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
-    [HitShip s]). The remaining cells are [Water] or [ShotWater]. 
-*)
+    [HitShip s]. The remaining cells are [Water] or [ShotWater]. *)
 type t = {
   grid: spot array array;
   ships: ship list;
