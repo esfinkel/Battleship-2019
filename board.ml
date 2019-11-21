@@ -369,9 +369,12 @@ let shoot_helper (i, j) b =
       "It's a hit!", true, false
     )
   | Bomb -> bomb_hit (i, j) b;  
-    (b.status <- Some ("Your opponent hit a mine and may have " ^ 
-                       "damaged some of your ships!"));
-    ("You hit a mine!", false, false)
+    (b.status <- Some ("Your opponent hit a mine at location " ^ 
+                       (String.make 1 (Char.chr (i + 65))) ^ 
+                       (string_of_int (j + 1)) ^
+                       " and may have damaged some of your ships!"));
+    ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
+     (string_of_int (j + 1)) ^ "!", false, false)
   | HitBomb -> raise DuplicateShot
   | _ -> raise DuplicateShot
 
