@@ -16,16 +16,20 @@ let clear_screen () =
     (string list list) [grid]. *)
 let print_grid grid =
   let print_cell c = ANSITerminal.( match c with
-      | "w" -> print_string [white; on_blue] "🌊 "
-      | "x" -> print_string [white; on_blue] "🌀 "
-      | "?" -> print_string [on_blue] "❔ "
-      | "O" -> print_string [white; on_black] " o "
-      | "-" -> print_string [white; on_black; Bold] "🚢 " (* "═══" or === *)
-      | "|" -> print_string [white; on_black; Bold] "🚢 " (* " ║ " *)
-      | "X" | "X|" | "X-" -> print_string [on_red] "💥 "
-      | "#" -> print_string [on_blue] "🔥 "
-      | "b" -> print_string [on_blue] "💣 "
-      | "B" -> print_string [on_blue] "💥 "
+      | "w" -> print_string [cyan; on_blue]         "[ ]" (* " ■ " *)
+      (* | "w" -> print_string [white; on_blue] "🌊 " *)
+      | "x" -> print_string [white; on_blue]        "🌀 "
+      | "?" -> print_string [on_blue]               "❔ "
+      (* | "O" -> print_string [white; on_black]       " o " *)
+      | "-" -> print_string [white; on_magenta; Bold] "🚢 " (* "═══" or === *)
+      (* | "-" -> print_string [white; on_black; Bold] "🚢 " (* "═══" or === *) *)
+      | "|" -> print_string [white; on_green; Bold] "🚢 " (* " ║ " *)
+      (* | "|" -> print_string [white; on_black; Bold] "🚢 " " ║ "  *) 
+      | "X|" | "X-" -> print_string [on_red]  "💥 "
+      (* | "X" *)
+      | "#" -> print_string [on_blue]               "🔥 "
+      | "b" -> print_string [on_blue]               "💣 "
+      | "B" -> print_string [on_blue]               "💥 "
       | _ -> ()
     )
   in
@@ -50,6 +54,10 @@ let print_grid grid =
   print_string "   ";
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ()
+
+
+
+
 
 (** [print_self_board b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
@@ -77,11 +85,11 @@ let print_help unit : unit =
          ])); ()
 
 let hit_sound () =
-  try Sys.command "afplay audio/boom_midlength.m4a & :" |> ignore
+  try Sys.command "afplay audio/boom_midlength.m4a -v 0.4 & :" |> ignore
   with | _ -> ()
 
 let splash_sound () =
-  try Sys.command "afplay audio/splash_midlength.m4a & :" |> ignore
+  try Sys.command "afplay audio/splash_midlength.m4a -v 0.2 & :" |> ignore
   with | _ -> ()
 
 let shoot_sound suc = if suc then hit_sound () else splash_sound ()
@@ -501,6 +509,10 @@ let rec main () =
 
 (* Execute the game engine. *)
 let () = clear_screen ();
+  ANSITerminal.(print_string [cyan]
+                  "\n\nWelcome to Battleship!\n");
+  main () ship!\n");
+  main () lear_screen ();
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   main () 
