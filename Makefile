@@ -1,4 +1,4 @@
-MODULES=command main author board test ai_random ai_normal ai_smart helpers
+MODULES=command main author board test ai_random ai_normal ai_smart helpers loading_screen
 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)

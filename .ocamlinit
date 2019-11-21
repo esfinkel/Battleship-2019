@@ -2,3 +2,10 @@
 #require "str";;
 #require "ANSITerminal";;
 #directory "_build";;
+#load_rec "command.cmo";;
+#load_rec "board.cmo";;
+#load_rec "ai_random.cmo";;
+#load_rec "ai_normal.cmo";;
+#load_rec "ai_smart.cmo";;
+#load_rec "helpers.cmo";;
+#load_rec "loading_screen.cmo";;

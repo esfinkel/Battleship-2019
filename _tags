@@ -1,4 +1,4 @@
-<{ai_normal,ai_random,ai_smart,board,command}.ml>: coverage
+<{ai_normal,ai_random,ai_smart,board,command,helpers}.ml>: coverage
 <test.{byte,native}>: coverage
 
 true: package(oUnit),package(yojson),package(ANSITerminal), package(str), package(oUnit), package(qcheck)
