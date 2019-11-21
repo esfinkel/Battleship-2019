@@ -13,7 +13,7 @@
    ai_smart.mli, and ai_random.mli. 
 
    For command.ml, our bisect gave us a code coverage of 100 percent. This is 
-   because command.ml only has to do with parsing. Which it is very easy to 
+   because command.ml only has to do with parsing which it is very easy to 
    test all of the outcomes and situations for. Also, we've played the game
    through fully enough while paying attention/testing parsing details to 
    tell that everything is working properly. 
