@@ -25,11 +25,19 @@ let make_parse_exn_test
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
     (Place ["ship"; "shot"; "ship"]);
+  make_parse_test "place default" "place    default     " 
+    (Place ["default";"";""]);
+  make_parse_test "place random" "     place    random     " 
+    (Place ["random";"";""]);
+  make_parse_test "place without on" "place    cruiser c1 c2     " 
+    (Place ["cruiser";"c1";"c2"]);
 
   make_parse_test "normal shoot" "shoot Ship" 
     (Shoot ["Ship"]);
   make_parse_test "shoot with numbers and spaces" " shoot 6  " 
     (Shoot ["6"]);
+  make_parse_test "shoot with s" " s a6  " 
+    (Shoot ["a6"]);
 
   make_parse_test "normal status" "status" Status;
   make_parse_test "status with spaces" "status   " Status;
