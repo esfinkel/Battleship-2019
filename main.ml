@@ -92,7 +92,11 @@ let splash_sound () =
   try Sys.command "afplay audio/splash_midlength.m4a -v 0.2 & :" |> ignore
   with | _ -> ()
 
-let shoot_sound suc = if suc then hit_sound () else splash_sound ()
+let shoot_sound suc =
+  let with_sound = Sys.argv.(1) in
+  if with_sound = "1" then
+    if suc then hit_sound () else splash_sound ()
+  else ()
 
 (** [read_command] returns a user string input from the command line. *)
 let read_command unit : string =
@@ -509,7 +513,7 @@ let rec main () =
 
 (* Execute the game engine. *)
 let () = clear_screen ();
-  Loading_screen.scroll_battleship ();
+  if Sys.argv.(1)="1" then Loading_screen.scroll_battleship () else ();
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   main () 

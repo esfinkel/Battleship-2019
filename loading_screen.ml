@@ -164,7 +164,8 @@ let scroll arr w h v =
   let inc x = x := (!x + 1) in
   let len_str = Array.length arr.(0) in
   while (!t)-w < len_str + 5 do
-    ANSITerminal.(erase Screen) |> ignore;
+    (* ANSITerminal.(erase Screen) |> ignore; *)
+    Sys.command("clear") |> ignore;
     window arr w h (!t) |> print_endline;
     Unix.sleepf (1. /. v);
     inc t;
