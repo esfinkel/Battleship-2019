@@ -511,8 +511,4 @@ let rec main () =
 let () = clear_screen ();
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
-  main () ship!\n");
-  main () lear_screen ();
-  ANSITerminal.(print_string [cyan]
-                  "\n\nWelcome to Battleship!\n");
   main () 
