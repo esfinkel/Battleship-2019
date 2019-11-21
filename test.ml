@@ -120,6 +120,17 @@ let make_is_unshot_test
   name >:: (fun _ ->
       assert_equal expected_output (Board.is_unshot board loc))
 
+(** [make_no_exn_mines_test name board num_mines] constructs an OUnit test
+    named [name] that asserts that [Board.place_mine board num_mines] raises 
+    no exceptions. *)
+let make_no_exn_mines_test 
+    (name : string)
+    (board : Board.t)
+    (num_mines : int) = 
+  name >:: (fun _ -> 
+      assert_equal true ( try (Board.place_mine board num_mines |> ignore; true)
+                          with | _ -> false ))
+
 (* Some of these tests make Board.t break the "all ships have been placed"
    invariant. This couldn't happen during gameplay. *)
 let bd1 = Board.init_board "fake name"
@@ -177,6 +188,9 @@ let () = Board.place "default" "" "" bd_full6
 let _ = Board.shoot "b1" bd_full6
 let _ = Board.shoot "b2" bd_full6
 let _ = Board.shoot "f5" bd_full6
+
+let bd_full7 = Board.init_board "all ships placed"
+let () = Board.place "default" "" "" bd_full7
 
 let board_tests = [
   (* Board.row_col *)
@@ -298,11 +312,14 @@ let board_tests = [
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"]];
 
-  (* Board.is_unshot*)
+  (* Board.is_unshot *)
   make_is_unshot_test "not shot water" bd_full2 (9,8) true;
   make_is_unshot_test "not shot ship" bd_full2 (1,0) true;
   make_is_unshot_test "shot water" bd_full2 (9,9) false;
   make_is_unshot_test "shot water" bd_full5 (1,0) false;
+
+  (* Board.place_mine *)
+  make_no_exn_mines_test "place 10" bd_full7 10;
 ]
 
 (** [make_no_exn_raised_test name f ai_board] constructs an OUnit test
