@@ -1,7 +1,7 @@
 open ANSITerminal
 
 let idk = "        
-   ⛵==  \n        
+  ⛵==   \n        
     🚢== \n        \n        "
 
 let b = 
@@ -77,16 +77,6 @@ let s =
         ||   
      ===/    " *)
 
-
-(* let battleship = "
-   ----------------------------------------------------------------------------------------------------      
-   ||     \        //\\       |------------|------------|  | |           |======     /===    ||      |   ======    
-   || ____/       //  \\           | |          | |        | |           |||        ||       ||      |     ||      
-   ||     \      //____\\          | |          | |        | |           |======     \==\    ||======|     ||      
-   ||      |    //      \\         | |          | |        | |______     |||            ||   ||      |     ||      
-   ||_____/    //        \\        |_|          |_|         \ _____/     |======     ===/    ||      |   ======      
-   ---------------------------------------------------------------------------------------------------
-   " *)
 
 
 let h =
@@ -174,14 +164,15 @@ let scroll arr w h v =
   let inc x = x := (!x + 1) in
   let len_str = Array.length arr.(0) in
   while (!t)-w < len_str + 5 do
-    Sys.command("clear") |> ignore;
+    ANSITerminal.(erase Screen) |> ignore;
     window arr w h (!t) |> print_endline;
     Unix.sleepf (1. /. v);
     inc t;
   done
 
 let scroll_words letter_list w =
-  scroll (make_word letter_list |> str_to_arr) w 6 50.
+  scroll (make_word letter_list |> str_to_arr) w 10 75.
+(* 75.0 is the "speed" *)
 
 let scroll_battleship () =
   let width, _ = ANSITerminal.size () in

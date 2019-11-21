@@ -509,6 +509,7 @@ let rec main () =
 
 (* Execute the game engine. *)
 let () = clear_screen ();
+  Loading_screen.scroll_battleship ();
   ANSITerminal.(print_string [cyan]
                   "\n\nWelcome to Battleship!\n");
   main () 
