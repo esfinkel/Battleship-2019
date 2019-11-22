@@ -348,7 +348,7 @@ let mine_hit_your_ship boolean =
   else "\nThe mine didn't damage anything."
 
 let mine_hit_op_ship boolean =
-  if boolean then " The mine damaged some of you opponents ships."
+  if boolean then " The mine damaged some of your opponent's ships."
   else "\nThe mine didn't damage anything."
 
 (** [shoot_helper coor b] is (s, m, n). [s] is a string message explaining
@@ -385,7 +385,6 @@ let shoot_helper (i, j) b =
                        ^ (mine_hit_your_ship !hit_ship));
      ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
       (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false)
-  | HitBomb -> raise DuplicateShot
   | _ -> raise DuplicateShot
 
 
@@ -406,9 +405,6 @@ let setup_status b =
   ^ (long_string_of_ships off_board)
 
 let setup_status_m_r b =
-  (* let on_board = List.filter (fun s -> s.on_board) b.ships
-                 |> List.map (fun s -> (s.name |> string_of_ship, s.size))
-     in *)
   let off_board = List.filter (fun s -> not s.on_board) b.ships
                   |> List.map (fun s -> (s.name |> string_of_ship, s.size))
   in
