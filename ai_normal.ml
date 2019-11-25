@@ -76,7 +76,7 @@ let rec shoot_random b =
   try 
     let coor = random_coors () in 
     match Board.shoot (coor) b with
-    | _, true -> hit_history.hit <- coor; "It's a hit!"
+    | _, true, _ -> hit_history.hit <- coor; "It's a hit!"
     | _ -> ""
   with | _ -> shoot_random b
 
