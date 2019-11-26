@@ -389,7 +389,10 @@ let shoot_helper (i, j) b =
 
 
 let shoot l b = 
-  let message, success, _, bomb_success = shoot_helper (row_col l) b in message, success, bomb_success
+  match row_col l with 
+  | exception Failure(_) -> raise InvalidLoc
+  | loc -> let message, success, _, bomb_success = 
+             shoot_helper (loc) b in message, success, bomb_success
 
 
 let shoot_m_r (i, j) b =

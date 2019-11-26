@@ -89,7 +89,7 @@ let hit_sound () =
   with | _ -> ()
 
 let splash_sound () =
-  try Sys.command "afplay audio/splash_midlength.m4a -v 0.2 & :" |> ignore
+  try Sys.command "afplay audio/splash_midlength.m4a -v 0.3 & :" |> ignore
   with | _ -> ()
 
 let bomb_sound () = 
