@@ -86,17 +86,23 @@ let print_help unit : unit =
          ])); ()
 
 let hit_sound () =
-  try Sys.command "afplay audio/boom_midlength.m4a -v 0.4 & :" |> ignore
+  try Sys.command "afplay audio/boom_midlength.m4a -v 1.0 & :" |> ignore
   with | _ -> ()
 
 let splash_sound () =
-  try Sys.command "afplay audio/splash_midlength.m4a -v 0.2 & :" |> ignore
+  try Sys.command "afplay audio/splash_midlength.m4a -v 0.3 & :" |> ignore
   with | _ -> ()
 
-let shoot_sound suc =
+let bomb_sound () = 
+  try Sys.command "afplay audio/bombexplosion.mp3 -v 0.5 & :" |> ignore
+  with | _ -> ()
+
+let shoot_sound suc bomb_suc =
   let with_sound = Sys.argv.(1) in
   if with_sound = "1" then
-    if suc then hit_sound () else splash_sound ()
+    if bomb_suc then bomb_sound () 
+    else if suc then hit_sound ()
+    else splash_sound ()
   else ()
 
 (** [read_command] returns a user string input from the command line. *)
@@ -265,8 +271,8 @@ let rec try_shooting shoot_phrase target_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | message, success -> display_board target_board my_board; 
-        shoot_sound success;
+      | message, success, bomb_suc -> display_board target_board my_board; 
+        shoot_sound success bomb_suc;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
@@ -397,7 +403,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
       | exception Board.InvalidLoc -> ANSITerminal.(
           print_string [red] "That's not on the board!"
         ); false
-      | message, success -> clear_screen (); shoot_sound success;
+      | message, success, bomb_suc -> clear_screen (); shoot_sound success bomb_suc;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););

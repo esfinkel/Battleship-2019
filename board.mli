@@ -71,7 +71,7 @@ val did_lose : t -> bool
     Raises:
     - DuplicateShot if that location has already been shot.
     - InvalidLoc if that location is not on the board. *)
-val shoot : Command.location -> t -> string * bool
+val shoot : Command.location -> t -> string * bool * bool 
 
 (* i.e. shoot machine readable *)
 (** [shoot_m_r coor b] is is (m, n). [m] is [true] iff a ship has been shot.

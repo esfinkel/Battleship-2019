@@ -424,17 +424,17 @@ let shoot_helper (i, j) b =
     b.status <- Some ("Your opponent shot "
                       ^(rev_row_col (i, j) |> String.uppercase_ascii)
                       ^" and missed.");
-    "It's a miss!", false, false
+    "It's a miss!", false, false, false
   | Ship s -> b.grid.(i).(j) <- HitShip s;
     (* let sh_name = string_of_ship s.name in *)
     let sh_name = s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
-      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), true, true
+      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), true, true, false
     ) 
     else  (
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
-      "It's a hit!", true, false
+      "It's a hit!", true, false, false
     )
   | Bomb -> let hit_ship = ref (bomb_hit (i, j) b) in
     (b.status <- Some ("\nYour opponent hit a mine at location " 
@@ -442,16 +442,19 @@ let shoot_helper (i, j) b =
                        ^  (string_of_int (j + 1)) ^ "." 
                        ^ (mine_hit_your_ship !hit_ship));
      ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
-      (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false)
+      (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false, true)
   | _ -> raise DuplicateShot
 
 
 let shoot l b = 
-  let message, success, _ = shoot_helper (row_col l) b in message, success
+  match row_col l with 
+  | exception Failure(_) -> raise InvalidLoc
+  | loc -> let message, success, _, bomb_success = 
+             shoot_helper (loc) b in message, success, bomb_success
 
 
 let shoot_m_r (i, j) b =
-  let _, success, killed = shoot_helper (i, j) b in success, killed
+  let _, success, killed, _ = shoot_helper (i, j) b in success, killed
 
 
 let setup_status b = 
