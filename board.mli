@@ -35,6 +35,9 @@ val init_board_default : string -> t
     name [f], all cells initialized to [Water], and player_name [n]. *)
 val init_board_from_file : string -> string -> t 
 
+(** [min_ship_size b] is the length of the shortest ship of [b]. *)
+val min_ship_size : t -> int
+
 (** [board_size b] is the size of the square grid of board b. *)
 val board_size : t -> int
 

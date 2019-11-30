@@ -14,7 +14,12 @@ let init () = {
 }
 
 let init_custom f =
-  failwith "unimplemented"
+  let b = Board.init_board_from_file "💻" f in
+  let parity =
+    if Board.min_ship_size b > 1
+    then Some (Random.int 2)
+    else None in
+  {board=b; parity=parity}
 
 let get_board c = c.board
 

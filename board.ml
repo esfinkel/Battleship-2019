@@ -179,6 +179,10 @@ let init_board_from_file player_name filepath =
   }
 
 
+let min_ship_size b =
+  List.fold_left (fun a sh -> if sh.size < a then sh.size else a) 100 b.ships
+
+
 let player_name b = b.player_name
 
 (** [ship_of_string str] is the ship_name with string name [str]. *)
