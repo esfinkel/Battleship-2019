@@ -167,13 +167,13 @@ let make_no_exn_mines_test
 
 (* Some of these tests make Board.t break the "all ships have been placed"
    invariant. This couldn't happen during gameplay. *)
-let bd1 = Board.init_board "fake name"
+let bd1 = Board.init_board_default "fake name"
 let () = Board.place "battleship" "b2" "e2" bd1
 
-let bd2 = Board.init_board "fake name 2"
+let bd2 = Board.init_board_default "fake name 2"
 let _ = Board.shoot "a3" bd2
 
-let bd_lose = Board.init_board "this player will lose"
+let bd_lose = Board.init_board_default "this player will lose"
 let () = Board.(
     place "battleship" "a1" "a4" bd_lose;
     place "cruiser" "b1" "b2" bd_lose;
@@ -191,39 +191,39 @@ let () = shoot_locs bd_lose [
     "e1"; "e2"; "e3"
   ] 
 
-let bd3 = Board.init_board "fake name"
+let bd3 = Board.init_board_default "fake name"
 let () = Board.place_m_r "battleship" (1,1) (4,1) bd3
 
-let bd4 = Board.init_board "fake name"
+let bd4 = Board.init_board_default "fake name"
 let () = Board.place "battleship" "b2" "e2" bd4
 
-let bd_full = Board.init_board "all ships placed"
+let bd_full = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full
 
-let bd_full2 = Board.init_board "all ships placed"
+let bd_full2 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full2
 let _ = Board.shoot "j10" bd_full2
 
-let bd_full3 = Board.init_board "all ships placed"
+let bd_full3 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full3
 let _ = Board.shoot "b1" bd_full3
 
-let bd_full4 = Board.init_board "all ships placed"
+let bd_full4 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full4
 let _ = Board.shoot "b1" bd_full4
 let _ = Board.shoot "b2" bd_full4
 
-let bd_full5 = Board.init_board "all ships placed"
+let bd_full5 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full5
 let _ = Board.shoot "b1" bd_full5
 
-let bd_full6 = Board.init_board "all ships placed"
+let bd_full6 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full6
 let _ = Board.shoot "b1" bd_full6
 let _ = Board.shoot "b2" bd_full6
 let _ = Board.shoot "f5" bd_full6
 
-let bd_full7 = Board.init_board "all ships placed"
+let bd_full7 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full7
 
 let board_tests = [
@@ -394,15 +394,15 @@ let ai_norm1 = Ai_normal.init()
 let ai_smart1 = Ai_smart.init()
 
 let ai_rand2 = Ai_random.init()
-let p_rand2 = Board.init_board "💻"
+let p_rand2 = Board.init_board_default "💻"
 
 let ai_norm2 = Ai_normal.init()
-let p_norm2 = Board.init_board "💻"
+let p_norm2 = Board.init_board_default "💻"
 
 let ai_smart2 = Ai_smart.init()
-let p_smart2 = Board.init_board "💻"
+let p_smart2 = Board.init_board_default "💻"
 
-let p1 = Board.init_board "player 1"
+let p1 = Board.init_board_default "player 1"
 
 let ai_tests = [
   (* Ai.init and Ai.place_all_ships *)

@@ -1,4 +1,4 @@
-exception InvalidShipName
+(* exception InvalidShipName *)
 
 type object_phrase = string list
 

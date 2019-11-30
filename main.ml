@@ -14,19 +14,20 @@ let clear_screen () =
 
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
-let print_grid grid =
-  let print_cell c = ANSITerminal.( match c with
-      | "w" -> print_string [cyan; on_blue]         "[ ]" (* " ■ " *)
-      (* | "w" -> print_string [white; on_blue] "🌊 " *)
-      | "x" -> print_string [white; on_blue]        "🌀 "
-      | "?" -> print_string [on_blue]               "❔ "
-      (* | "O" -> print_string [white; on_black]       " o " *)
-      | "-" -> print_string [white; on_magenta; Bold] "🚢 " (* "═══" or === *)
-      (* | "-" -> print_string [white; on_black; Bold] "🚢 " (* "═══" or === *) *)
-      | "|" -> print_string [white; on_green; Bold] "🚢 " (* " ║ " *)
-      (* | "|" -> print_string [white; on_black; Bold] "🚢 " " ║ "  *) 
+let print_grid mode grid =
+  let print_cell c = ANSITerminal.(
+      let ship = if mode="space" then "🚀 " else "🚢 " in
+      match c with
+      | "w" ->
+        let colors =
+          if mode="space" then [white; on_black] else [cyan; on_blue] in
+        print_string colors         "[ ]" (* " ■ " *)
+      | "x" -> if mode="space" then print_string [on_black]  "🕳️ "
+        else print_string [on_blue]        "🌀 "
+      | "?" -> print_string [if mode="space" then on_black else on_blue] "❔ "
+      | "-" -> print_string [on_magenta] ship (* "═══" or === *)
+      | "|" -> print_string [on_green] ship (* " ║ " *)
       | "X|" | "X-" -> print_string [on_red]  "💥 "
-      (* | "X" *)
       | "#" -> print_string [on_blue]               "🔥 "
       | "b" -> print_string [on_blue]               "💣 "
       | "B" -> print_string [on_blue]               "💥 "
@@ -61,13 +62,13 @@ let print_grid grid =
 
 (** [print_self_board b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
-let print_self_board b =
-  b |> Board.string_self |> print_grid
+let print_self_board mode b =
+  b |> Board.string_self |> print_grid mode
 
 (** [print_other_board b] prints the colorful string representation of
     board [b], as seen by other playesr. *)
-let print_other_board b =
-  b |> Board.string_other |> print_grid
+let print_other_board mode b =
+  b |> Board.string_other |> print_grid mode
 
 (** [print_help] prints the list of valid commands. *)
 let print_help unit : unit = 
@@ -109,8 +110,9 @@ let read_command unit : string =
 (** [display_board ob b] displays a hidden version of the opponents board [ob] 
     and a visible version of the players board [b]. *)
 let display_board other_board my_board =
-  print_other_board other_board;
-  print_self_board my_board
+  let mode = Board.graphics_mode other_board in
+  print_other_board mode other_board;
+  print_self_board mode my_board
 
 (** [try_placing ship_phrase board] attempts to place a ship on the board. *)
 let try_placing (ship_phrase: string list) board =
@@ -145,7 +147,7 @@ let try_placing (ship_phrase: string list) board =
                         ("\n\nYou cannot place that ship there."
                          ^ " There is already a ship on those coordinates."
                          ^ " Try placing the ship on a different location."));
-      | () -> print_self_board board;
+      | () -> print_self_board (Board.graphics_mode board) board;
         print_endline ("\n\nYou placed the "  ^  name ^ ".");
         Board.setup_status board |> print_endline
     )
@@ -202,7 +204,8 @@ let pause () =
 
 (** [setup board] starts the process of setting up [board]. *)
 let setup board  =
-  print_self_board board;  Board.setup_status board |> print_endline;
+  print_self_board (Board.graphics_mode board) board; 
+  Board.setup_status board |> print_endline;
   ANSITerminal.(
     print_string [cyan]
       ("\n\n"^(Board.player_name board)^": Please set up your board." 
@@ -219,13 +222,14 @@ let lose_message = ": You lost! Better luck next time! \n\n"
     lost. *)
 let display_two_player_end_message loser_board winner_board = 
   print_string "\n\n\n\n";
-  print_self_board loser_board;
+  let mode = (Board.graphics_mode loser_board) in
+  print_self_board mode loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
        ^(Board.player_name loser_board)
        ^lose_message));
-  print_self_board winner_board;
+  print_self_board mode winner_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
@@ -236,8 +240,9 @@ let display_two_player_end_message loser_board winner_board =
     won the game iff [won], or that they lost otherwise. *)
 let display_one_player_end_message won winner_board loser_board = 
   print_string "\n\n\n\n";
-  print_self_board winner_board;
-  print_self_board loser_board;
+  let mode = (Board.graphics_mode loser_board) in
+  print_self_board mode winner_board;
+  print_self_board mode loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
@@ -357,8 +362,8 @@ let rec choose_mines () =
     starts it.*)
 let multiplayer () =
   let p1, p2 = get_names () in
-  let p1_board = Board.init_board p1 in
-  let p2_board = Board.init_board p2 in
+  let p1_board = Board.init_board_default p1 in
+  let p2_board = Board.init_board_default p2 in
   let mine_count = choose_mines () in
   clear_screen ();
   setup p1_board; Board.place_mine p1_board mine_count; clear_screen ();
@@ -476,7 +481,7 @@ let rec choose_difficulty () =
     then starts it.*)
 let singleplayer () =
   let player = get_name () in
-  let player_board = Board.init_board player in
+  let player_board = Board.init_board_default player in
   let single_dif = choose_difficulty () in
   let mine_count = choose_mines () in
   match single_dif with

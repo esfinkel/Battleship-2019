@@ -9,14 +9,14 @@ type t = {
 
 
 let init () = {
-  board = Board.init_board "💻";
+  board = Board.init_board_default "💻";
   (* hit_history = []; *)
   parity = Some (Random.int 2);
 }
 
 let get_board c = c.board
 
-let board_size = 10
+let board_size = Board.board_size
 
 let get_history b =
   let append ls (elt:coor_type) = ls := elt :: (!ls) in
@@ -25,8 +25,8 @@ let get_history b =
                   |> Array.map (Array.of_list) in
   let is_x s = s="X" || s="X|" || s="X-" in
   let xs = ref [] in
-  for i = 0 to (board_size-1) do
-    for j = 0 to (board_size-1) do
+  for i = 0 to (board_size b -1) do
+    for j = 0 to (board_size b -1) do
       if is_x full_hist.(i).(j) then append xs (i, j) else ()
     done
   done;
@@ -43,11 +43,11 @@ let ordered ((pos1, pos2) : coor_type * coor_type)
 
 (** [on_board a] is true iff a coordinate with i=[a] would be on a square
     grid with size [board_size]. *)
-let on_board a = 0 <= a && a < board_size
+let on_board bd a = 0 <= a && a < board_size bd
 
 (** [coor_on_board coor] is true iff [coor] would be on a square grid with
     size [board_size]. *)
-let coor_on_board (a, b) = on_board a && on_board b
+let coor_on_board bd (a, b) = on_board bd a && on_board bd b
 
 (** [all_cells_between c1 c2] is all the grid cells (inclusive) between [c1]
     and [c2]. *)
@@ -61,9 +61,9 @@ let rec all_cells_between c1 c2 =
 
 (** [random_placement_coors size] is a random pair of coordinates that span
     [size] grid cells. *)
-let random_placement_coors size =
-  let c1_i = (Random.int board_size) in 
-  let c1_j = (Random.int board_size) in 
+let random_placement_coors bd size =
+  let c1_i = (Random.int (board_size bd)) in 
+  let c1_j = (Random.int (board_size bd)) in 
   let c1 = (c1_i, c1_j) in
   let dir = Random.int 4 in
   match dir with
@@ -106,11 +106,11 @@ let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
       the ship's location. *)
 let rec place_ship_smartly b name size off_limits =
   (* pick a random coor, and a diff random at appropriate distance *)
-  let new_coors = random_placement_coors size in
+  let new_coors = random_placement_coors b size in
   (* order them *)
   let c1, c2 = ordered new_coors in
   (* if anything off_board, recurse *)
-  if not (coor_on_board c1 && coor_on_board c2)
+  if not (coor_on_board b c1 && coor_on_board b c2)
   then place_ship_smartly b name size off_limits
   else
     (* calculate coors for all ship cells *)
@@ -143,14 +143,14 @@ let place_all_ships c =
 (** [random_coors c] is a tuple [(i, j)] where (i, j) is on the board
     belonging to [c], and has parity corresponding to [c.parity]. *)
 let random_coors c =
-  let i = (Random.int board_size) in 
-  let j = (Random.int board_size) in 
+  let i = (Random.int (board_size c.board)) in 
+  let j = (Random.int (board_size c.board)) in 
   (* Use parity to up your chances *)
   match c.parity with
   | None -> (i, j)
   | Some n -> let j = if (i + j) mod 2 = n
                 then j
-                else (j+1) mod board_size in (i, j)
+                else (j+1) mod (board_size c.board) in (i, j)
 (* may not implement: *)
 (* Fire at the center of the board *)
 (* Move away when you have two misses in the same segment *)
@@ -173,33 +173,30 @@ let rec living_coors_adjacent_to_this
   List.filter (is_adjacent) coor_list
   |> List.map (fun (c2) -> (coor, c2))
 
-(** [shoot c b coor] shoots coordinate [coor] on [b] in accordance with
-    the history belonging to [c], and then updates that history. *)
-let shoot c b coor =
+(** [shoot b coor] shoots coordinate [coor] on [b]. *)
+let shoot b coor =
   match Board.shoot_m_r (coor) b with
-  (* | true, _ -> c.hit_history <- coor::c.hit_history *)
   | _ -> ()
 
-(** [shoot_random c b] shoots randomly on board [b] and then updates the
-    history belonging to [c]. *)
+(** [shoot_random c b] shoots randomly on board [b]. *)
 let rec shoot_random c b = 
   (* print_endline "shooting randomly"; *)
-  try shoot c b (random_coors c)
+  try shoot b (random_coors c)
   with | _ -> shoot_random c b
 
-(** [shoot_from c b targets] randomly selects a member of [targets], shoots
-    it on [b], and then updates the history belonging to [c]. *)
-let rec shoot_from c b targets =
+(** [shoot_from b targets] randomly selects a member of [targets] and
+    shoots it on [b]. *)
+let rec shoot_from b targets =
   try
     let len = List.length targets in
     let target = List.nth targets (Random.int len) in
-    shoot c b target
+    shoot b target
   with 
-  | _ -> shoot_from c b targets
+  | _ -> shoot_from b targets
 
-(** [find_adjacent_xs b xs] is a list of all pairs [(m, n)] on [b] such
+(** [find_adjacent_xs xs] is a list of all pairs [(m, n)] such
     that [m] is adjacent to [n] and both have been shot (but are not dead). *)
-let find_adjacent_xs b xs =
+let find_adjacent_xs xs =
   (* let xs = xs
            |> List.filter
              (fun coor -> Board.is_part_of_living_ship b coor) in *)
@@ -219,15 +216,15 @@ let shoot_find_unknown_on_ends b adjx =
   let is_unknown = Board.is_unshot b in
   List.map (fun coors ->  coors |> ordered |> ends) adjx
   |> List.flatten
-  |> List.filter coor_on_board
+  |> List.filter (coor_on_board b)
   |> List.filter is_unknown
 
 (** [nearby coors] is a list of all coordinates that are on the board
     and adjacent to one of the coordinates in [coors] *)
-let nearby coors =
-  List.map adjacent_cells coors
-  |> List.flatten
-  |> List.filter coor_on_board
+let nearby b coors =
+  (List.map adjacent_cells coors
+   |> List.flatten)
+  |> List.filter (coor_on_board b)
 
 
 (* let print_coor (x, y) = Helpers.rev_row_col (x,y) |> print_string *)
@@ -254,7 +251,7 @@ let rec shoot_find_nearby c b =
      print_newline () ); *)
   (* look for adjacent X's in history *)
   let hits = get_history b in
-  let adjx = find_adjacent_xs b hits in
+  let adjx = find_adjacent_xs hits in
   (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
   let targets = shoot_find_unknown_on_ends b adjx in
   (* (print_string "end targets: ";print_coor_list targets); *)
@@ -263,7 +260,7 @@ let rec shoot_find_nearby c b =
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
   then (
     (* (print_endline "looking at ends"); *)
-    shoot_from c b targets)
+    shoot_from b targets)
   (* otherwise, shoot a ? next to any X *)
   else 
     (* let hits =
@@ -275,7 +272,7 @@ let rec shoot_find_nearby c b =
        [] c.hit_history in *)
     (* (print_string "\nliving hits: "; print_coor_list hits;
        print_newline () ); *)
-    let adj = nearby hits in
+    let adj = nearby b hits in
     (* (print_string "adj: "; List.length adj |> print_int;
        print_newline () ); *)
     let adj_questions = adj |> List.filter (Board.is_unshot b)
@@ -284,7 +281,7 @@ let rec shoot_find_nearby c b =
        print_newline () ); *)
     if List.length adj_questions > 0 then (
       (* (print_endline "looking at all adjacent"); *)
-      shoot_from c b adj_questions)
+      shoot_from b adj_questions)
     (* if you don't find one, shoot randomly *)
     else shoot_random c b
 

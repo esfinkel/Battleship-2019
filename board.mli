@@ -27,9 +27,12 @@ type t
     to [loc]. *)
 val row_col : Command.location -> int * int
 
-(** [init_board n] is a new [t], with all cells initialized to [Water] and
-    player_name [n]. *)
-val init_board : string -> t 
+(** [init_board_default n] is a new [t], with all cells initialized to
+    [Water] and player_name [n]. *)
+val init_board_default : string -> t 
+
+(** [board_size b] is the size of the square grid of board b. *)
+val board_size : t -> int
 
 (** [player_name b] is the name of the owner of [b]. *)
 val player_name : t -> string
@@ -116,3 +119,6 @@ val is_unshot : t -> int*int -> bool
 (** [place_mine b] places a mine on the board randomly if playing 
     mine game mode. *)
 val place_mine : t -> int -> unit
+
+(** [graphics_mode b] is the graphical mode of [b]. *)
+val graphics_mode : t -> string

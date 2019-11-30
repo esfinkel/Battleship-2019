@@ -10,7 +10,9 @@ exception InvalidLoc
 exception InvalidShipName
 
 (** The type [ship_name] represents the name of each ship in the game. *)
-type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine
+(* type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine *)
+
+type ship_name = string
 
 (** The abstract type of values representing a ship's orientation. *)
 type orn = Horz | Vert
@@ -46,10 +48,12 @@ type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
     [HitShip s]. The remaining cells are [Water] or [ShotWater]. *)
 type t = {
+  board_size: int;
   grid: spot array array;
   ships: ship list;
   player_name: string;
   mutable status: string option;
+  mode: string;
 }
 
 
@@ -82,24 +86,24 @@ let ordered_coors c1 c2 = if c1 < c2 then c1, c2 else c2, c1
 let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
   ordered_coors pos1 pos2
 
-let board_size = 10
+let default_board_size = 10
 
 (* Used for getting random letters. (Didn't have to hardcode this but figured
    it was easier since our gameboard is always the same size.) *)
-let lst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j"]
+let lst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j";"k";"l";"m";"n";"o"]
 
 (** [choose_random_letter ()] is a random letter represented as a string from 
     the first ten letters of the alphabet in the list [lst]. *)
-let choose_random_letter () =  
-  List.nth lst (Random.int 10)
+let choose_random_letter size =  
+  List.nth lst (Random.int size)
 
 (** [random_coordinates size] is a set of valid random locations used for 
     randomly placing a ship of size [size]. *)
-let random_coordinates size : Command.location * Command.location = 
+let random_coordinates board_size size : Command.location * Command.location = 
   (* horizontal ship placements with probability 0.5 *)
   if Random.bool() then 
-    let letter = choose_random_letter () in
-    let number = (Random.int 10) + 1 in 
+    let letter = choose_random_letter board_size in
+    let number = (Random.int board_size) + 1 in 
     if ((number + size) < board_size) then begin
       ((letter ^ string_of_int(number)), 
        (letter ^ string_of_int(number + size))) end
@@ -107,8 +111,8 @@ let random_coordinates size : Command.location * Command.location =
       ((letter ^ string_of_int(number)), 
        (letter ^ string_of_int(number - size))) end
   else (* vertical ship placements with probability 0.5 *)
-    let letter_num = (Random.int 10) in 
-    let number = string_of_int((Random.int 10) + 1) in 
+    let letter_num = (Random.int board_size) in 
+    let number = string_of_int((Random.int board_size) + 1) in 
     if ((letter_num + size) < board_size) then begin
       ((List.nth lst letter_num) ^ number), 
       ((List.nth lst (letter_num + size)) ^ number) end
@@ -129,46 +133,93 @@ let init_ship name size default = {
 (** [init_ships ()] is a list of all ships in gameplay, with the appropriate
     names and sizes, [on_board] set to [false], no orientation, and [default]
     location values hardcoded. *)
-let init_ships () = [
-  init_ship Battleship 4 ("a1", "a4");
-  init_ship Cruiser 2 ("b1", "b2");
-  init_ship Carrier 5 ("d2", "d6");
-  init_ship Destroyer 3 ("e2", "g2");
-  init_ship Submarine 3 ("f4", "f6");
+let init_ships_default () = [
+  init_ship "battleship" 4 ("a1", "a4");
+  init_ship "cruiser" 2 ("b1", "b2");
+  init_ship "carrier" 5 ("d2", "d6");
+  init_ship "destroyer" 3 ("e2", "g2");
+  init_ship "submarine" 3 ("f4", "f6");
 ]
 
 
-let init_board player_name = {
-  grid=Water |> Array.make_matrix board_size board_size;
-  ships = init_ships ();
-  player_name= player_name;
-  status=None;
+let init_board_default player_name = {
+  board_size = default_board_size;
+  grid = Water |> Array.make_matrix default_board_size default_board_size;
+  ships = init_ships_default ();
+  player_name = player_name;
+  status = None;
+  mode = ""; (* default to water mode *)
 }
+
+let board_size b = b.board_size
+
+(* let shiptoship _ =
+   (* standin function. we should just eradicate the ship_name type if
+     we want to go this route! *)
+   "Cruiser" *)
+
+let make_ships ships =
+  (* let rec enum s (i, j) size = if size<=1 then (rev_row_col (i, j))
+     else if s then (rev_row_col (i, j), enum false (i, j+1) (size-1))
+     else enum false (i, j+1) (size-1) in *)
+
+  let count = ref 0 in
+  let default size = (rev_row_col (!count, 0),
+                      rev_row_col (!count, size-1)) in
+  List.map (fun (name, size) ->
+      count := (!count + 1);
+      init_ship name size (default size)
+    )
+    ships
+
+
+let init_board_from_file player_name filepath =
+  let board_size, mode, ship_info =
+    Custom_board_parser.get_board_from_file filepath in
+  let ships = make_ships ship_info in
+  {
+    board_size=board_size;
+    grid=Water |> Array.make_matrix board_size board_size;
+    ships = ships;
+    player_name = player_name;
+    status=None;
+    mode=mode;
+  }
+
 
 let player_name b = b.player_name
 
 (** [ship_of_string str] is the ship_name with string name [str]. *)
 let ship_of_string = function
-  | "battleship" -> Battleship
-  | "cruiser" -> Cruiser
-  | "carrier" -> Carrier
-  | "destroyer" -> Destroyer
-  | "submarine" -> Submarine
+  | "battleship" -> "battleship"
+  | "cruiser" -> "cruiser"
+  | "carrier" -> "carrier"
+  | "destroyer" -> "destroyer"
+  | "submarine" -> "submarine"
   | _ -> raise InvalidShipName
+(* let ship_of_string = function
+   | "battleship" -> Battleship
+   | "cruiser" -> Cruiser
+   | "carrier" -> Carrier
+   | "destroyer" -> Destroyer
+   | "submarine" -> Submarine
+   | _ -> raise InvalidShipName *)
 
 (** [string_of_ship shp] is the string name of ship_name [shp]. *)
-let string_of_ship = function
-  | Battleship -> "battleship"
-  | Cruiser -> "cruiser"
-  | Carrier -> "carrier"
-  | Destroyer -> "destroyer"
-  | Submarine -> "submarine"
+let string_of_ship id = id 
+(* let string_of_ship = function
+   | Battleship -> "battleship"
+   | Cruiser -> "cruiser"
+   | Carrier -> "carrier"
+   | Destroyer -> "destroyer"
+   | Submarine -> "submarine" *)
 
 (** [long_string_of_ships shp_lst] is a long-form string description
     of [shp_lst]. *)
 let long_string_of_ships shp_lst = 
   let to_string sh = 
-    (string_of_ship sh.name)
+    (* (string_of_ship sh.name) *)
+    sh.name
     ^" (length "
     ^(sh.size |> string_of_int)
     ^")" in
@@ -177,7 +228,8 @@ let long_string_of_ships shp_lst =
 
 (** [get_ship str_name b] is the ship on [b] with string name [str_name]. *)
 let get_ship str_name b =
-  let sh_name = ship_of_string str_name in
+  (* let sh_name = ship_of_string str_name in *)
+  let sh_name = str_name in
   List.filter (fun s -> s.name=sh_name) b.ships |>
   function 
   | s::[] -> s
@@ -186,7 +238,7 @@ let get_ship str_name b =
 (** [on_board loc b] raises [OffBoard] iff [loc] refers to an invalid
     location on board [b]. *)
 let on_board (loc : Command.location) (b : t) =
-  let size = board_size in
+  let size = b.board_size in
   match row_col loc with 
   | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
   | _ -> raise OffBoard
@@ -249,7 +301,9 @@ let new_orientation (i1, j1) (i2, j2) =
         present on [b]. *)
 let place_single_ship sh l1 l2 b =
   (* let sh = get_ship s b in *)
-  let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = ordered l1 l2 in 
+  let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = 
+    (try ordered l1 l2 with | NoShip -> raise InvalidShipName
+                            | e -> raise e) in 
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;
@@ -278,16 +332,19 @@ let rec place s l1 l2 b =
         () b.ships;
       List.fold_left
         (fun _ sh ->
-           let rand1, rand2 = random_coordinates (sh.size - 1) in
+           let rand1, rand2 = random_coordinates b.board_size (sh.size - 1) in
            place_single_ship sh rand1 rand2 b)
         () b.ships 
     with exn -> place "random" "" "" b
-  else 
-    place_single_ship (get_ship s b) l1 l2 b
+  else
+    place_single_ship (try get_ship s b with | NoShip -> raise InvalidShipName
+                                             | e -> raise e )
+      l1 l2 b
 
 
 let place_m_r s ((i_1, j_1) as l1) ((i_2, j_2) as l2) b =
-  let sh = get_ship s b in 
+  let sh = (try get_ship s b with | NoShip -> raise InvalidShipName
+                                  | e -> raise e ) in 
   place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
 
 
@@ -305,13 +362,13 @@ let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
 (** [is_on_board loc] is true if [(i, j)] is on the board. False otherwise. *)
-let is_on_board (i, j) = 
-  (0 <= i && i < 10) && (0 <= j && j < 10)
+let is_on_board (i, j) b = 
+  (0 <= i && i < b.board_size) && (0 <= j && j < b.board_size)
 
 (** [make_bomb_shot (i, j) b] updates board to have the (i, j) coordinate 
     counted as a shot. (Used for bomb damage.) *)
 let rec make_bomb_shot (i, j) b =
-  if is_on_board (i, j) then 
+  if is_on_board (i, j) b then 
     match b.grid.(i).(j) with 
     | Water -> b.grid.(i).(j) <- ShotWater; false
     | Ship s -> b.grid.(i).(j) <- HitShip s; true
@@ -369,7 +426,8 @@ let shoot_helper (i, j) b =
                       ^" and missed.");
     "It's a miss!", false, false
   | Ship s -> b.grid.(i).(j) <- HitShip s;
-    let sh_name = string_of_ship s.name in
+    (* let sh_name = string_of_ship s.name in *)
+    let sh_name = s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
       ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), true, true
@@ -406,7 +464,8 @@ let setup_status b =
 
 let setup_status_m_r b =
   let off_board = List.filter (fun s -> not s.on_board) b.ships
-                  |> List.map (fun s -> (s.name |> string_of_ship, s.size))
+                  (* |> List.map (fun s -> (s.name |> string_of_ship, s.size)) *)
+                  |> List.map (fun s -> (s.name, s.size))
   in
   off_board
 
@@ -464,8 +523,8 @@ let is_unshot b (i, j) = try
 
 let rec place_mine b num = 
   if num > 0 then
-    let i = (Random.int 10) in if i >=0 && i <= 10 then
-      let j = (Random.int 10) in if j >=0 && j <= 10 then
+    let i = (Random.int b.board_size) in if i >=0 && i <= b.board_size then
+      let j = (Random.int b.board_size) in if j >=0 && j <= b.board_size then
         if b.grid.(i).(j) = Water then 
           (b.grid.(i).(j) <- Bomb; place_mine b (num - 1))
         else place_mine b num
@@ -473,5 +532,6 @@ let rec place_mine b num =
     else place_mine b num
   else ()
 
+let graphics_mode b = b.mode
 
 

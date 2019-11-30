@@ -6,7 +6,7 @@ type t = {
 }
 
 let init () = {
-  board = Board.init_board "💻";
+  board = Board.init_board_default "💻";
   name = "💻"
 }
 
@@ -15,9 +15,10 @@ let get_board c = c.board
 let place_all_ships c = Board.place "random" "" "" c.board
 
 (** [random_coors()] is a random coordinate on the board. *)
-let random_coors () =
-  let yaxis = Char.chr ((Random.int 10) + 65) |> String.make 1 in
-  let xaxis = string_of_int ((Random.int 10) + 1) in
+let random_coors b =
+  let yaxis = Char.chr ((Random.int (Board.board_size b)) + 65)
+              |> String.make 1 in
+  let xaxis = string_of_int ((Random.int (Board.board_size b)) + 1) in
   yaxis ^ xaxis
 
 (* To help AI keep track of guesses around a hit. *)
@@ -74,7 +75,7 @@ let reset_history hist =
 (** [shoot_random b] shoots a random spot on board [b]. *)
 let rec shoot_random b = 
   try 
-    let coor = random_coors () in 
+    let coor = random_coors b in 
     match Board.shoot (coor) b with
     | _, true -> hit_history.hit <- coor; "It's a hit!"
     | _ -> ""
