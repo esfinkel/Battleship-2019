@@ -153,16 +153,8 @@ let init_board_default player_name = {
 
 let board_size b = b.board_size
 
-(* let shiptoship _ =
-   (* standin function. we should just eradicate the ship_name type if
-     we want to go this route! *)
-   "Cruiser" *)
 
 let make_ships ships =
-  (* let rec enum s (i, j) size = if size<=1 then (rev_row_col (i, j))
-     else if s then (rev_row_col (i, j), enum false (i, j+1) (size-1))
-     else enum false (i, j+1) (size-1) in *)
-
   let count = ref 0 in
   let default size = (rev_row_col (!count, 0),
                       rev_row_col (!count, size-1)) in
