@@ -22,7 +22,7 @@ let print_grid mode grid =
         let colors =
           if mode="space" then [white; on_black] else [cyan; on_blue] in
         print_string colors         "[ ]" (* " ■ " *)
-      | "x" -> if mode="space" then print_string [on_black]  "🕳️ "
+      | "x" -> if mode="space" then print_string [on_black]  "🕳️  "
         else print_string [on_blue]        "🌀 "
       | "?" -> print_string [if mode="space" then on_black else on_blue] "❔ "
       | "-" -> print_string [on_magenta] ship (* "═══" or === *)
