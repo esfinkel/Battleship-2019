@@ -11,8 +11,10 @@ open Yojson.Basic.Util
     - There are not 1..10 ships
     - There is a ship with length not in 1.."the board size"
     - There are not 1..20 total ship cells
-    - There are too many ship cells for the board size *)
-let check_board (b_size, mode, ships) =
+    - There are too many ship cells for the board size
+    - The json has "ship_names" and "ship_sizes" lists of different
+          lengths.*)
+let check_board (b_size, mode, ships) same_num_ship_names_sizes =
   let rec count a = function
     | [] -> 0
     | v::t -> (if v=a then 1 else 0) + (count a t) in
@@ -20,6 +22,8 @@ let check_board (b_size, mode, ships) =
   let assert_raise equality issue =
     try assert equality with | _ -> raise (InvalidBoardFile issue) in
   let ship_names = (List.map (fun (n, _) -> n) ships) in
+  assert_raise same_num_ship_names_sizes ("make sure you have same number "
+                                          ^"of ship_names and ship_sizes!");
   assert_raise (0 < b_size && b_size <= 15)
     "board_size should be in 1..15.";
   assert_raise (List.fold_left
@@ -45,16 +49,16 @@ let get_board_from_file f =
     let names = j |> member "ship_names" |> to_list
                 |> List.map to_string |> List.map String.lowercase_ascii in
     let sizes = j |> member "ship_sizes" |> to_list |> List.map to_int in
-    List.map2 (fun a b -> (a, b)) names sizes 
+    try List.map2 (fun a b -> (a, b)) names sizes, true with
+    | _ -> [], false
   in
-  let board_tup = (
-    try
-      let j = Yojson.Basic.from_file f in (
-        j |> member "board_size" |> to_int,
-        j |> member "mode" |> to_string,
-        make_ships j
-      )
-    with | _ -> raise ParsingError
-  ) in
-  check_board board_tup
+  let j = try Yojson.Basic.from_file f with | _ -> raise ParsingError in
+  let ships, valid_len = make_ships j in
+  let board_tup = 
+    (
+      j |> member "board_size" |> to_int,
+      j |> member "mode" |> to_string,
+      ships
+    ) in
+  check_board board_tup valid_len
 
