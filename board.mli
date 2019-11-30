@@ -31,6 +31,10 @@ val row_col : Command.location -> int * int
     [Water] and player_name [n]. *)
 val init_board_default : string -> t 
 
+(** [init_board_from_file n f] is a new [t], with attributes from json with
+    name [f], all cells initialized to [Water], and player_name [n]. *)
+val init_board_from_file : string -> string -> t 
+
 (** [board_size b] is the size of the square grid of board b. *)
 val board_size : t -> int
 
