@@ -10,9 +10,11 @@ type t = {
 
 let init () = {
   board = Board.init_board_default "💻";
-  (* hit_history = []; *)
   parity = Some (Random.int 2);
 }
+
+let init_custom f =
+  failwith "unimplemented"
 
 let get_board c = c.board
 

@@ -5,6 +5,11 @@ type t
     the computer's default-design board. *)
 val init : unit -> t
 
+(** [init_custom f] is a new [t] representing a computerized Battleship
+    player and the computer's board (with design based on the json at 
+    filepath [f]). *)
+val init_custom : string -> t
+
 (** [place_all_ships ()] places all of the ships on the board in legal 
     positions. *)
 val place_all_ships : t -> unit

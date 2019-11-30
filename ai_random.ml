@@ -8,6 +8,10 @@ let init () = {
   board = Board.init_board_default "💻";
 }
 
+let init_custom f =
+  failwith "unimplemented"
+
+
 let get_board c = c.board
 
 let place_all_ships c = Board.place "random" "" "" c.board
