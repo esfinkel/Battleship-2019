@@ -1,8 +1,8 @@
 (** [t] is the abstract type representing a computerized Battleship player. *)
 type t
 
-(** [init ()] is a new [t] representing a computerized Battleship player and the 
-    computer's board. *)
+(** [init ()] is a new [t] representing a computerized Battleship player and
+    the computer's default-design board. *)
 val init : unit -> t
 
 (** [place_all_ships ()] places all of the ships on the board in legal 
