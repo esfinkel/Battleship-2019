@@ -62,11 +62,11 @@ let scroll_words letter_list w =
   scroll (make_word letter_list |> str_to_arr) w 10 75.
 (* 75.0 is the "speed" *)
 
-let letters () = match List.map Helpers.from_file
-                         [ "load_screen_a"; "load_screen_b"; "load_screen_e";
-                           "load_screen_h"; "load_screen_i"; "load_screen_l";
-                           "load_screen_p"; "load_screen_s";
-                           "load_screen_tt";"load_screen_ships" ]
+let letters () = match
+    List.map Helpers.from_file
+      [ "load_screen_a"; "load_screen_b"; "load_screen_e"; "load_screen_h";
+        "load_screen_i"; "load_screen_l"; "load_screen_p"; "load_screen_s";
+        "load_screen_tt";"load_screen_ships" ]
   with
   | [a; b; e; h; i; l; p; s; tt; ships] -> a, b, e, h, i, l, p, s, tt, ships
   | _ -> "", "", "", "", "", "", "", "", "", ""
