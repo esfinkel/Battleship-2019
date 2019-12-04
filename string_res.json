@@ -9,5 +9,11 @@
     "load_screen_s": "---------\n /===    \n||       \n \\==\\    \n    ||   \n ===/    ", 
     "load_screen_tt": "-----------------------------\n|------------|------------|  \n     | |          | |        \n     | |          | |        \n     | |          | |        \n     |_|          |_|        ",
     "load_screen_ships": "        \n  ⛵==   \n        \n    🚢== \n        \n        ", 
-    "": ""
+
+    "main_help": "\n\nGame set-up commands:\nUse 'place <ship name> on <coordinate 1> <coordinate 2>' to place a ship on the board.\nUse 'ready' when your board is set up and ready to play.\n\n Gameplay commands:\nUse 'shoot' <coordinate> to shoot that spot.\nUse 'status' to see what ships you still have.\nUse 'quit' to quit the game.",
+    "main_offboard": "\n\nYou cannot place the ship there.\nPlease enter coordinates that are on the board.",
+    "main_misaligned": "\n\nYou cannot place the ship with those coordinates. Coordinates must be in the same row or column.",
+    "main_wronglength": "\n\nYou cannot place this ship with those coordinates. The ship must have the right length.",
+    "main_invalidname": "\n\nYou cannot place that ship. Please enter a valid ship name.",
+    "main_overlapping": "\n\nYou cannot place that ship there. There is already a ship on those coordinates. Try placing the ship on a different location."
 }

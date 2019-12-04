@@ -72,18 +72,7 @@ let print_other_board mode b =
 
 (** [print_help] prints the list of valid commands. *)
 let print_help unit : unit = 
-  ANSITerminal.(
-    print_string [cyan] 
-      (String.concat "\n" 
-         [ "\n\nGame set-up commands:";
-           "Use 'place' <ship name> 'on' <coordinate 1> <coordinate 2>."
-           ^ " to place a ship on the board.";
-           "Use 'ready' when your board is set up and ready to play.";
-           "\n Gameplay commands:";
-           "Use 'shoot' <coordinate> to shoot that spot.";
-           "Use 'status' to see what ships you still have.";
-           "Use 'quit' to quit the game."
-         ])); ()
+  ANSITerminal.(print_string [cyan] (Helpers.from_file "main_help"))
 
 let hit_sound () =
   try Sys.command "afplay audio/boom_midlength.m4a -v 1.0 & :" |> ignore
@@ -124,39 +113,25 @@ let display_board other_board my_board =
 let try_placing (ship_phrase: string list) board =
   match ship_phrase with
   | name::l1::l2::[] -> (
-      match Board.place name l1 l2 board with
+      match Board.place name l1 l2 board with 
       | exception Board.OffBoard -> 
-        ANSITerminal.
-          (print_string [red] (
-              "\n\nYou cannot place the ship"
-              ^ "there.\nPlease enter coordinates that are on" 
-              ^ " the board.")
-          );
+        ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
       | exception Board.Misaligned -> 
         ANSITerminal.
-          (print_string [red]
-             ("\n\nYou cannot place the ship with those "
-              ^ "coordinates. Coordinates must be in the "
-              ^ "same row or column."));
+          (print_string [red] (Helpers.from_file "main_misaligned"))
       | exception Board.WrongLength -> 
         ANSITerminal.
-          (print_string [red]
-             ("\n\nYou cannot place this ship with "
-              ^ "those coordinates. The ship must have" 
-              ^ " the right length."));
+          (print_string [red] (Helpers.from_file "main_wronglength"));
       | exception Board.InvalidShipName ->
         ANSITerminal.(print_string [red] 
-                        ("\n\nYou cannot place that ship."
-                         ^ " Please enter a valid ship name."));
+                        (Helpers.from_file "main_invalidname"));
       | exception Board.OverlappingShips ->
         ANSITerminal.(print_string [red] 
-                        ("\n\nYou cannot place that ship there."
-                         ^ " There is already a ship on those coordinates."
-                         ^ " Try placing the ship on a different location."));
+                        (Helpers.from_file "main_overlapping"));
       | () -> print_self_board (Board.graphics_mode board) board;
         print_endline ("\n\nYou placed the "  ^  name ^ ".");
         Board.setup_status board |> print_endline
-    )
+    ) 
   | _ -> print_endline "\n parsing error"
 
 (** [continue_setup board] reads in a command, parses it, and executes it. *)
@@ -215,7 +190,7 @@ let setup board  =
   ANSITerminal.(
     print_string [cyan]
       ("\n\n"^(Board.player_name board)^": Please set up your board." 
-       ^ "\nUse 'place' <ship name> 'on' <coordinate 1> <coordinate 2>."
+       ^ "\nUse 'place <ship name> on <coordinate 1> <coordinate 2>'."
        ^ "\nUse 'ready' when all your ships are placed to continue.")
   );
   continue_setup board
