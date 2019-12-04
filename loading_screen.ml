@@ -1,120 +1,8 @@
 open ANSITerminal
 
-let idk = "        
-  ⛵==   \n        
-    🚢== \n        \n        "
-
-let b = 
-  "------------\n" ^
-  "||     \\    \n" ^
-  "|| ____/    \n" ^
-  "||     \\    \n" ^
-  "||      |   \n" ^
-  "||_____/    "
-(* "------------\n" ^
-   "||     \    \n" ^
-   "|| ____/    \n" ^
-   "||     \    \n" ^
-   "||      |   \n" ^
-   "||_____/    " *)
-
-let a = "---------------\n" ^
-        "    //\\\\       \n" ^
-        "   //  \\\\      \n" ^
-        "  //____\\\\     \n" ^
-        " //      \\\\    \n" ^
-        "//        \\\\   "
-(* "---------------\n" ^
-   "    //\\       \n" ^
-   "   //  \\      \n" ^
-   "  //____\\     \n" ^
-   " //      \\    \n" ^
-   "//        \\   " *)
-
-
-let tt = 
-  "-----------------------------
-|------------|------------|  
-     | |          | |        
-     | |          | |        
-     | |          | |        
-     |_|          |_|        "
-
-let l =
-  "--------------
-| |           
-| |           
-| |           
-| |______     
-\\ ______/     "
-(* "--------------
-    | |           
-    | |           
-    | |           
-    | |______     
-    \ ______/     " *)
-
-
-let e = 
-  "-----------
-|======    
-|||        
-|======    
-|||        
-|======    "
-
-let s = 
-  "---------
- /===    
-||       
- \\==\\    
-    ||   
- ===/    "
-(* "---------
-     /===    
-    ||       
-     \==\    
-        ||   
-     ===/    " *)
-
-
-
-let h =
-  "-----------
-||     |   
-||     |   
-||=====|   
-||     |   
-||     |   "
-
-let i =
-  "----------
-======    
-  ||      
-  ||      
-  ||      
-======    "
-
-
-let p = 
-  "-----   
-|    || 
-|    || 
- ====   
-|       
-|       "
-(* let p = "
-   _______  
-   |🏴🏳️🏴|  
-   |🏳️🏴🏳️|  
-   ------   
-   |         
-   |         " *)
-
 
 let str_to_arr str =
   let explode s = List.init (String.length s) (String.get s)
-  (* |> List.map (String.make 0) *)
   in
   String.split_on_char '\n' str
   |> Array.of_list
@@ -138,7 +26,6 @@ let rec make_word =
     | [] -> ""
     | a::[] -> a
     | a::b::t -> make_word ((combine_letters a b)::t)
-
 
 let arr_to_str arr =
   arr
@@ -175,6 +62,59 @@ let scroll_words letter_list w =
   scroll (make_word letter_list |> str_to_arr) w 10 75.
 (* 75.0 is the "speed" *)
 
+let letters () = match List.map Helpers.from_file
+                         [ "load_screen_a"; "load_screen_b"; "load_screen_e";
+                           "load_screen_h"; "load_screen_i"; "load_screen_l";
+                           "load_screen_p"; "load_screen_s";
+                           "load_screen_tt";"load_screen_ships" ]
+  with
+  | [a; b; e; h; i; l; p; s; tt; ships] -> a, b, e, h, i, l, p, s, tt, ships
+  | _ -> "", "", "", "", "", "", "", "", "", ""
+
 let scroll_battleship () =
   let width, _ = ANSITerminal.size () in
-  scroll_words [b; a; tt; l; e; s; h; i; p; idk] (width - 5)
+  let a, b, e, h, i, l, p, s, tt, ships = letters () in
+  scroll_words [b; a; tt; l; e; s; h; i; p; ships] (width - 2)
+
+
+
+
+
+(* for my reference: *)
+
+(* "------------\n" ^
+   "||     \    \n" ^
+   "|| ____/    \n" ^
+   "||     \    \n" ^
+   "||      |   \n" ^
+   "||_____/    " *)
+
+(* "---------------\n" ^
+   "    //\\       \n" ^
+   "   //  \\      \n" ^
+   "  //____\\     \n" ^
+   " //      \\    \n" ^
+   "//        \\   " *)
+
+(* "--------------
+    | |           
+    | |           
+    | |           
+    | |______     
+    \ ______/     " *)
+
+(* "---------
+     /===    
+    ||       
+     \==\    
+        ||   
+     ===/    " *)
+
+(* let p = "
+   _______  
+   |🏴🏳️🏴|  
+   |🏳️🏴🏳️|  
+   ------   
+   |         
+   |         " *)
+
