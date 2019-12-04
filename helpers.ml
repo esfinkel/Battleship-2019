@@ -11,3 +11,7 @@ let rev_row_col loc : Command.location =
 
 
 
+let from_file key =
+  Yojson.Basic.(let j = from_file "string_res.json" in
+                j |> Util.member key |> Util.to_string)
+
