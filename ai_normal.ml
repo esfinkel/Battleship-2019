@@ -2,16 +2,15 @@ open Helpers
 
 type t = {
   board: Board.t;
-  name: string;
 }
 
 let init () = {
   board = Board.init_board_default "💻";
-  name = "💻"
 }
 
-let init_custom f =
-  failwith "unimplemented"
+let init_custom f = {
+  board = Board.init_board_from_file "💻" f;
+}
 
 
 let get_board c = c.board
