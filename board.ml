@@ -185,30 +185,8 @@ let min_ship_size b =
 
 let player_name b = b.player_name
 
-(** [ship_of_string str] is the ship_name with string name [str]. *)
-let ship_of_string = function
-  | "battleship" -> "battleship"
-  | "cruiser" -> "cruiser"
-  | "carrier" -> "carrier"
-  | "destroyer" -> "destroyer"
-  | "submarine" -> "submarine"
-  | _ -> raise InvalidShipName
-(* let ship_of_string = function
-   | "battleship" -> Battleship
-   | "cruiser" -> Cruiser
-   | "carrier" -> Carrier
-   | "destroyer" -> Destroyer
-   | "submarine" -> Submarine
-   | _ -> raise InvalidShipName *)
-
 (** [string_of_ship shp] is the string name of ship_name [shp]. *)
 let string_of_ship id = id 
-(* let string_of_ship = function
-   | Battleship -> "battleship"
-   | Cruiser -> "cruiser"
-   | Carrier -> "carrier"
-   | Destroyer -> "destroyer"
-   | Submarine -> "submarine" *)
 
 (** [long_string_of_ships shp_lst] is a long-form string description
     of [shp_lst]. *)
@@ -224,7 +202,6 @@ let long_string_of_ships shp_lst =
 
 (** [get_ship str_name b] is the ship on [b] with string name [str_name]. *)
 let get_ship str_name b =
-  (* let sh_name = ship_of_string str_name in *)
   let sh_name = str_name in
   List.filter (fun s -> s.name=sh_name) b.ships |>
   function 

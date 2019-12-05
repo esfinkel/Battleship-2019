@@ -41,7 +41,7 @@ bisect: clean test
 	bisect-ppx-report -I _build -html report bisect0001.out
 
 zip: bisect
-	zip battleship.zip *.txt *.ml* _tags Makefile report/*
+	zip battleship.zip *.txt *.ml* _tags Makefile report/* custom_boards/example.json
 	
 docs: docs-public docs-private
 	
