@@ -438,9 +438,18 @@ let make_helper_rrc_test
   name >:: (fun _ ->
       assert_equal (rev_row_col coord) expected_output)
 
+let make_helper_ff_test
+    (name : string)
+    (key : string)
+    (expected_output : string) =
+  name >:: (fun _ ->
+      assert_equal (from_file key) expected_output)
+
 let helper_tests = [
   make_helper_rrc_test "Test a1" (0, 0) "A1";
-  make_helper_rrc_test "Test b2" (1, 1) "B2"
+  make_helper_rrc_test "Test b2" (1, 1) "B2";
+
+  make_helper_ff_test "Test load screen" "load_screen_a" "---------------\n    //\\\\       \n   //  \\\\      \n  //____\\\\     \n //      \\\\    \n//        \\\\   ";
 ]
 
 let suite =
