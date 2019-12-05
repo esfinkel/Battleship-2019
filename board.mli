@@ -15,8 +15,8 @@ exception OverlappingShips
 exception NoShip
 (** Raised when a player attempts to shoot a spot that's already been shot. *)
 exception DuplicateShot
-(** Raised when a player attempts to shoot a location that isn't on 
-    the board. *)
+(** Raised when a player attempts to shoot or place a ship on 
+    a location that isn't on the board. *)
 exception InvalidLoc
 (** Raised when a player attempts to place a ship that has an invalid name. *)
 exception InvalidShipName
