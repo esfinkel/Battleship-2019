@@ -37,6 +37,7 @@ open Command
 open Board
 open Ai
 open Helpers
+open Custom_board_parser
 
 (** [make_parse_test name str_input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with 
@@ -458,12 +459,26 @@ let helper_tests = [
      " are on the board.");
 ]
 
+let make_gbf_test 
+    (name : string)
+    (file : string)
+    (expected_output : int * string * (string * int) list) : test = 
+  name >:: (fun _ -> 
+      assert_equal expected_output (get_board_from_file file))
+
+let command_parser_tests = 
+  [
+    make_gbf_test "space board" "custom_boards/example.json" 
+      (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)])
+  ]
+
 let suite =
   "test suite for game engine"  >::: List.flatten [
     command_tests;
     board_tests;
     ai_tests;
-    helper_tests
+    helper_tests;
+    command_parser_tests
   ]
 
 let _ = run_test_tt_main suite
