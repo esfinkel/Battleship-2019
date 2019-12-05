@@ -469,7 +469,10 @@ let make_gbf_test
 let command_parser_tests = 
   [
     make_gbf_test "space board" "custom_boards/example.json" 
-      (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)])
+      (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)]);
+    make_gbf_test "pasta board" "custom_boards/example2.json" 
+      (12, "", 
+       [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguine", 4)])
   ]
 
 let suite =
