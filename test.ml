@@ -449,7 +449,13 @@ let helper_tests = [
   make_helper_rrc_test "Test a1" (0, 0) "A1";
   make_helper_rrc_test "Test b2" (1, 1) "B2";
 
-  make_helper_ff_test "Test load screen" "load_screen_a" "---------------\n    //\\\\       \n   //  \\\\      \n  //____\\\\     \n //      \\\\    \n//        \\\\   ";
+  make_helper_ff_test "Test load screen" "load_screen_a" 
+    ("---------------" ^
+     "\n    //\\\\       \n   //  \\\\      \n  //____\\\\     \n //      \\\\"^
+     "    \n//        \\\\   ");
+  make_helper_ff_test "Test error" "main_offboard" 
+    ("\n\nYou cannot place the ship there.\nPlease enter coordinates that" ^
+     " are on the board.");
 ]
 
 let suite =
