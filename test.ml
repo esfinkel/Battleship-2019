@@ -36,6 +36,7 @@ open OUnit2
 open Command
 open Board
 open Ai
+open Helpers
 
 (** [make_parse_test name str_input expected_output] constructs an OUnit test
     named [name] that asserts the quality of [expected_output] with 
@@ -428,14 +429,26 @@ let ai_tests = [
     (Ai_normal.get_board) ai_norm2 p_norm2;
   make_ai_get_board_test "get board ai smart" 
     (Ai_smart.get_board) ai_smart2 p_smart2  
+]
 
+let make_helper_rrc_test
+    (name : string)
+    (coord : int * int)
+    (expected_output : string) =
+  name >:: (fun _ ->
+      assert_equal (rev_row_col coord) expected_output)
+
+let helper_tests = [
+  make_helper_rrc_test "Test a1" (0, 0) "A1";
+  make_helper_rrc_test "Test b2" (1, 1) "B2"
 ]
 
 let suite =
   "test suite for game engine"  >::: List.flatten [
     command_tests;
     board_tests;
-    ai_tests
+    ai_tests;
+    helper_tests
   ]
 
 let _ = run_test_tt_main suite

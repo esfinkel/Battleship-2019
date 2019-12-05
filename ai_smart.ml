@@ -3,7 +3,6 @@ type coor_type = int * int
 
 type t = {
   board: Board.t;
-  (* mutable hit_history: coor_type list; *)
   parity : int option; (* None if you're not using the parity trick *)
 }
 
@@ -112,7 +111,7 @@ let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
     - [res] if [off_limits] with the addition of the cells surrounding
       the ship's location. *)
 let rec place_ship_smartly b name size off_limits =
-  (* pick a random coor, and a diff random at appropriate distance *)
+  (* pick a two random coors at appropriate distance *)
   let new_coors = random_placement_coors b size in
   (* order them *)
   let c1, c2 = ordered new_coors in
@@ -158,12 +157,6 @@ let random_coors c =
   | Some n -> let j = if (i + j) mod 2 = n
                 then j
                 else (j+1) mod (board_size c.board) in (i, j)
-(* may not implement: *)
-(* Fire at the center of the board *)
-(* Move away when you have two misses in the same segment *)
-
-
-
 
 
 (* when shooting with history, keep track of direction -
