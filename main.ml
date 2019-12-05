@@ -15,21 +15,22 @@ let clear_screen () =
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
 let print_grid mode grid =
+  let spacemode = mode = "space" in
   let print_cell c = ANSITerminal.(
-      let ship = if mode="space" then "🚀 " else "🚢 " in
+      let ship = if spacemode then "🚀 " else "🚢 " in
       match c with
       | "w" ->
         let colors =
-          if mode="space" then [white; on_black] else [cyan; on_blue] in
+          if spacemode then [white; on_black] else [cyan; on_blue] in
         print_string colors         "[ ]" (* " ■ " *)
-      | "x" -> if mode="space" then print_string [on_black]  "🕳️  "
+      | "x" -> if spacemode then print_string [on_black]  "🕳️  "
         else print_string [on_blue]        "🌀 "
-      | "?" -> print_string [if mode="space" then on_black else on_blue] "❔ "
+      | "?" -> print_string [if spacemode then on_black else on_blue] "❔ "
       | "-" -> print_string [on_magenta] ship (* "═══" or === *)
       | "|" -> print_string [on_green] ship (* " ║ " *)
       | "X|" | "X-" -> print_string [on_red]  "💥 "
       | "#" -> print_string [on_blue]               "🔥 "
-      | "b" -> print_string [on_blue]               "💣 "
+      | "b" -> print_string [if spacemode then on_black else on_blue] "💣 "
       | "B" -> print_string [on_blue]               "💥 "
       | _ -> ()
     )
@@ -336,8 +337,10 @@ let rec choose_mines () =
     with board style [style], then starts it.*)
 let multiplayer style =
   let p1, p2 = get_names () in
-  let p1_board = Board.init_board_default p1 in
-  let p2_board = Board.init_board_default p2 in
+  let p1_board, p2_board = match style with
+    | "default" -> Board.init_board_default p1, Board.init_board_default p2
+    | f -> Board.init_board_from_file p1 f, Board.init_board_from_file p2 f
+  in
   let mine_count = choose_mines () in
   clear_screen ();
   setup p1_board; Board.place_mine p1_board mine_count; clear_screen ();
@@ -437,44 +440,51 @@ let rec single_next_move player_board ai_board single_dif =
   ai_shoot player_board ai_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
-(** [choose_difficulty ()] is the level of ai difficulty that the player
-    chooses upon prompting. *)
-let rec choose_difficulty () =
+(** [make_ai_player style_dif] makes an ai player, in style [style], at the
+    level of ai difficulty that the player chooses upon prompting. *)
+let rec make_ai_player_dif style =
   print_string "\nChoose the game difficulty: easy, medium, or hard.";
-  match read_command () with
-  | "easy" -> Easy (Ai_random.init())
-  | "medium" -> Medium (Ai_normal.init())
-  | "hard" -> Hard (Ai_smart.init())
+  match style, read_command () with
+  | "default", "easy" -> Easy (Ai_random.init())
+  | f, "easy" -> Easy (Ai_random.init_custom f)
+  | "default", "medium" -> Medium (Ai_normal.init())
+  | f, "medium" -> Medium (Ai_normal.init_custom f)
+  | "default", "hard" -> Hard (Ai_smart.init())
+  | f, "hard" -> Hard (Ai_smart.init_custom f)
   | _ -> ANSITerminal.(print_string [red] 
                          "\n\nEnter 'easy', 'medium', or 'hard'."); 
-    choose_difficulty ()
+    make_ai_player_dif style
 
 (** [singleplayer style] prompts for the singleplayer game to play,
     with board style [style], then starts it.*)
 let singleplayer style =
   let player = get_name () in
-  let player_board = Board.init_board_default player in
-  let single_dif = choose_difficulty () in
+  let player_board = match style with
+    | "default" -> Board.init_board_default player
+    | f -> Board.init_board_from_file player f
+  in
+  let ai_player_with_diff = make_ai_player_dif style in
   let mine_count = choose_mines () in
-  match single_dif with
+  setup player_board; Board.place_mine player_board mine_count;
+  match ai_player_with_diff with
   | Easy ai_player -> 
     Ai_random.place_all_ships ai_player;
-    setup player_board; Board.place_mine player_board mine_count;
     Board.place_mine (Ai_random.get_board ai_player) mine_count;
     clear_screen ();
-    single_next_move player_board (Ai_random.get_board ai_player) single_dif
+    single_next_move player_board (Ai_random.get_board ai_player)
+      ai_player_with_diff
   | Medium ai_player-> 
     Ai_normal.place_all_ships ai_player;
-    setup player_board; Board.place_mine player_board mine_count; 
     Board.place_mine (Ai_normal.get_board ai_player) mine_count;
     clear_screen ();
-    single_next_move player_board (Ai_normal.get_board ai_player) single_dif
+    single_next_move player_board (Ai_normal.get_board ai_player)
+      ai_player_with_diff
   | Hard ai_player ->
     Ai_smart.place_all_ships ai_player;
-    setup player_board; Board.place_mine player_board mine_count;
     Board.place_mine (Ai_smart.get_board ai_player) mine_count;
     clear_screen ();
-    single_next_move player_board (Ai_smart.get_board ai_player) single_dif
+    single_next_move player_board (Ai_smart.get_board ai_player)
+      ai_player_with_diff
 
 let rec board_style () =
   print_string "\n'default' board? If not, enter filepath:";
