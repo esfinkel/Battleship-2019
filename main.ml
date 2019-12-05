@@ -56,10 +56,6 @@ let print_grid mode grid =
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ()
 
-
-
-
-
 (** [print_self_board b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
 let print_self_board mode b =
@@ -116,6 +112,8 @@ let try_placing (ship_phrase: string list) board =
       match Board.place name l1 l2 board with 
       | exception Board.OffBoard -> 
         ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
+      | exception Board.InvalidLoc -> 
+        ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
       | exception Board.Misaligned -> 
         ANSITerminal.
           (print_string [red] (Helpers.from_file "main_misaligned"))
@@ -145,24 +143,24 @@ let rec continue_setup board  =
     continue_setup board 
   | Ready -> if Board.complete board then () else
       (ANSITerminal.(print_string [red]
-                       "No you're not! Make sure all your ships are placed.");
+                       (Helpers.from_file "main_ready_setup_error"));
        continue_setup board)
   | Status -> ANSITerminal.(
       print_string [red]
-        "\n\nYou cannot check your game status until you begin playing."
+        (Helpers.from_file "main_status_setup_error")
     );
     continue_setup board
   | Shoot _ -> ANSITerminal.(
       print_string [red]
-        "\n\nYou cannot shoot until you begin playing."
+        (Helpers.from_file "main_shoot_setup_error")
     );
     continue_setup board
   | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     continue_setup board 
   | exception Command.Empty -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     continue_setup board 
 
@@ -189,14 +187,12 @@ let setup board  =
   Board.setup_status board |> print_endline;
   ANSITerminal.(
     print_string [cyan]
-      ("\n\n"^(Board.player_name board)^": Please set up your board." 
-       ^ "\nUse 'place <ship name> on <coordinate 1> <coordinate 2>'."
-       ^ "\nUse 'ready' when all your ships are placed to continue.")
+      ("\n\n"^(Board.player_name board)^Helpers.from_file "main_setup")
   );
   continue_setup board
 
-let win_message = ": You won the game! Congratulations! \n\n"
-let lose_message = ": You lost! Better luck next time! \n\n"
+let win_message = Helpers.from_file "main_win_message"
+let lose_message = Helpers.from_file "main_lose_message"
 
 (** [display_two_player_end_message winner_board loser_board] displays that 
     [winner_board.player_name] won the game and [loser_board.player_name]
@@ -240,11 +236,10 @@ let rec try_shooting shoot_phrase target_board my_board =
   | loc::[] -> begin 
       match Board.shoot loc target_board with 
       | exception Board.DuplicateShot -> ANSITerminal.(
-          print_string [red] ("You've already shot there! Try shooting " 
-                              ^ "somewhere else!")
+          print_string [red] ((Helpers.from_file "main_dup_shot"))
         ); false
       | exception Board.InvalidLoc -> ANSITerminal.(
-          print_string [red] "That's not on the board!"
+          print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
       | message, success, bomb_suc -> display_board target_board my_board; 
         shoot_sound success bomb_suc;
@@ -265,12 +260,12 @@ let rec try_shooting shoot_phrase target_board my_board =
 let rec continue_game board o_board = 
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
-      print_string[red] "You can't move your ships during the game!");
+      print_string[red] (Helpers.from_file "main_place_game_error"));
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
   | Ready -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     continue_game board o_board
   | Status -> ANSITerminal.(
@@ -280,11 +275,11 @@ let rec continue_game board o_board =
   | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () 
     else continue_game board o_board
   | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     continue_game board o_board
   | exception Command.Empty -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     continue_game board o_board
 
@@ -298,9 +293,7 @@ let rec next_move board o_board =
       ("\n\n"
        ^ (Board.status board) ^ "\n"
        ^(Board.player_name board)
-       ^": Please make your move." 
-       ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
-       ^ "\nUse 'status' to check your status."));
+       ^(Helpers.from_file "main_move")));
   continue_game board o_board;
   next_move o_board board (* boards are swapped! *)
 
@@ -327,7 +320,7 @@ let get_names () =  print_string "Player 1 name?";
 (** [choose_mines] prompts the player to enter a number of mines to place on
     each board. Both boards should have an equal number of bombs. *)
 let rec choose_mines () =
-  print_string "\nHow many mines would you like to put in the boards: 0 to 10";
+  print_string (Helpers.from_file "main_mine_number");
   try
     match read_command () with
     | num -> let n = int_of_string num in 
@@ -372,13 +365,13 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
   | loc::[] -> begin 
       match Board.shoot loc ai_board with 
       | exception Board.DuplicateShot -> ANSITerminal.(
-          print_string [red] ("You've already shot there! Try shooting " 
-                              ^ "somewhere else!")
+          print_string [red] (Helpers.from_file "main_dup_shot")
         ); false
       | exception Board.InvalidLoc -> ANSITerminal.(
-          print_string [red] "That's not on the board!"
+          print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
-      | message, success, bomb_suc -> clear_screen (); shoot_sound success bomb_suc;
+      | message, success, bomb_suc -> clear_screen (); 
+        shoot_sound success bomb_suc;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
@@ -396,7 +389,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
 let rec single_continue_game player_board ai_board =
   match Command.parse (read_command ()) with
   | Place _ -> ANSITerminal.( 
-      print_string[red] "You can't move your ships during the game!");
+      print_string[red] (Helpers.from_file "main_place_game_error"));
     single_continue_game player_board ai_board
   | Help -> print_help (); 
     single_continue_game player_board ai_board
@@ -409,11 +402,11 @@ let rec single_continue_game player_board ai_board =
     if single_try_shooting shoot_phrase ai_board player_board then () 
     else single_continue_game player_board ai_board
   | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     single_continue_game player_board ai_board
   | exception Command.Empty -> ANSITerminal.(
-      print_string [red] "Please input a valid command."
+      print_string [red] (Helpers.from_file "main_invalid_command")
     );
     single_continue_game player_board ai_board
 
@@ -439,9 +432,7 @@ let rec single_next_move player_board ai_board single_dif =
       ("\n\n"
        ^ (Board.status player_board) ^ "\n"
        ^(Board.player_name player_board)
-       ^": Please make your move." 
-       ^ "\nUse 'shoot' <coordinate 1> to shoot that location."
-       ^ "\nUse 'status' to check your status."));
+       ^(Helpers.from_file "main_move")));
   single_continue_game player_board ai_board;
   ai_shoot player_board ai_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
