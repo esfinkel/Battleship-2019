@@ -8,3 +8,11 @@ Run "make build".
 Run "make play" to run the program and play the game.
 Run "make play-music" to play the game with sound effects/music and an animated title screen.
 Run "make test" to run our unit tests.
+Run "make bisect" and type 'open report/index.html' to view our code coverage percentages.
+
+Note:
+We added the option to use the 'default' (normal battleship style) game mode upon running 
+make play and also the option to use a customizeable JSON to change things such as board
+size, ship names, etc. We included an example of one of these JSON files called "example.json".
+To use this file instead of the default battleship game mode, type 'custom_boards/example.json'.
+This JSON example is a space mode version of battleship. 
