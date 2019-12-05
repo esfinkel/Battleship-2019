@@ -1,3 +1,6 @@
+exception ParsingError
+exception InvalidBoardFile of string
+
 (** [get_board_from_file f] is [(board_size, mode, ships)] where [f] is the
     filepath of a valid json containing valid values corresponding to
     [board_size], [mode], and [ships].

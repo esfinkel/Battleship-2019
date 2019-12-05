@@ -339,9 +339,9 @@ let rec choose_mines () =
                             "\n\nEnter a number of mines from 0 to 10"); 
     choose_mines ()
 
-(** [multiplayer ()] prompts for the multiplayer game to play, then
-    starts it.*)
-let multiplayer () =
+(** [multiplayer style] prompts for the multiplayer game to play,
+    with board style [style], then starts it.*)
+let multiplayer style =
   let p1, p2 = get_names () in
   let p1_board = Board.init_board_default p1 in
   let p2_board = Board.init_board_default p2 in
@@ -458,9 +458,9 @@ let rec choose_difficulty () =
                          "\n\nEnter 'easy', 'medium', or 'hard'."); 
     choose_difficulty ()
 
-(** [singleplayer ()] prompts for the singleplayer game to play,
-    then starts it.*)
-let singleplayer () =
+(** [singleplayer style] prompts for the singleplayer game to play,
+    with board style [style], then starts it.*)
+let singleplayer style =
   let player = get_name () in
   let player_board = Board.init_board_default player in
   let single_dif = choose_difficulty () in
@@ -485,17 +485,34 @@ let singleplayer () =
     clear_screen ();
     single_next_move player_board (Ai_smart.get_board ai_player) single_dif
 
+let rec board_style () =
+  print_string "\n'default' board? If not, enter filepath:";
+  match read_command () with
+  | "default" -> "default"
+  | filepath ->
+    (if Sys.file_exists filepath
+     then 
+       (try Custom_board_parser.get_board_from_file filepath |> ignore;
+          filepath with
+       | Custom_board_parser.ParsingError ->
+         print_endline "Error parsing json."; board_style ()
+       | Custom_board_parser.InvalidBoardFile s ->
+         print_endline ("Your board file is invalid: "^s); board_style ()
+       | _ -> print_endline "Unknown exception. Using default board.";
+         "default"
+       )
+     else (print_endline "Invalid filepath."; board_style ())
+    )
+
 (** [main ()] prompts for the game to play, then starts it. *)
 let rec main () = 
+  let style = board_style () in
   print_string "\n1 player or 2 players? Enter '1' or '2'.";
   match read_command () with
-  | "1" -> singleplayer ()
-  | "1 player" -> singleplayer ()
-  | "2" -> multiplayer ()
-  | "2 players" -> multiplayer ()
+  | "1" | "1 player" -> singleplayer style
+  | "2" | "2 players" -> multiplayer style
   | _ -> ANSITerminal.(print_string [red] 
-                         "\n\nEnter the number of players: 1 or 2.");
-    main ()
+                         "\n\nEnter the number of players: 1 or 2."); main ()
 
 (* Execute the game engine. *)
 let () = clear_screen ();
