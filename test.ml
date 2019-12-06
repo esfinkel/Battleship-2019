@@ -432,6 +432,9 @@ let ai_tests = [
     (Ai_smart.get_board) ai_smart2 p_smart2  
 ]
 
+(** [make_helper_rrc_test name coord expected_output] constructs an OUnit test
+    named [name] that asserts the quality of [expected output] with 
+    [rev_row_col coord]. *)
 let make_helper_rrc_test
     (name : string)
     (coord : int * int)
@@ -439,6 +442,9 @@ let make_helper_rrc_test
   name >:: (fun _ ->
       assert_equal (rev_row_col coord) expected_output)
 
+(** [make_helper_ff_test name key expected_output] constructs an OUnit test
+    named [name] that asserts the quality of [expected output] with 
+    [from_file key]. *)
 let make_helper_ff_test
     (name : string)
     (key : string)
@@ -459,6 +465,9 @@ let helper_tests = [
      " are on the board.");
 ]
 
+(** [make_gbf_test name file expected_ouput] constructs an OUnit test named
+    [name] that asserts the quality of [expected_output] with 
+    [get_board_from_file file]. *)
 let make_gbf_test 
     (name : string)
     (file : string)
