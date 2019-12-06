@@ -472,7 +472,7 @@ let command_parser_tests =
       (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)]);
     make_gbf_test "pasta board" "custom_boards/example2.json" 
       (12, "", 
-       [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguine", 4)])
+       [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguini", 4)])
   ]
 
 let suite =
