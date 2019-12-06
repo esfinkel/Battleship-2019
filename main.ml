@@ -325,10 +325,12 @@ let rec choose_mines () =
   try
     match read_command () with
     | num -> let n = int_of_string num in 
-      if (int_of_string num ) >=0 && (int_of_string num) <= 10 then n else begin
-        ANSITerminal.(print_string [red]
-                        "\n\nEnter a number of mines from 0 to 10"); 
-        choose_mines () end
+      if (int_of_string num ) >=0 && (int_of_string num) <= 10 then n else
+        begin
+          ANSITerminal.(print_string [red]
+                          "\n\nEnter a number of mines from 0 to 10"); 
+          choose_mines ()
+        end
   with _ -> ANSITerminal.(print_string [red]
                             "\n\nEnter a number of mines from 0 to 10"); 
     choose_mines ()
@@ -415,15 +417,20 @@ let rec single_continue_game player_board ai_board =
 
 (** [ai_shoot player_board single_dif] shoots the [player_board] based
     on the level of [single_dif]. *)
-let ai_shoot player_board ai_player single_dif=
-  match single_dif with
-  | Easy ai_board -> ignore (Ai_random.shoot_ship ai_board player_board);
-  | Medium ai_board -> ignore (Ai_normal.shoot_ship ai_board player_board);
-  | Hard ai_board-> ignore (Ai_smart.shoot_ship ai_board player_board);
-    if (Board.did_lose player_board) then 
-      (display_one_player_end_message false ai_player player_board;
-       exit 0 )
-    else ()
+let ai_shoot player_board single_dif=
+  (match single_dif with
+   | Easy ai_board -> Ai_random.shoot_ship ai_board player_board
+   | Medium ai_board -> Ai_normal.shoot_ship ai_board player_board
+   | Hard ai_board-> Ai_smart.shoot_ship ai_board player_board
+  ) |> ignore;
+  if Board.did_lose player_board
+  then let ai_board = match single_dif with
+      | Easy ai_p -> Ai_random.get_board ai_p
+      | Medium ai_p -> Ai_normal.get_board ai_p
+      | Hard ai_p -> Ai_smart.get_board ai_p in
+    display_one_player_end_message false (ai_board) player_board;
+    exit 0 
+  else ()
 
 (** [single_next_move player_board ai_board single_dif] prompts the player 
     for a gameplay command which it then processes in [single_continue_game].
@@ -437,7 +444,7 @@ let rec single_next_move player_board ai_board single_dif =
        ^(Board.player_name player_board)
        ^(Helpers.from_file "main_move")));
   single_continue_game player_board ai_board;
-  ai_shoot player_board ai_board single_dif;
+  ai_shoot player_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
 (** [make_ai_player style_dif] makes an ai player, in style [style], at the
