@@ -22,4 +22,6 @@ let place_all_ships c = Board.place "random" "" "" c.board
 let rec shoot_ship c b =
   try Board.shoot (Helpers.random_coor_string (Board.board_size b)) b
       |> get_fst with
+  (*BISECT-IGNORE-BEGIN*)
   | _ -> shoot_ship c b
+(*BISECT-IGNORE-END*)

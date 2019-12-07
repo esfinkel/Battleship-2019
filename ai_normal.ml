@@ -37,6 +37,7 @@ let init_history () =
   }
 let hit_history = init_history () 
 
+(*BISECT-IGNORE-BEGIN*)
 (** [up_coor loc] gives the coordinate pair directly above [loc]. *)
 let up_coor loc = 
   let (x, y) = Helpers.row_col loc in 
@@ -67,6 +68,7 @@ let reset_history hist =
   hist.tried_left <- false;
   hist.tried_up <- false;
   hist.tried_right <- false
+(*BISECT-IGNORE-END*)
 
 (** [shoot_random b] shoots a random spot on board [b]. *)
 let rec shoot_random b = 
@@ -77,6 +79,7 @@ let rec shoot_random b =
     | _ -> ""
   with | _ -> shoot_random b
 
+(*BISECT-IGNORE-BEGIN*)
 (** [shoot_left b] shoots the spot to the left of the hit in [hit_history] and 
     updates [hit_history] accordingly.
     If the spot is off the board, it attempts to shoot right of the spot.
@@ -144,10 +147,11 @@ and shoot_down b =
   | false, false -> hit_history.tried_down <- true; ""
   | true, true -> reset_history hit_history; ""
   | _ -> failwith "impossible"
-
+(*BISECT-IGNORE-END*)
 let rec shoot_ship c b = 
   if hit_history.hit = "" then 
     shoot_random b
+    (*BISECT-IGNORE-BEGIN*)
   else begin
     if (hit_history.tried_left && hit_history.tried_down && 
         hit_history.tried_up && hit_history.tried_right) then begin
@@ -161,4 +165,5 @@ let rec shoot_ship c b =
       shoot_left b
     else
       shoot_right b
+      (*BISECT-IGNORE-END*)
   end 
