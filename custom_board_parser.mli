@@ -4,8 +4,10 @@
 
 (** Raised when the json is unable to be parsed. *)
 exception ParsingError
+
 (** Raised when a field is missing or of the wrong type. *)
 exception MissingField
+
 (** Raised when the board illegal according to a number of arbitrary rules.
     String will contain helpful information. *)
 exception InvalidBoardFile of string

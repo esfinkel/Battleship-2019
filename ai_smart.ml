@@ -1,5 +1,3 @@
-
-
 type t = {
   board: Board.t;
   parity : int option; (* None if you're not using the parity trick *)
@@ -21,8 +19,11 @@ let init_custom f =
 
 let get_board c = c.board
 
+(** [board_size b] is the size of the grid of [b]. *)
 let board_size = Board.board_size
 
+(** [get-history b] is a list of hit coordinates on [b] that contain
+    living ships. *)
 let get_history b =
   (*BISECT-IGNORE-BEGIN*)
   let append ls (elt:Helpers.coor_type) = ls := elt :: (!ls) in
@@ -45,17 +46,16 @@ let get_history b =
 
 (* ship placement *)
 
-(** [on_board a] is true iff a coordinate with i=[a] would be on a square
-    grid with size [board_size]. *)
+(** [on_board bd a] is true iff a coordinate [(a, a)] would be on [bd]. *)
 let on_board bd a = 0 <= a && a < board_size bd
 
-(** [coor_on_board coor] is true iff [coor] would be on a square grid with
-    size [board_size]. *)
-let coor_on_board bd (a, b) = on_board bd a && on_board bd b
+(** [coor_on_board bd coor] is true iff [coor] would be on [board_size]. *)
+let coor_on_board bd ((a, b):Helpers.coor_type) =
+  on_board bd a && on_board bd b
 
 (** [all_cells_between c1 c2] is all the grid cells (inclusive) between [c1]
     and [c2]. *)
-let rec all_cells_between c1 c2 = 
+let rec all_cells_between c1 c2 : Helpers.coor_type list = 
   let (i_1, j_1), (i_2, j_2) = Helpers.ordered_coors c1 c2 in
   match (i_1 < i_2, j_1 < j_2) with
   | true, false -> (i_1, j_1)::(all_cells_between (i_1+1, j_1) (i_2, j_2))
@@ -65,9 +65,9 @@ let rec all_cells_between c1 c2 =
   | true, true -> failwith "something has gone very wrong"
 (*BISECT-IGNORE-END*)
 
-(** [random_placement_coors size] is a random pair of coordinates that span
-    [size] grid cells. *)
-let random_placement_coors bd size =
+(** [random_placement_coors bd size] is a random pair of coordinates on 
+    [bd] that span [size] grid cells. *)
+let random_placement_coors bd size : Helpers.coor_type * Helpers.coor_type =
   let c1_i = (Random.int (board_size bd)) in 
   let c1_j = (Random.int (board_size bd)) in 
   let c1 = (c1_i, c1_j) in
@@ -82,19 +82,21 @@ let random_placement_coors bd size =
     between [ship_cells] and [off_limits]. *)
 let no_overlap ship_cells off_limits =
   List.fold_left
-    (fun sofar coor -> sofar && (List.mem coor off_limits |> not))
+    (fun sofar coor ->
+       sofar && (List.mem (coor:Helpers.coor_type) off_limits |> not))
     true ship_cells
 
 (** [adjacent_cells coor] is a list of the coordinates that are horizontally
     or vertically adjacent to [coor]. *)
-let adjacent_cells (i, j) = (i+1,j)::(i-1,j)::(i,j-1)::(i,j+1)::[]
+let adjacent_cells ((i, j): Helpers.coor_type) : Helpers.coor_type list =
+  (i+1,j)::(i-1,j)::(i,j-1)::(i,j+1)::[]
 
 (** [all_cells_adjacent_to_next_ship ship_cells off_limits] is [off_limits]
     with the addition of all cells that are adjacent to any cell in
     [ship_cells]. *)
 let all_cells_adjacent_to_next_ship ship_cells off_limits =
   ship_cells
-  |> List.fold_left (fun sofar coor ->
+  |> List.fold_left (fun sofar (coor:Helpers.coor_type) ->
       coor::(adjacent_cells coor) @ sofar
     ) off_limits
   |> List.sort_uniq Stdlib.compare
@@ -103,11 +105,10 @@ let all_cells_adjacent_to_next_ship ship_cells off_limits =
     [c1] and [c2]. *)
 let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
 
-(** - [place_ship_smartly b name size off_limits] is a new list [res]
-    (see end).
+(** - [place_ship_smartly b name size off_limits] is a new list [res]:
     - The ship with [name] and [size] has been placed on [b] such that 
       the ship does not overlap with the cells described by [off_limits].
-      In effect, the ship is not touching any existing ships.
+      In effect, the ship is not directly adjacent to any existing ships.
     - [res] if [off_limits] with the addition of the cells surrounding
       the ship's location. *)
 let rec place_ship_smartly b name size off_limits =
@@ -145,9 +146,9 @@ let place_all_ships c =
 
 
 (* when shooting randomly *)
-(** [random_coors c] is a tuple [(i, j)] where (i, j) is on the board
-    belonging to [c], and has parity corresponding to [c.parity]. *)
-let random_coors c =
+(** [random_coors c] is a coordinate [coor], where [coor] is on the board
+    belonging to [c] and has parity corresponding to [c.parity]. *)
+let random_coors c : Helpers.coor_type =
   let i = (Random.int (board_size c.board)) in 
   let j = (Random.int (board_size c.board)) in 
   (* Use parity to up your chances *)
@@ -158,11 +159,11 @@ let random_coors c =
                 else (j+1) mod (board_size c.board) in (i, j)
 
 
-(* when shooting with history, keep track of direction -
+(* Use holistic history, keep track of direction -
    otherwise the same as ai_normal *)
 
 (** [living_coors_adjacent_to_this coor coor_list] is a list of pairs
-    [(coor, c2)] where the [c2] come from all of the coordinates in
+    [(coor, c2)], where the set of [c2] comes from all of the coordinates in
     [coor_list] that are adjacent to [coor]. Pairs where either coordinate
     is dead are excluded. *)
 let rec living_coors_adjacent_to_this
@@ -179,7 +180,6 @@ let shoot b coor =
 
 (** [shoot_random c b] shoots randomly on board [b]. *)
 let rec shoot_random c b = 
-  (* print_endline "shooting randomly"; *)
   try shoot b (random_coors c)
   with | _ -> shoot_random c b
 
@@ -193,12 +193,10 @@ let rec shoot_from b targets =
   with 
   | _ -> shoot_from b targets
 
-(** [find_adjacent_xs xs] is a list of all pairs [(m, n)] such
-    that [m] is adjacent to [n] and both have been shot (but are not dead). *)
+(** [find_adjacent_xs xs] is a list of all pairs [(c1, c2)], with each [c]
+    selected from [xs], such that [c1] is adjacent to [c2] and both
+    have been shot (but are not dead). *)
 let find_adjacent_xs xs =
-  (* let xs = xs
-           |> List.filter
-             (fun coor -> Board.is_part_of_living_ship b coor) in *)
   List.fold_left
     (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs))
     [] xs
@@ -220,7 +218,7 @@ let shoot_find_unknown_on_ends b adjx =
   |> List.filter (coor_on_board b)
   |> List.filter is_unknown
 
-(** [nearby coors] is a list of all coordinates that are on the board
+(** [nearby b coors] is a list of all coordinates that are on board [b]
     and adjacent to one of the coordinates in [coors] *)
 let nearby b coors =
   (List.map adjacent_cells coors
@@ -229,8 +227,7 @@ let nearby b coors =
 
 
 (** [shoot_find_nearby c b] shoots a location on [b] that is likely to be
-    part of a ship; if there is no likely location, it shoots randomly. 
-    It then updates the hit history of [c]. *)
+    part of a ship; if there is no likely location, it shoots randomly. *)
 let rec shoot_find_nearby c b = 
   (* look for adjacent X's in history *)
   let hits = get_history b in
@@ -240,7 +237,6 @@ let rec shoot_find_nearby c b =
   if num_targets > 0
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
   (*BISECT-IGNORE-BEGIN*)
-  (* can't predetermine in test whether this will be run *)
   then shoot_from b targets
   else 
     let adj = nearby b hits in
@@ -253,76 +249,7 @@ let rec shoot_find_nearby c b =
 (*BISECT-IGNORE-END*)
 
 (** [shoot_ship c b] shoots a location on [b] that is likely to be
-    part of a ship; if there is no likely location, it shoots randomly. 
-    It then updates the hit history of [c]. *)
+    part of a ship; if there is no likely location, it shoots randomly. *)
 let rec shoot_ship c b = 
   shoot_find_nearby c b; ""
 
-
-
-
-
-
-
-(* **************************** *)
-
-
-(* version of shoot_find_nearby with a bajillion prints and printhelpers: *)
-
-(* let print_coor (x, y) = Helpers.rev_row_col (x,y) |> print_string *)
-
-
-(* let print_coor_list ls = 
-   let rec print_l_h = function
-    | [] -> ()
-    | coor::t -> print_coor coor; print_string "; "; print_l_h t
-   in print_string "[ "; print_l_h ls; print_endline "]" *)
-
-(* let print_coor_pair_lst ls =
-   let rec print_l_h = function
-    | [] -> ()
-    | (c1, c2)::t -> print_string "("; print_coor c1; print_string ", ";
-    print_coor c2; print_string ")"; print_string "; "; print_l_h t
-   in print_string "[ "; print_l_h ls; print_endline "]" *)
-
-(* (** [shoot_find_nearby c b] shoots a location on [b] that is likely to be
-    part of a ship; if there is no likely location, it shoots randomly. 
-    It then updates the hit history of [c]. *)
-   let rec shoot_find_nearby c b = 
-   (* (print_string "hit history: "; print_coor_bool_list c.hit_history ;
-     print_newline () ); *)
-   (* look for adjacent X's in history *)
-   let hits = get_history b in
-   let adjx = find_adjacent_xs hits in
-   (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
-   let targets = shoot_find_unknown_on_ends b adjx in
-   (* (print_string "end targets: ";print_coor_list targets); *)
-   let num_targets = List.length targets in
-   if num_targets > 0
-   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
-   then (
-    (* (print_endline "looking at ends"); *)
-    shoot_from b targets)
-   (* otherwise, shoot a ? next to any X *)
-   else 
-    (* let hits =
-       (* List.filter (fun (_, b) -> b) *)
-       history
-       |> List.filter (Board.is_part_of_living_ship b) 
-       in    *)
-    (* ;List.fold_left (fun ls (coor, b) -> if b then coor::ls else ls)
-       [] c.hit_history in *)
-    (* (print_string "\nliving hits: "; print_coor_list hits;
-       print_newline () ); *)
-    let adj = nearby b hits in
-    (* (print_string "adj: "; List.length adj |> print_int;
-       print_newline () ); *)
-    let adj_questions = adj |> List.filter (Board.is_unshot b)
-    in 
-    (* (print_string "adjq: "; List.length adj_questions |> print_int;
-       print_newline () ); *)
-    if List.length adj_questions > 0 then (
-      (* (print_endline "looking at all adjacent"); *)
-      shoot_from b adj_questions)
-    (* if you don't find one, shoot randomly *)
-    else shoot_random c b *)

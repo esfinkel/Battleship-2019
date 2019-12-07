@@ -1,3 +1,5 @@
+(** Shared module type for all AI modules. *)
+
 (** [t] is the abstract type representing a computerized Battleship player. *)
 type t
 

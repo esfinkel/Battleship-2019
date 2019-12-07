@@ -1,3 +1,5 @@
+(** Various helper functions used by other modules. *)
+
 (** Raised when a player attempts to shoot or place a ship on 
     a location that isn't on the board. *)
 exception InvalidLoc
@@ -7,7 +9,7 @@ type coor_type = int * int
 
 (** [row_col loc] is the [(row, column)] coordinate pair corresponding
     to [loc]. *)
-let row_col (loc : Command.location) : (int*int) =
+let row_col (loc : Command.location) : coor_type =
   let r = Str.regexp "\\([a-z]\\)\\([0-9]+\\)" in
   let pull_regex s =
     Str.global_replace r "\\1 \\2" (String.lowercase_ascii s)
@@ -24,11 +26,11 @@ let row_col (loc : Command.location) : (int*int) =
 
 (** [rev_row_col loc] takes in a pair of ints in the range 0 to 15 and 
     converts it to a string representing a location on the board. *)
-let rev_row_col loc : Command.location = 
-  let (i, j) = loc in 
+let rev_row_col ((i, j) : coor_type) : Command.location = 
   String.make 1 (Char.chr (65 + i)) ^ string_of_int (j + 1)
 
-(** [get_letter n] is the nth letter of the alphabet, where ["A"] is #0. *)
+(** [get_letter n] is the nth letter of the alphabet, where ["A"] is
+    the 0th. *)
 let get_letter n = Char.chr (n+65)
                    |> String.make 1
 
@@ -39,7 +41,7 @@ let choose_random_letter bound = Random.int bound
                                  |> get_letter
 
 (** [random_coors()] is a random coordinate string on the board. *)
-let random_coor_string bound =
+let random_coor_string bound : Command.location =
   let yaxis = choose_random_letter bound in
   let xaxis = string_of_int ((Random.int bound) + 1) in
   yaxis ^ xaxis
@@ -49,7 +51,7 @@ let random_coor_string bound =
     if given in the reverse order.
     Precondition to comparability is that [l1] and [l2] are in either the
     same row or the same column. *)
-let ordered_coors c1 c2 = if c1 < c2 then c1, c2 else c2, c1
+let ordered_coors (c1:coor_type) c2 = if c1 < c2 then c1, c2 else c2, c1
 
 (** [ordered l1 l2] is [(l1_i, l1_j), (l2_i, l2_j)], the coordinates of
     location [l1] and location [l2] respectively, except they are swapped

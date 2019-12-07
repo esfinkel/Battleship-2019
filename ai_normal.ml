@@ -149,6 +149,7 @@ and shoot_down b =
   | true, true -> reset_history hit_history; ""
   | _ -> failwith "impossible"
 (*BISECT-IGNORE-END*)
+
 let rec shoot_ship c b = 
   if hit_history.hit = "" then 
     shoot_random b

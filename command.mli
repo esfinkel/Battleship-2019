@@ -1,4 +1,5 @@
 (**Command parse input commands from the player through terminal.*)
+
 (** The type [location] represents a specific location on the gameboard. 
     (e.g. ["A6"], ["B10"], etc.) *)
 type location = string 
@@ -30,11 +31,13 @@ exception Malformed
     Raises: [Empty] if [str] is the empty string or contains only spaces. 
 
     Raises: [Malformed] if the command is malformed. A command
-    is {i malformed} if the verb is neither "place", "shoot", 
-    "status", "help", "quit", nor "ready", or if the verb is "status", "help", 
-    "ready" or "quit" and there is a non-empty object phrase, or if the verb 
-    is "place", "remove", "shoot", or "status" and there is an empty object 
-    phrase. *)
+    is {i malformed} if
+    - the verb is neither "place", "shoot", "status", "help", "quit",
+        nor "ready"
+    - the verb is "status", "help", "ready" or "quit" and there is a
+        non-empty object phrase
+    - the verb is "place", "shoot", or "status" and there is an empty object 
+        phrase *)
 val parse : string -> command 
 
 

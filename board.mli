@@ -1,5 +1,5 @@
-(**Board initiates the battleship boards and keeps track of ship
-   locations, hit spots, and mine locations. *)
+(** Board initiates the battleship boards and keeps track of ship
+    locations, hit spots, and mine locations. *)
 
 (** Raised when a player attempts to place a ship on a location that is
     off the board. *)
@@ -24,6 +24,7 @@ exception DuplicateShot
 (** Raised when a player attempts to place a ship that has an invalid name. *)
 exception InvalidShipName
 
+(** Abstract type for values representing battleship boards. *)
 type t 
 
 
@@ -65,7 +66,7 @@ val place : string -> Command.location -> Command.location -> t -> unit
     - WrongLength if [c1] and [c2] are the wrong distance apart
     - OverlappingShips if the ship would overlap with a ship already
         present in [b]. *)
-val place_m_r : string -> (int*int) -> (int*int) -> t -> unit
+val place_m_r : string -> Helpers.coor_type -> Helpers.coor_type -> t -> unit
 
 (** [did_lose b] is true iff all ships have been destroyed in [b]. *)
 val did_lose : t -> bool
@@ -88,7 +89,7 @@ val shoot : Command.location -> t -> string * bool * bool
     Raises:
     - DuplicateShot if that location has already been shot.
     - InvalidLoc if that location is not on the board.*)
-val shoot_m_r : (int*int) -> t -> bool*bool
+val shoot_m_r : Helpers.coor_type -> t -> bool*bool
 
 (** [setup_status b] is a string representing the status of [b], where
     [b] has not yet completed setup. *)
@@ -109,7 +110,7 @@ val complete : t -> bool
 
 (** [is_part_of_living_ship b (i, j)] is true iff there is a non-sunken ship
     on [b] at [(i, j)]. *)
-val is_part_of_living_ship : t -> (int*int) -> bool 
+val is_part_of_living_ship : t -> Helpers.coor_type -> bool 
 
 (** [string_self b] is the grid representation of board [b], as seen by
     the board's player. *)
@@ -121,7 +122,7 @@ val string_other : t -> string list list
 
 (** [is_unshot b (i, j)] is true iff the cell on [b] at [(i, j)] has
     not been shot. *)
-val is_unshot : t -> int*int -> bool
+val is_unshot : t -> Helpers.coor_type -> bool
 
 (** [place_mine b] places a mine on the board randomly if playing 
     mine game mode. *)

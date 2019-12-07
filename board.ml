@@ -57,8 +57,9 @@ type t = {
 
 let default_board_size = 10
 
-(** [random_coordinates size] is a set of valid random locations used for 
-    randomly placing a ship of size [size]. *)
+(** [random_coordinates board_size size] is a set of valid random locations
+    on a board of size [board_size], used for randomly placing a ship of
+    size [size]. *)
 let random_coordinates board_size size : Command.location * Command.location = 
   (* horizontal ship placements with probability 0.5 *)
   if Random.bool() then 

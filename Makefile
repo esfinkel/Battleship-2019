@@ -1,8 +1,8 @@
 MODULES=command main author board ai_random ai_normal ai_smart custom_board_parser loading_screen
 
 OBJECTS=$(MODULES:=.cmo)
-MLS=$(MODULES:=.ml)
-MLIS=$(MODULES:=.mli)
+MLS=$(MODULES:=.ml) helpers.ml
+MLIS=$(MODULES:=.mli) ai.mli
 TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind -plugin-tag 'package(bisect_ppx-ocamlbuild)'
@@ -40,12 +40,11 @@ zip: bisect
 	zip -r battleship.zip *.txt *.ml* *.json bg_music.sh _tags Makefile report/ custom_boards/ .merlin .ocamlinit README.md	audio/
 
 docs: docs-public docs-private
-	echo "We know that there are some warnings from Ai. Ignore that :)"
 	
 docs-public: build
 	mkdir -p doc.public
 	ocamlfind ocamldoc -I _build -package $(PKGS) \
-		-html -stars -d doc.public $(MLIS)
+		-html -stars -d doc.public $(MLIS) helpers.ml
 
 docs-private: build
 	mkdir -p doc.private
