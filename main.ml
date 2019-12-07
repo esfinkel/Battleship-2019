@@ -196,7 +196,9 @@ let setup board  =
   );
   continue_setup board
 
+(**[win_message] returns the win message found in [Helpers] *)
 let win_message = Helpers.from_file "main_win_message"
+(**[lose_message] returns the lose message found in [Helpers] *)
 let lose_message = Helpers.from_file "main_lose_message"
 
 (** [display_two_player_end_message winner_board loser_board] displays that 
@@ -497,6 +499,8 @@ let singleplayer style =
     single_next_move player_board (Ai_smart.get_board ai_player)
       ai_player_with_diff
 
+(**[board_style] prompts the player for a style of board. Can either be 
+   [default] or a custom board found in a .json file. *)
 let rec board_style () =
   print_string "\n'default' board? If not, enter filepath:";
   match read_command () with
