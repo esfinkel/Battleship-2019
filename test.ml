@@ -508,6 +508,19 @@ let command_parser_tests =
       "custom_boards/with_errors/wrong_num_ship_sizes.json"
       (Custom_board_parser.InvalidBoardFile 
          "make sure you have same number of ship_names and ship_sizes!");
+    make_exn_raised_test "dup name in json"
+      Custom_board_parser.get_board_from_file
+      "custom_boards/with_errors/dup_name.json"
+      (Custom_board_parser.InvalidBoardFile 
+         "Ships should not have duplicate names.");
+    make_exn_raised_test "json missing field 1"
+      Custom_board_parser.get_board_from_file
+      "custom_boards/with_errors/missing_field.json"
+      Custom_board_parser.MissingField;
+    make_exn_raised_test "json missing field 2"
+      Custom_board_parser.get_board_from_file
+      "custom_boards/with_errors/missing_field_2.json"
+      Custom_board_parser.MissingField;
 
     make_equal_test "min ship size" Board.min_ship_size
       (Ai_smart.get_board ai_smart_sample_board) 2;

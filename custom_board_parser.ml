@@ -21,7 +21,7 @@ let check_board (b_size, mode, ships) =
     | v::t -> (if v=a then 1 else 0) + (count a t) in
   let num_cells = List.fold_left (fun acc (_, sz) -> acc + sz) 0 ships in
   let assert_raise equality issue =
-    try assert equality with | _ -> raise (InvalidBoardFile issue) in
+    if equality then () else raise (InvalidBoardFile issue) in
   let ship_names = (List.map (fun (n, _) -> n) ships) in
   assert_raise (0 < b_size && b_size <= 15)
     "board_size should be in 1..15.";
@@ -37,6 +37,8 @@ let check_board (b_size, mode, ships) =
     "There must be 1..20 total ship cells.";
   assert_raise (num_cells*5 < b_size*b_size)
     "Too many ship cells for the board size.";
+  assert_raise (List.length ships < b_size - 1)
+    "Too many ships for the board size.";
   let mode = match String.lowercase_ascii mode with
     | "space" -> "space"
     | _ -> "" in (* default to water mode *)
@@ -44,8 +46,9 @@ let check_board (b_size, mode, ships) =
 
 
 let get_board_from_file f =
-  let get_member s j = try YoUtils.member s j
-    with | _ -> raise MissingField in
+  let get_member s j =
+    let mem = YoUtils.member s j in
+    if mem = `Null then raise MissingField else mem in
   let make_ships j =
     let names = j |> get_member "ship_names" |> YoUtils.to_list
                 |> List.map YoUtils.to_string
