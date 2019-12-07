@@ -17,17 +17,10 @@ build:
 test: build
 	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
-# $(OCAMLBUILD) $(MAIN) && ./$(MAIN)
-# ((while :; do afplay audio/boom1.mp3; done) || echo "(end music)") & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)
-# what does "test -something afplay file" do?
 play_h: build
 	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "") && echo "log back in during your next war!\n"
-	
-# play music                 (if exception vv)   & in parallel,     build + run         stop music after ocaml program ends 
-#  ((afplay audio/s1.m4a || echo "")             & ($(OCAMLBUILD) $(MAIN) && ./$(MAIN) && killall afplay)) || (killall afplay || echo "")
-# I think afplay is Mac-only?
-# maybe I could write a Python script that is system-independent, and call it from here
 
+# I think afplay is Mac-only?
 
 # -s silence command printing
 # -k ignore errors
@@ -44,9 +37,10 @@ bisect-view: bisect
 	open report/index.html
 
 zip: bisect
-	zip battleship.zip *.txt *.ml* _tags Makefile report/* custom_boards/example.json
-	
+	zip -r battleship.zip *.txt *.ml* *.json bg_music.sh _tags Makefile report/ custom_boards/ .merlin .ocamlinit README.md	audio/
+
 docs: docs-public docs-private
+	echo "We know that there are some warnings from Ai. Ignore that :)"
 	
 docs-public: build
 	mkdir -p doc.public
