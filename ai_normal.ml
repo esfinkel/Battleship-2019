@@ -15,9 +15,7 @@ let init_custom f = {
 
 let get_board c = c.board
 
-(*BISECT-IGNORE-BEGIN*)
 let place_all_ships c = Board.place "random" "" "" c.board
-(*BISECT-IGNORE-END*)
 
 (* To help AI keep track of guesses around a hit. *)
 type history = {
@@ -70,7 +68,6 @@ let reset_history hist =
   hist.tried_up <- false;
   hist.tried_right <- false
 
-(*BISECT-IGNORE-BEGIN*)
 (** [shoot_random b] shoots a random spot on board [b]. *)
 let rec shoot_random b = 
   try 
@@ -79,7 +76,6 @@ let rec shoot_random b =
     | _, true, _ -> hit_history.hit <- coor; "It's a hit!"
     | _ -> ""
   with | _ -> shoot_random b
-(*BISECT-IGNORE-END*)
 
 (** [shoot_left b] shoots the spot to the left of the hit in [hit_history] and 
     updates [hit_history] accordingly.

@@ -1,3 +1,4 @@
+(**Command parse input commands from the player through terminal.*)
 (** The type [location] represents a specific location on the gameboard. 
     (e.g. ["A6"], ["B10"], etc.) *)
 type location = string 

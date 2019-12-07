@@ -1,3 +1,5 @@
+(**Board initiate the battleship boards and keep track of ship
+   locations, hit spots, and mine locations. *)
 (** Raised when a player attempts to place a ship on a location that is
     off the board. *)
 exception OffBoard
