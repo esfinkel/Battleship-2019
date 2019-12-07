@@ -24,7 +24,9 @@ let get_board c = c.board
 let board_size = Board.board_size
 
 let get_history b =
+  (*BISECT-IGNORE-BEGIN*)
   let append ls (elt:Helpers.coor_type) = ls := elt :: (!ls) in
+  (*BISECT-IGNORE-END*)
   let full_hist = Board.string_other b
                   |> Array.of_list 
                   |> Array.map (Array.of_list) in
@@ -32,7 +34,9 @@ let get_history b =
   let xs = ref [] in
   for i = 0 to (board_size b -1) do
     for j = 0 to (board_size b -1) do
+      (*BISECT-IGNORE-BEGIN*)
       if is_x full_hist.(i).(j) then append xs (i, j) else ()
+      (*BISECT-IGNORE-END*)
     done
   done;
   !xs
@@ -57,7 +61,9 @@ let rec all_cells_between c1 c2 =
   | true, false -> (i_1, j_1)::(all_cells_between (i_1+1, j_1) (i_2, j_2))
   | false, true -> (i_1, j_1)::(all_cells_between (i_1, j_1+1) (i_2, j_2))
   | false, false -> [(i_1, j_1)]
+  (*BISECT-IGNORE-BEGIN*) (* error case *)
   | true, true -> failwith "something has gone very wrong"
+(*BISECT-IGNORE-END*)
 
 (** [random_placement_coors size] is a random pair of coordinates that span
     [size] grid cells. *)
@@ -233,15 +239,18 @@ let rec shoot_find_nearby c b =
   let num_targets = List.length targets in
   if num_targets > 0
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
+  (*BISECT-IGNORE-BEGIN*)
+  (* can't predetermine in test whether this will be run *)
   then shoot_from b targets
   else 
     let adj = nearby b hits in
     let adj_questions = adj |> List.filter (Board.is_unshot b)
     in 
-    if List.length adj_questions > 0 then (
-      shoot_from b adj_questions)
-    (* if you don't find one, shoot randomly *)
+    if List.length adj_questions > 0 then 
+      shoot_from b adj_questions
+      (* if you don't find one, shoot randomly *)
     else shoot_random c b
+(*BISECT-IGNORE-END*)
 
 (** [shoot_ship c b] shoots a location on [b] that is likely to be
     part of a ship; if there is no likely location, it shoots randomly. 

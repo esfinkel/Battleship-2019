@@ -483,13 +483,18 @@ let make_gbf_test
   name >:: (fun _ -> 
       assert_equal expected_output (get_board_from_file file))
 
+let ai_smart_sample_board = Ai_smart.init_custom "custom_boards/example.json"
+
 let command_parser_tests = 
   [
     make_gbf_test "space board" "custom_boards/example.json" 
       (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)]);
     make_gbf_test "pasta board" "custom_boards/example2.json" 
       (12, "", 
-       [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguini", 4)])
+       [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguini", 4)]);
+
+    make_equal_test "" Board.min_ship_size
+      (Ai_smart.get_board ai_smart_sample_board) 2;
   ]
 
 let suite =
