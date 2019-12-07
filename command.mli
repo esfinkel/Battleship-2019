@@ -1,10 +1,10 @@
 (**Command parse input commands from the player through terminal.*)
 
+type object_phrase = string list
+
 (** The type [location] represents a specific location on the gameboard. 
     (e.g. ["A6"], ["B10"], etc.) *)
 type location = string 
-
-type object_phrase = string list
 
 (** The type [command] represents a player command that is decomposed
     into a verb and and possibly an object phrase. *)

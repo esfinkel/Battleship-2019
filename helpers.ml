@@ -62,7 +62,7 @@ let ordered_strings l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
   ordered_coors pos1 pos2
 
 
-(** [from_file key] is the string in the string resource json with key
+(** [from_file key] is the string in the string-resource json with key
     [key]. *)
 let from_file key =
   Yojson.Basic.(let j = from_file "string_res.json" in

@@ -1,2 +1,2 @@
-(** Main initiate and run the battleship game using terminal 
+(** Main initiates and runs the battleship game using terminal 
     prompts.*)

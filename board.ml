@@ -45,7 +45,7 @@ type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
 
     RI : Once board setup has ended, every ship [s] in [t.ships] 
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
-    [HitShip s]. The remaining cells are [Water] or [ShotWater]. *)
+    [HitShip s]. The remaining cells are not a [Ship _] or a [Hitship _]. *)
 type t = {
   board_size: int;
   grid: spot array array;
@@ -208,8 +208,8 @@ let remove sh b =
 (** [new_orientation l1 l2] is [Some Horz] if [l1] and [l2] are horizontal
     relative to one another and [Some Vert] if they are vertical.
     Precondition: [l1] and [l2] are in either the same row or column. *)
-let new_orientation (i1, j1) (i2, j2) =
-  if i1 = i2 then Some Horz else Some Vert
+let new_orientation ((i1, j1):Helpers.coor_type) ((i2, j2):Helpers.coor_type)
+  = if i1 = i2 then Some Horz else Some Vert
 
 (** [place_single_ship sh l1 l2 b] places [sh] on [b],
     with its ends on the locations represented by [c1] and [c2].
@@ -222,7 +222,8 @@ let new_orientation (i1, j1) (i2, j2) =
         present on [b]. *)
 let place_single_ship sh l1 l2 b =
   (* let sh = get_ship s b in *)
-  let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = 
+  let ((i_1, j_1) as coors_1:Helpers.coor_type),
+      ((i_2, j_2) as coors_2:Helpers.coor_type) = 
     ordered_strings l1 l2 in 
   on_board l1 b;
   on_board l2 b;
@@ -259,7 +260,9 @@ let rec place s l1 l2 b =
     place_single_ship (get_ship s b)
       l1 l2 b
 
-let place_m_r s ((i_1, j_1) as l1) ((i_2, j_2) as l2) b =
+let place_m_r s
+    ((i_1, j_1) as l1:Helpers.coor_type) ((i_2, j_2) as l2:Helpers.coor_type)
+    b =
   let sh = get_ship s b in 
   place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
 

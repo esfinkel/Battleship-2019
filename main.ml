@@ -68,7 +68,7 @@ let print_other_board mode b =
   b |> Board.string_other |> print_grid mode
 
 (** [print_help] prints the list of valid commands. *)
-let print_help unit : unit = 
+let print_help () : unit = 
   ANSITerminal.(print_string [cyan] (Helpers.from_file "main_help"))
 
 (** [hit_sound ()] plays the hit-ship sound. *)
@@ -96,15 +96,15 @@ let shoot_sound suc bomb_suc =
   else ()
 
 (** [read_command] returns a user string input from the command line. *)
-let read_command unit : string =
+let read_command () : string =
   print_string "\n> ";
   match String.lowercase_ascii (String.trim (read_line ())) with
   | "quit" -> exit 0
   | exception End_of_file -> "End of file exception thrown."
   | new_command -> new_command
 
-(** [display_board ob b] displays a hidden version of the opponents board [ob] 
-    and a visible version of the players board [b]. *)
+(** [display_board ob b] displays a hidden version of the opponent's board
+    [ob] and a visible version of the player's board [b]. *)
 let display_board other_board my_board =
   let mode = Board.graphics_mode other_board in
   print_other_board mode other_board;
@@ -359,6 +359,8 @@ let multiplayer style =
   (match read_command () with | _ -> ());
   next_move p1_board p2_board
 
+(** [get_name ()] is [name]; it asks the player for their name,
+    and [name] is that name. *)
 let rec get_name () : string = print_string "Player name?";
   let name = read_command () in
   if name = "" then (ANSITerminal.(print_string [red] 
@@ -453,7 +455,7 @@ let rec single_next_move player_board ai_board single_dif =
   ai_shoot player_board single_dif;
   single_next_move player_board ai_board single_dif (* boards are swapped! *)
 
-(** [make_ai_player style_dif] makes an ai player, in style [style], at the
+(** [make_ai_player style] makes an ai player, in style [style], at the
     level of ai difficulty that the player chooses upon prompting. *)
 let rec make_ai_player_dif style =
   print_string "\nChoose the game difficulty: easy, medium, or hard.";
