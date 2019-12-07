@@ -9,7 +9,7 @@
    have left it out of the test suite, we explain all of the relevant
    information below:
 
-   We tested all of the functions in helpers.ml, command.mli, board.mli, 
+   We tested the functions in helpers.ml, command.mli, board.mli, 
    custom_board_parser.mli, ai_normal.mli, ai_smart.mli, and ai_random.mli. 
 
    Our overall bisect code coverage is 93.93 percent. In general, the only 
