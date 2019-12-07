@@ -17,7 +17,8 @@ let get_board c = c.board
 
 let place_all_ships c = Board.place "random" "" "" c.board
 
-(* To help AI keep track of guesses around a hit. *)
+(** The abstract type of values representing the AI's shot history.
+    (Gets updated based on successful hits and guesses around that hit.) *)
 type history = {
   mutable hit : Command.location; 
   mutable tried_down : bool;
