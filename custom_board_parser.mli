@@ -1,4 +1,5 @@
 exception ParsingError
+exception MissingField
 exception InvalidBoardFile of string
 
 (** [get_board_from_file f] is [(board_size, mode, ships)] where [f] is the
@@ -7,5 +8,6 @@ exception InvalidBoardFile of string
     Raises:
     - [InvalidBoardFile s] if the board does not match certain parameters;
         [s] will contain helpful information (see [check_board]).
-    - ParsingError if the json cannot be found or parsed. *)
+    - ParsingError if the json cannot be found or parsed.
+    - MissingField if a required field is missing. *)
 val get_board_from_file : string -> int * string * (string*int) list
