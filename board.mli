@@ -11,8 +11,6 @@ exception WrongLength
 (** Raised when a player attempts to place a ship on a location that is
     already occupied by another ship. *)
 exception OverlappingShips 
-(** Raised when a player attempts to place a ship that doesn't exist. *)
-exception NoShip
 (** Raised when a player attempts to shoot a spot that's already been shot. *)
 exception DuplicateShot
 (** Raised when a player attempts to place a ship that has an invalid name. *)
