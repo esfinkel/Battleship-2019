@@ -4,7 +4,6 @@ exception OffBoard
 exception Misaligned
 exception WrongLength
 exception OverlappingShips 
-exception NoShip
 exception DuplicateShot
 exception InvalidShipName
 
@@ -146,14 +145,10 @@ let min_ship_size b =
 
 let player_name b = b.player_name
 
-(** [string_of_ship shp] is the string name of ship_name [shp]. *)
-let string_of_ship id = id 
-
 (** [long_string_of_ships shp_lst] is a long-form string description
     of [shp_lst]. *)
 let long_string_of_ships shp_lst = 
   let to_string sh = 
-    (* (string_of_ship sh.name) *)
     sh.name
     ^" (length "
     ^(sh.size |> string_of_int)
@@ -167,7 +162,7 @@ let get_ship str_name b =
   List.filter (fun s -> s.name=sh_name) b.ships |>
   function 
   | s::[] -> s
-  | _ -> raise NoShip
+  | _ -> raise InvalidShipName
 
 (** [on_board loc b] raises [OffBoard] iff [loc] refers to an invalid
     location on board [b]. *)
@@ -203,12 +198,6 @@ let overlapping_ship_by_coors sh (i_1, j_1) (i_2, j_2) b =
     done
   done
 
-(** [overlapping_ship sh l1 l2 b] is true iff there are any ships (excepting
-    [sh]) present in the span from [l1] to [l2] on [b]. *)
-let overlapping_ship sh l1 l2 b =
-  let c1, c2 = ordered_strings l1 l2 in overlapping_ship_by_coors sh c1 c2 b
-
-
 (** [remove sh b] removes [sh] from [b] and replaces its grid cells with
     Water. If [sh] was not present on [b], it does nothing. *)
 let remove sh b = 
@@ -236,8 +225,7 @@ let new_orientation (i1, j1) (i2, j2) =
 let place_single_ship sh l1 l2 b =
   (* let sh = get_ship s b in *)
   let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = 
-    (try ordered_strings l1 l2 with | NoShip -> raise InvalidShipName
-                                    | e -> raise e) in 
+    ordered_strings l1 l2 in 
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;
@@ -255,14 +243,14 @@ let place_single_ship sh l1 l2 b =
 let rec place s l1 l2 b =
   if s="default" then (
     List.fold_left
-      (fun _ sh -> try remove sh b with | _ -> ())
+      (fun _ sh -> remove sh b)
       () b.ships;
     List.fold_left
       (fun _ sh -> let def1, def2 = sh.default in
         place_single_ship sh def1 def2 b)
       () b.ships 
   ) else if s="random" then try 
-      List.fold_left (fun _ sh -> try remove sh b with | _ -> ())
+      List.fold_left (fun _ sh -> remove sh b)
         () b.ships;
       List.fold_left
         (fun _ sh ->
@@ -271,14 +259,12 @@ let rec place s l1 l2 b =
         () b.ships 
     with exn -> place "random" "" "" b
   else
-    place_single_ship (try get_ship s b with | NoShip -> raise InvalidShipName
-                                             | e -> raise e )
+    place_single_ship (get_ship s b)
       l1 l2 b
 
 
 let place_m_r s ((i_1, j_1) as l1) ((i_2, j_2) as l2) b =
-  let sh = (try get_ship s b with | NoShip -> raise InvalidShipName
-                                  | e -> raise e ) in 
+  let sh = get_ship s b in 
   place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
 
 
@@ -295,6 +281,7 @@ let is_dead (s:ship) (g : spot array array) =
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
+(*BISECT-IGNORE-BEGIN*)
 (** [is_on_board loc] is true if [(i, j)] is on the board. False otherwise. *)
 let is_on_board (i, j) b = 
   (0 <= i && i < b.board_size) && (0 <= j && j < b.board_size)
@@ -341,6 +328,7 @@ let mine_hit_your_ship boolean =
 let mine_hit_op_ship boolean =
   if boolean then " The mine damaged some of your opponent's ships."
   else "\nThe mine didn't damage anything."
+(*BISECT-IGNORE-END*)
 
 (** [shoot_helper coor b] is (s, m, n). [s] is a string message explaining
     the result of shooting location [coor] on [b]. [m] is [true] iff a
@@ -360,7 +348,6 @@ let shoot_helper (i, j) b =
                       ^" and missed.");
     "It's a miss!", false, false, false
   | Ship s -> b.grid.(i).(j) <- HitShip s;
-    (* let sh_name = string_of_ship s.name in *)
     let sh_name = s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
@@ -370,6 +357,7 @@ let shoot_helper (i, j) b =
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
       "It's a hit!", true, false, false
     )
+  (*BISECT-IGNORE-BEGIN*)
   | Bomb -> let hit_ship = ref (bomb_hit (i, j) b) in
     (b.status <- Some ("\nYour opponent hit a mine at location " 
                        ^  (String.make 1 (Char.chr (i + 65))) 
@@ -377,14 +365,13 @@ let shoot_helper (i, j) b =
                        ^ (mine_hit_your_ship !hit_ship));
      ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
       (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false, true)
+  (*BISECT-IGNORE-END*)
   | _ -> raise DuplicateShot
 
 
-let shoot l b = 
-  match row_col l with 
-  | exception Failure(_) -> raise InvalidLoc
-  | loc -> let message, success, _, bomb_success = 
-             shoot_helper (loc) b in message, success, bomb_success
+let shoot l b =
+  let message, success, _, bomb_success = shoot_helper (row_col l) b in
+  message, success, bomb_success
 
 
 let shoot_m_r (i, j) b =
@@ -401,7 +388,6 @@ let setup_status b =
 
 let setup_status_m_r b =
   let off_board = List.filter (fun s -> not s.on_board) b.ships
-                  (* |> List.map (fun s -> (s.name |> string_of_ship, s.size)) *)
                   |> List.map (fun s -> (s.name, s.size))
   in
   off_board
@@ -432,7 +418,7 @@ let to_string_grid is_self b =
   let rec row_str self g = function
     | [] -> []
     | Water::t -> (if self then "w" else "?")::(row_str self g t)
-    | ShotWater::t -> (if self then "x" else "x")::(row_str self g t)
+    | ShotWater::t -> "x"::(row_str self g t)
     | (Ship s)::t -> (
         (
           if self then (if s.orientation=Some Vert then "|" else "-")
@@ -443,8 +429,10 @@ let to_string_grid is_self b =
       (if is_dead s g then "#" else (
           if s.orientation=Some Vert then "X|" else "X-"
         ))::(row_str self g t) 
+    (*BISECT-IGNORE-BEGIN*)
     | Bomb::t -> (if self then "b" else "?")::(row_str self g t) 
     | HitBomb::t -> (if self then "B" else "?")::(row_str self g t) in
+  (*BISECT-IGNORE-END*)
   b.grid |> Array.to_list
   |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))
 
@@ -460,12 +448,10 @@ let is_unshot b (i, j) = try
 
 let rec place_mine b num = 
   if num > 0 then
-    let i = (Random.int b.board_size) in if i >=0 && i <= b.board_size then
-      let j = (Random.int b.board_size) in if j >=0 && j <= b.board_size then
-        if b.grid.(i).(j) = Water then 
-          (b.grid.(i).(j) <- Bomb; place_mine b (num - 1))
-        else place_mine b num
-      else place_mine b num
+    let i = (Random.int b.board_size) in 
+    let j = (Random.int b.board_size) in 
+    if b.grid.(i).(j) = Water then 
+      (b.grid.(i).(j) <- Bomb; place_mine b (num - 1))
     else place_mine b num
   else ()
 

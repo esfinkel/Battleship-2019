@@ -508,6 +508,8 @@ let rec board_style () =
           filepath with
        | Custom_board_parser.ParsingError ->
          print_endline "Error parsing json."; board_style ()
+       | Custom_board_parser.MissingField ->
+         print_endline "json is missing a field."; board_style ()
        | Custom_board_parser.InvalidBoardFile s ->
          print_endline ("Your board file is invalid: "^s); board_style ()
        | _ -> print_endline "Unknown exception. Using default board.";

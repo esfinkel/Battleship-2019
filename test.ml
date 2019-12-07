@@ -228,6 +228,7 @@ let () = Board.place "default" "" "" bd_full6
 let _ = Board.shoot "b1" bd_full6
 let _ = Board.shoot "b2" bd_full6
 let _ = Board.shoot "f5" bd_full6
+let _ = Board.shoot "f2" bd_full6
 
 let bd_full7 = Board.init_board_default "all ships placed"
 let () = Board.place "default" "" "" bd_full7
@@ -339,7 +340,7 @@ let board_tests = [
      ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
      ["w"; "-"; "-"; "-"; "-"; "-"; "w"; "w"; "w"; "w"];
      ["w"; "|"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
-     ["w"; "|"; "w"; "-"; "X-"; "-"; "w"; "w"; "w"; "w"];
+     ["w"; "X|"; "w"; "-"; "X-"; "-"; "w"; "w"; "w"; "w"];
      ["w"; "|"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
      ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
      ["w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"; "w"];
@@ -352,7 +353,7 @@ let board_tests = [
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
-     ["?"; "?"; "?"; "?"; "X-"; "?"; "?"; "?"; "?"; "?"];
+     ["?"; "X|"; "?"; "?"; "X-"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
      ["?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"; "?"];
@@ -498,9 +499,20 @@ let command_parser_tests =
     make_gbf_test "pasta board" "custom_boards/example2.json" 
       (12, "", 
        [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguini", 4)]);
+    make_exn_raised_test "invalid json"
+      Custom_board_parser.get_board_from_file
+      "custom_boards/with_errors/bad_json.json"
+      Custom_board_parser.ParsingError;
+    make_exn_raised_test "wrong num ships in json"
+      Custom_board_parser.get_board_from_file
+      "custom_boards/with_errors/wrong_num_ship_sizes.json"
+      (Custom_board_parser.InvalidBoardFile 
+         "make sure you have same number of ship_names and ship_sizes!");
 
-    make_equal_test "" Board.min_ship_size
+    make_equal_test "min ship size" Board.min_ship_size
       (Ai_smart.get_board ai_smart_sample_board) 2;
+    make_equal_test "style mode" Board.graphics_mode
+      (Ai_smart.get_board ai_smart_sample_board) "space";
   ]
 
 let suite =
