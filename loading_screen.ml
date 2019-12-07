@@ -1,6 +1,14 @@
 open ANSITerminal
 
+(** [string_of_chars chars] is the string containing the chars in [chars],
+    in order. *)
+let string_of_chars chars = 
+  let buf = Buffer.create 16 in
+  List.iter (Buffer.add_char buf) chars;
+  Buffer.contents buf
 
+(** [str_to_arr str] is the grid representation of [s], with rows
+    delimited by newlines. *)
 let str_to_arr str =
   let explode s = List.init (String.length s) (String.get s)
   in
@@ -11,11 +19,20 @@ let str_to_arr str =
               |> explode
               |> Array.of_list)
 
-let string_of_chars chars = 
-  let buf = Buffer.create 16 in
-  List.iter (Buffer.add_char buf) chars;
-  Buffer.contents buf
+(** [arr_to_str arr] is the string representation of [arr], with newlines
+    delimiting rows. *)
+let arr_to_str arr =
+  arr
+  |> Array.to_list
+  |> List.map
+    (fun a -> a |> Array.to_list |> string_of_chars)
+  |> String.concat "\n"
 
+(** [make_word ls] is the horizontal concatenation of all of the strings
+    in [ls], accounting for newlines.
+    For instance, [make_word [a; b]], where [a] is ["18\n27"] and [b] is
+    ["3\n4"], should be ["183\n274"].
+*)
 let rec make_word =
   let combine_letters s1 s2 = 
     let s1s = String.split_on_char '\n' s1 in
@@ -27,13 +44,8 @@ let rec make_word =
     | a::[] -> a
     | a::b::t -> make_word ((combine_letters a b)::t)
 
-let arr_to_str arr =
-  arr
-  |> Array.to_list
-  |> List.map
-    (fun a -> a |> Array.to_list |> string_of_chars)
-  |> String.concat "\n"
-
+(** [window arr w h t] is the window view of the logo in [arr] with width
+    [w] and height [h], at the time-step corresponding to [t]. *)
 let window arr w h t : string =
   let new_arr = Array.make_matrix h w ' ' in
   for i = 0 to (h-1) do
@@ -46,6 +58,8 @@ let window arr w h t : string =
   done;
   new_arr |> arr_to_str
 
+(** [scroll arr w h v] makes the string corresponding to [arr] scroll across
+    the screen with width [w], height [h], and velocity [v]. *)
 let scroll arr w h v = 
   let t = ref 0 in
   let inc x = x := (!x + 1) in
@@ -58,10 +72,14 @@ let scroll arr w h v =
     inc t;
   done
 
+(** [scroll_words ls w] makes the string corresponding to horizontal
+    concatenation of the strings represented in [ls] scroll across the screen,
+    with width [w]. *)
 let scroll_words letter_list w =
   scroll (make_word letter_list |> str_to_arr) w 10 75.
 (* 75.0 is the "speed" *)
 
+(** [letters ()] is a list of the letters in the battleship logo. *)
 let letters () = match
     List.map Helpers.from_file
       [ "load_screen_a"; "load_screen_b"; "load_screen_e"; "load_screen_h";

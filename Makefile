@@ -1,4 +1,4 @@
-MODULES=command main author board ai_random ai_normal ai_smart custom_board_parser
+MODULES=command main author board ai_random ai_normal ai_smart custom_board_parser loading_screen
 
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
