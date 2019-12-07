@@ -196,9 +196,9 @@ let setup board  =
   );
   continue_setup board
 
-(**[win_message] returns the win message found in [Helpers] *)
+(**[win_message] returns the win message found in [string_res.json] *)
 let win_message = Helpers.from_file "main_win_message"
-(**[lose_message] returns the lose message found in [Helpers] *)
+(**[lose_message] returns the lose message found in [string_res.json] *)
 let lose_message = Helpers.from_file "main_lose_message"
 
 (** [display_two_player_end_message winner_board loser_board] displays that 
