@@ -252,12 +252,18 @@ let board_tests = [
     (Board.place "destroyer" "b9" "b12") bd1 Board.OffBoard;
   make_board_op_exn_test "InvalidShipName"
     (Board.place "destroyor" "b9" "b12") bd1 Board.InvalidShipName;
-  make_board_op_exn_test "WrongLength"
+  make_board_op_exn_test "WrongLength horz"
     (Board.place "destroyer" "b2" "b9") bd1 Board.WrongLength;
+  make_board_op_exn_test "WrongLength vert"
+    (Board.place "destroyer" "b2" "g2") bd1 Board.WrongLength;
   make_board_op_exn_test "Misaligned"
     (Board.place "destroyer" "b2" "c7") bd1 Board.Misaligned;
   make_no_exn_raised_test "insertion indices are reversed"
     (Board.place "cruiser" "h5" "h4") bd2;
+  make_no_exn_raised_test "place ship on itself"
+    (Board.place "cruiser"  "b2" "b1") bd_full7;
+  make_no_exn_raised_test "place default again"
+    (Board.place "default" "" "") bd_full7;
 
   (* Board.place_m_r *)
   make_board_op_exn_test "OverlappingShips (place_m_r)"
