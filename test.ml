@@ -1,37 +1,39 @@
 (* Overall, our test suite encompasses all things that could reasonably be 
    tested without gameplay. For everything else, (such as AI shooting in single
    player mode) we tested the functionality through playing our game, and by
-   making sure everything proceeded as expected while we played. To do this, we 
-   tested that all of the error messages for invalid inputs worked as we hoped 
-   and that everything involving game setup, two-player and one-player modes, 
-   and all expected functionality with our game worked as planned. For more 
-   details on what we tested in each file, how we tested it, and why we may 
-   or may not have left it out of the test suite, we explain all of the relevant
-   files below:
+   making sure everything proceeded as expected while we played. We tested that 
+   all of the error messages for invalid inputs worked as we hoped and that 
+   everything involving game setup, two-player and one-player modes, and all
+   expected functionality with our game worked as planned. For more details on 
+   what we tested in each file, how we tested it, and why we may or may not 
+   have left it out of the test suite, we explain all of the relevant
+   information below:
 
-   We tested all of the functions in command.mli, board.mli, ai_normal.mli, 
-   ai_smart.mli, and ai_random.mli. 
+   We tested all of the functions in helpers.ml, command.mli, board.mli, 
+   custom_board_parser.mli, ai_normal.mli, ai_smart.mli, and ai_random.mli. 
 
-   For command.ml, our bisect gave us a code coverage of 100 percent. This is 
-   because command.ml only has to do with parsing which it is very easy to 
-   test all of the outcomes and situations for. Also, we've played the game
-   through fully enough while paying attention/testing parsing details to 
-   tell that everything is working properly. 
+   Our overall bisect code coverage is 93.93 percent. In general, the only 
+   things we omitted in testing were things that involved randomness and 
+   could only be tested in gameplay. For these things that relied on the
+   outcome of random events, we used the "Bisect ignore" feature, so the code
+   that we could only test (and did test) in gameplay would not be included in 
+   our code coverage report. (Without "Bisect ignore", our total code coverage 
+   is around 75 percent.) The list of things we omitted in testing and/or used
+   "Bisect ignore" for is included below:
 
-   For board.ml, our bisect gave us a code coverage of 76.70 percent.
+   - Bomb hits/explosions:
+     Hitting a bomb is based on random chance since the bombs are placed 
+      randomly.
+   - AI shots involving hits:
+     Getting a successful hit is also based on random chance. For medium
+      (and hard) difficulty AI, much of the code is based on getting the AI
+      to continue shoot successfully after a hit has been made. This code is
+      based on the random chance of getting an initial hit and choosing certain
+      directions to shoot in. 
 
-   For ai_random.ml, our bisect gave us a code coverage of 91.67 percent. The
-   only parts of the easiest/random AI we couldn't put into the test file 
-   were the cases where there was a successful shot. Since the AI fires shots 
-   randomly, we found it better to test this function with gameplay to make 
-   sure it always functioned properly and as expected. 
-
-   For ai_normal.ml, our bisect gave us a relatively low code coverage. The main
-   reason for this is
-
-   For ai_smart.ml, our bisect once again gave us a relatively low code 
-   coverage. The main reason for this is *)
-
+   (Once again, note that we thoroughly tested all of these things through
+   gameplay. )
+*)
 open OUnit2
 open Command
 open Board
