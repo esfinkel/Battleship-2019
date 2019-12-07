@@ -69,12 +69,15 @@ let letters () = match
         "load_screen_tt";"load_screen_ships" ]
   with
   | [a; b; e; h; i; l; p; s; tt; ships] -> a, b, e, h, i, l, p, s, tt, ships
-  | _ -> "", "", "", "", "", "", "", "", "", ""
+  | _ -> failwith "oops"
 
 let scroll_battleship () =
   let width, _ = ANSITerminal.size () in
-  let a, b, e, h, i, l, p, s, tt, ships = letters () in
-  scroll_words [b; a; tt; l; e; s; h; i; p; ships] (width - 2)
+  let right_buffer = 2 in
+  try
+    let a, b, e, h, i, l, p, s, tt, ships = letters () in
+    scroll_words [b; a; tt; l; e; s; h; i; p; ships] (width - right_buffer)
+  with | _ -> ()
 
 
 

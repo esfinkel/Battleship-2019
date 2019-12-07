@@ -40,6 +40,9 @@ play: build
 bisect: clean test
 	bisect-ppx-report -I _build -html report bisect0001.out
 
+bisect-view: bisect
+	open report/index.html
+
 zip: bisect
 	zip battleship.zip *.txt *.ml* _tags Makefile report/* custom_boards/example.json
 	

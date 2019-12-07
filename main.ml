@@ -36,10 +36,10 @@ let print_grid mode grid =
     )
   in
   let print_row i row =
-    Char.chr (i+65) |> print_char;
+    Helpers.get_letter i |> print_string;
     print_string " ";
     List.iter print_cell row;
-    Char.chr (i+65) |> print_char;
+    Helpers.get_letter i |> print_string;
     print_newline ()
   in
   let rec print_nums s e =
@@ -71,18 +71,22 @@ let print_other_board mode b =
 let print_help unit : unit = 
   ANSITerminal.(print_string [cyan] (Helpers.from_file "main_help"))
 
+(** [hit_sound ()] plays the hit-ship sound. *)
 let hit_sound () =
   try Sys.command "afplay audio/boom_midlength.m4a -v 1.0 & :" |> ignore
   with | _ -> ()
 
+(** [splash_sound ()] plays the splash sound. *)
 let splash_sound () =
   try Sys.command "afplay audio/splash_midlength.m4a -v 0.3 & :" |> ignore
   with | _ -> ()
 
+(** [bomb_sound ()] plays the bomb sound. *)
 let bomb_sound () = 
   try Sys.command "afplay audio/bombexplosion.mp3 -v 0.5 & :" |> ignore
   with | _ -> ()
 
+(** [shoot_sound suc bomb_suc] plays the appropriate sound. *)
 let shoot_sound suc bomb_suc =
   let with_sound = Sys.argv.(1) in
   if with_sound = "1" then
@@ -113,7 +117,7 @@ let try_placing (ship_phrase: string list) board =
       match Board.place name l1 l2 board with 
       | exception Board.OffBoard -> 
         ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
-      | exception Board.InvalidLoc -> 
+      | exception Helpers.InvalidLoc -> 
         ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
       | exception Board.Misaligned -> 
         ANSITerminal.
@@ -239,7 +243,7 @@ let rec try_shooting shoot_phrase target_board my_board =
       | exception Board.DuplicateShot -> ANSITerminal.(
           print_string [red] ((Helpers.from_file "main_dup_shot"))
         ); false
-      | exception Board.InvalidLoc -> ANSITerminal.(
+      | exception Helpers.InvalidLoc -> ANSITerminal.(
           print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
       | message, success, bomb_suc -> display_board target_board my_board; 
@@ -372,7 +376,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
       | exception Board.DuplicateShot -> ANSITerminal.(
           print_string [red] (Helpers.from_file "main_dup_shot")
         ); false
-      | exception Board.InvalidLoc -> ANSITerminal.(
+      | exception Helpers.InvalidLoc -> ANSITerminal.(
           print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
       | message, success, bomb_suc -> clear_screen (); 

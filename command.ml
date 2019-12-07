@@ -9,7 +9,6 @@ type command =
   | Shoot of object_phrase
   | Status
   | Help 
-  (*| Quit *)
   | Ready
 
 exception Empty

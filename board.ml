@@ -6,7 +6,6 @@ exception WrongLength
 exception OverlappingShips 
 exception NoShip
 exception DuplicateShot
-exception InvalidLoc
 exception InvalidShipName
 
 (** The type [ship_name] represents the name of each ship in the game. *)
@@ -57,45 +56,7 @@ type t = {
 }
 
 
-let row_col (loc : Command.location) : (int*int) =
-  let r = Str.regexp "\\([a-z]\\)\\([0-9]+\\)" in
-  let pull_regex s =
-    Str.global_replace r "\\1 \\2" (String.lowercase_ascii s)
-    |> String.split_on_char ' ' in
-  let index (c:char) : int = Char.code c - 97 in
-  let tup = function
-    | letter::number::[] -> (
-        String.get letter 0 |> index,
-        Stdlib.int_of_string number - 1
-      )
-    | _ -> raise InvalidLoc
-  in
-  loc |> pull_regex |> tup
-
-(** [ordered_coors c1 c2] is [(c1, c2)], except they are swapped
-    if given in the reverse order.
-    Precondition to comparability is that [l1] and [l2] are in either the
-    same row or the same column. *)
-let ordered_coors c1 c2 = if c1 < c2 then c1, c2 else c2, c1
-
-(** [ordered l1 l2] is [(l1_i, l1_j), (l2_i, l2_j)], the coordinates of
-    location [l1] and location [l2] respectively, except they are swapped
-    if given in the reverse order.
-    Precondition to comparability is that [l1] and [l2] are in either the
-    same row or the same column. *)
-let ordered l1 l2 = let pos1, pos2 = (row_col l1), (row_col l2) in
-  ordered_coors pos1 pos2
-
 let default_board_size = 10
-
-(* Used for getting random letters. (Didn't have to hardcode this but figured
-   it was easier since our gameboard is always the same size.) *)
-let lst = ["a";"b";"c";"d";"e";"f";"g";"h";"i";"j";"k";"l";"m";"n";"o"]
-
-(** [choose_random_letter ()] is a random letter represented as a string from 
-    the first ten letters of the alphabet in the list [lst]. *)
-let choose_random_letter size =  
-  List.nth lst (Random.int size)
 
 (** [random_coordinates size] is a set of valid random locations used for 
     randomly placing a ship of size [size]. *)
@@ -114,11 +75,11 @@ let random_coordinates board_size size : Command.location * Command.location =
     let letter_num = (Random.int board_size) in 
     let number = string_of_int((Random.int board_size) + 1) in 
     if ((letter_num + size) < board_size) then begin
-      ((List.nth lst letter_num) ^ number), 
-      ((List.nth lst (letter_num + size)) ^ number) end
+      ((get_letter letter_num) ^ number), 
+      ((get_letter (letter_num + size)) ^ number) end
     else begin 
-      (((List.nth lst letter_num) ^ number), 
-       ((List.nth lst (letter_num - size)) ^ number)) end
+      (((get_letter letter_num) ^ number), 
+       ((get_letter (letter_num - size)) ^ number)) end
 
 (** [init_ship name size default] is an unplaced ship with the given [name],
     [size], and [default] position. *)
@@ -245,7 +206,7 @@ let overlapping_ship_by_coors sh (i_1, j_1) (i_2, j_2) b =
 (** [overlapping_ship sh l1 l2 b] is true iff there are any ships (excepting
     [sh]) present in the span from [l1] to [l2] on [b]. *)
 let overlapping_ship sh l1 l2 b =
-  let c1, c2 = ordered l1 l2 in overlapping_ship_by_coors sh c1 c2 b
+  let c1, c2 = ordered_strings l1 l2 in overlapping_ship_by_coors sh c1 c2 b
 
 
 (** [remove sh b] removes [sh] from [b] and replaces its grid cells with
@@ -275,8 +236,8 @@ let new_orientation (i1, j1) (i2, j2) =
 let place_single_ship sh l1 l2 b =
   (* let sh = get_ship s b in *)
   let (((i_1, j_1) as coors_1), ((i_2, j_2) as coors_2)) = 
-    (try ordered l1 l2 with | NoShip -> raise InvalidShipName
-                            | e -> raise e) in 
+    (try ordered_strings l1 l2 with | NoShip -> raise InvalidShipName
+                                    | e -> raise e) in 
   on_board l1 b;
   on_board l2 b;
   check_alignment_and_length l1 l2 sh;

@@ -49,14 +49,18 @@ let make_parse_test
   name >:: (fun _ -> 
       assert_equal expected_output (parse str_input))
 
-(** [make_parse_exn_test name str_input expected_exn] constructs an OUnit test 
-    named [name] that asserts [parse str_unput] raises the [expected_exn]. *)
-let make_parse_exn_test
+(** [make_exn_raised_test name func input expected_exn] constructs an OUnit
+    test  named [name] that asserts [func input] raises the
+    [expected_exn]. *)
+let make_exn_raised_test
     (name : string)
-    (str_input : string)
+    func
+    input
     (expected_exn : exn) : test = 
   name >:: (fun _ -> 
-      assert_raises expected_exn (fun () -> parse str_input))
+      assert_raises expected_exn (fun () -> func input))
+
+let make_parse_exn_test name = make_exn_raised_test name Command.parse 
 
 let command_tests = [
   make_parse_test "normal place" "place ship on shot ship" 
@@ -143,7 +147,7 @@ let make_row_col_test
     (loc : Command.location)
     (expected_output : int*int) = 
   name >:: (fun _ ->
-      assert_equal expected_output (Board.row_col loc))
+      assert_equal expected_output (Helpers.row_col loc))
 
 (** [[make_is_unshot_test name board loc] constructs an OUnit test
     named [name] that asserts the quality of [expected_value] with 
@@ -273,7 +277,7 @@ let board_tests = [
   make_board_op_exn_test "shoot shot location" (Board.shoot "a3")
     bd2 Board.DuplicateShot;
   make_board_op_exn_test "invalid shot location"
-    (Board.shoot "a99") bd1 Board.InvalidLoc;
+    (Board.shoot "a99") bd1 Helpers.InvalidLoc;
 
   (* Board.shoot_m_r *)
   make_no_exn_raised_test "can shoot without error"
@@ -281,7 +285,7 @@ let board_tests = [
   make_board_op_exn_test "shoot shot location" (Board.shoot_m_r (0, 2))
     bd2 Board.DuplicateShot;
   make_board_op_exn_test "invalid shot location"
-    (Board.shoot_m_r (3, 98)) bd1 Board.InvalidLoc;
+    (Board.shoot_m_r (3, 98)) bd1 Helpers.InvalidLoc;
   make_equal_test "successful sunk ship" (Board.shoot_m_r (1, 1))
     bd_full5 (true, true);
 
@@ -463,6 +467,10 @@ let helper_tests = [
   make_helper_ff_test "Test error" "main_offboard" 
     ("\n\nYou cannot place the ship there.\nPlease enter coordinates that" ^
      " are on the board.");
+
+  make_exn_raised_test "offboard in helpers" Helpers.row_col "AAA"
+    Helpers.InvalidLoc;
+
 ]
 
 (** [make_gbf_test name file expected_ouput] constructs an OUnit test named

@@ -17,13 +17,6 @@ let get_board c = c.board
 
 let place_all_ships c = Board.place "random" "" "" c.board
 
-(** [random_coors()] is a random coordinate on the board. *)
-let random_coors b =
-  let yaxis = Char.chr ((Random.int (Board.board_size b)) + 65)
-              |> String.make 1 in
-  let xaxis = string_of_int ((Random.int (Board.board_size b)) + 1) in
-  yaxis ^ xaxis
-
 (* To help AI keep track of guesses around a hit. *)
 type history = {
   mutable hit : Command.location; 
@@ -46,24 +39,24 @@ let hit_history = init_history ()
 
 (** [up_coor loc] gives the coordinate pair directly above [loc]. *)
 let up_coor loc = 
-  let (x, y) = Board.row_col loc in 
+  let (x, y) = Helpers.row_col loc in 
   (x - 1, y)
 
 (** [down_coor loc] gives the coordinate pair directly below [loc]. *)
 let down_coor loc = 
-  let (x, y) = Board.row_col loc in 
+  let (x, y) = Helpers.row_col loc in 
   (x + 1, y)
 
 (** [right_coor loc] gives the coordinate pair directly to the right of
     [loc].*)
 let right_coor loc = 
-  let (x, y) = Board.row_col loc in 
+  let (x, y) = Helpers.row_col loc in 
   (x, y + 1)
 
 (** [left_coor loc] gives the coordinate pair directly to the left of
     [loc]. *)
 let left_coor loc = 
-  let (x, y) = Board.row_col loc in 
+  let (x, y) = Helpers.row_col loc in 
   (x, y - 1)
 
 (** [reset_history hist] resets [hist] to have no successful hits and no
@@ -78,7 +71,7 @@ let reset_history hist =
 (** [shoot_random b] shoots a random spot on board [b]. *)
 let rec shoot_random b = 
   try 
-    let coor = random_coors b in 
+    let coor = Helpers.random_coor_string (Board.board_size b) in 
     match Board.shoot (coor) b with
     | _, true, _ -> hit_history.hit <- coor; "It's a hit!"
     | _ -> ""
@@ -92,7 +85,7 @@ let rec shoot_random b =
 let rec shoot_left b = 
   let left = left_coor hit_history.hit in
   match Board.shoot_m_r (left) b with 
-  | exception Board.InvalidLoc -> hit_history.tried_left <- true;
+  | exception Helpers.InvalidLoc -> hit_history.tried_left <- true;
     shoot_right b
   | exception Board.DuplicateShot -> hit_history.tried_left <- true;
     shoot_random b
@@ -109,7 +102,7 @@ let rec shoot_left b =
 and shoot_right b = 
   let right = right_coor hit_history.hit in
   match Board.shoot_m_r (right) b with 
-  | exception Board.InvalidLoc -> hit_history.tried_right <- true;
+  | exception Helpers.InvalidLoc -> hit_history.tried_right <- true;
     shoot_left b
   | exception Board.DuplicateShot -> hit_history.tried_right <- true;
     shoot_random b
@@ -126,7 +119,7 @@ and shoot_right b =
 let rec shoot_up b = 
   let up = up_coor hit_history.hit in
   match Board.shoot_m_r (up) b with 
-  | exception Board.InvalidLoc -> hit_history.tried_up <- true;
+  | exception Helpers.InvalidLoc -> hit_history.tried_up <- true;
     shoot_down b
   | exception Board.DuplicateShot -> hit_history.tried_up <- true;
     shoot_random b
@@ -143,7 +136,7 @@ let rec shoot_up b =
 and shoot_down b = 
   let down = down_coor hit_history.hit in
   match Board.shoot_m_r (down) b with 
-  | exception Board.InvalidLoc -> hit_history.tried_down <- true;
+  | exception Helpers.InvalidLoc -> hit_history.tried_down <- true;
     shoot_up b
   | exception Board.DuplicateShot -> hit_history.tried_down <- true;
     shoot_random b

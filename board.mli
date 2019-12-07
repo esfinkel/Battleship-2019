@@ -15,17 +15,11 @@ exception OverlappingShips
 exception NoShip
 (** Raised when a player attempts to shoot a spot that's already been shot. *)
 exception DuplicateShot
-(** Raised when a player attempts to shoot or place a ship on 
-    a location that isn't on the board. *)
-exception InvalidLoc
 (** Raised when a player attempts to place a ship that has an invalid name. *)
 exception InvalidShipName
 
 type t 
 
-(** [row_col loc] is the [(row, column)] coordinate pair corresponding
-    to [loc]. *)
-val row_col : Command.location -> int * int
 
 (** [init_board_default n] is a new [t], with all cells initialized to
     [Water] and player_name [n]. *)

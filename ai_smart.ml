@@ -1,5 +1,4 @@
-(** [coor_type] is a type for values representing grid coordinates. *)
-type coor_type = int * int
+
 
 type t = {
   board: Board.t;
@@ -25,7 +24,7 @@ let get_board c = c.board
 let board_size = Board.board_size
 
 let get_history b =
-  let append ls (elt:coor_type) = ls := elt :: (!ls) in
+  let append ls (elt:Helpers.coor_type) = ls := elt :: (!ls) in
   let full_hist = Board.string_other b
                   |> Array.of_list 
                   |> Array.map (Array.of_list) in
@@ -42,11 +41,6 @@ let get_history b =
 
 (* ship placement *)
 
-(** [ordered (pos1, pos2)] is [(pos_a, pos_b)], where [pos_a] is the
-    lesser of the two and [pos_b] the greater. *)
-let ordered ((pos1, pos2) : coor_type * coor_type)
-  = if pos1 < pos2 then pos1, pos2 else pos2, pos1
-
 (** [on_board a] is true iff a coordinate with i=[a] would be on a square
     grid with size [board_size]. *)
 let on_board bd a = 0 <= a && a < board_size bd
@@ -58,7 +52,7 @@ let coor_on_board bd (a, b) = on_board bd a && on_board bd b
 (** [all_cells_between c1 c2] is all the grid cells (inclusive) between [c1]
     and [c2]. *)
 let rec all_cells_between c1 c2 = 
-  let (i_1, j_1), (i_2, j_2) = ordered (c1, c2) in
+  let (i_1, j_1), (i_2, j_2) = Helpers.ordered_coors c1 c2 in
   match (i_1 < i_2, j_1 < j_2) with
   | true, false -> (i_1, j_1)::(all_cells_between (i_1+1, j_1) (i_2, j_2))
   | false, true -> (i_1, j_1)::(all_cells_between (i_1, j_1+1) (i_2, j_2))
@@ -111,10 +105,9 @@ let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
     - [res] if [off_limits] with the addition of the cells surrounding
       the ship's location. *)
 let rec place_ship_smartly b name size off_limits =
-  (* pick a two random coors at appropriate distance *)
-  let new_coors = random_placement_coors b size in
-  (* order them *)
-  let c1, c2 = ordered new_coors in
+  (* pick a two random coors at appropriate distance; order them *)
+  let c1, c2 = random_placement_coors b size in
+  let c1, c2 = Helpers.ordered_coors c1 c2 in
   (* if anything off_board, recurse *)
   if not (coor_on_board b c1 && coor_on_board b c2)
   then place_ship_smartly b name size off_limits
@@ -167,8 +160,8 @@ let random_coors c =
     [coor_list] that are adjacent to [coor]. Pairs where either coordinate
     is dead are excluded. *)
 let rec living_coors_adjacent_to_this
-    (coor : coor_type)
-    (coor_list : (coor_type) list) =
+    (coor : Helpers.coor_type)
+    (coor_list : Helpers.coor_type list) =
   let is_adjacent (c2) = (List.mem c2 (adjacent_cells coor)) in
   List.filter (is_adjacent) coor_list
   |> List.map (fun (c2) -> (coor, c2))
@@ -203,7 +196,7 @@ let find_adjacent_xs xs =
   List.fold_left
     (fun sofar coor -> sofar @ (living_coors_adjacent_to_this coor xs))
     [] xs
-  |> List.map ordered
+  |> List.map (fun (a, b) -> Helpers.ordered_coors a b)
   |> List.sort_uniq Stdlib.compare
 
 (** [shoot_find_unknown_on_ends b adjx] is a list of all coordinates [c] on
@@ -214,7 +207,9 @@ let shoot_find_unknown_on_ends b adjx =
     then (* horiz *) [(i1, j1-1); (i2, j2+1)]
     else (* vert *) [(i1-1, j1); (i2+1, j2)] in
   let is_unknown = Board.is_unshot b in
-  List.map (fun coors ->  coors |> ordered |> ends) adjx
+  List.map
+    (fun coors ->  coors |> (fun (a, b) -> Helpers.ordered_coors a b) |> ends)
+    adjx
   |> List.flatten
   |> List.filter (coor_on_board b)
   |> List.filter is_unknown
@@ -226,6 +221,44 @@ let nearby b coors =
    |> List.flatten)
   |> List.filter (coor_on_board b)
 
+
+(** [shoot_find_nearby c b] shoots a location on [b] that is likely to be
+    part of a ship; if there is no likely location, it shoots randomly. 
+    It then updates the hit history of [c]. *)
+let rec shoot_find_nearby c b = 
+  (* look for adjacent X's in history *)
+  let hits = get_history b in
+  let adjx = find_adjacent_xs hits in
+  let targets = shoot_find_unknown_on_ends b adjx in
+  let num_targets = List.length targets in
+  if num_targets > 0
+  (* if you find adjacent x's with ? on at least one end; shoot that ? *)
+  then shoot_from b targets
+  else 
+    let adj = nearby b hits in
+    let adj_questions = adj |> List.filter (Board.is_unshot b)
+    in 
+    if List.length adj_questions > 0 then (
+      shoot_from b adj_questions)
+    (* if you don't find one, shoot randomly *)
+    else shoot_random c b
+
+(** [shoot_ship c b] shoots a location on [b] that is likely to be
+    part of a ship; if there is no likely location, it shoots randomly. 
+    It then updates the hit history of [c]. *)
+let rec shoot_ship c b = 
+  shoot_find_nearby c b; ""
+
+
+
+
+
+
+
+(* **************************** *)
+
+
+(* version of shoot_find_nearby with a bajillion prints and printhelpers: *)
 
 (* let print_coor (x, y) = Helpers.rev_row_col (x,y) |> print_string *)
 
@@ -243,26 +276,26 @@ let nearby b coors =
     print_coor c2; print_string ")"; print_string "; "; print_l_h t
    in print_string "[ "; print_l_h ls; print_endline "]" *)
 
-(** [shoot_find_nearby c b] shoots a location on [b] that is likely to be
+(* (** [shoot_find_nearby c b] shoots a location on [b] that is likely to be
     part of a ship; if there is no likely location, it shoots randomly. 
     It then updates the hit history of [c]. *)
-let rec shoot_find_nearby c b = 
-  (* (print_string "hit history: "; print_coor_bool_list c.hit_history ;
+   let rec shoot_find_nearby c b = 
+   (* (print_string "hit history: "; print_coor_bool_list c.hit_history ;
      print_newline () ); *)
-  (* look for adjacent X's in history *)
-  let hits = get_history b in
-  let adjx = find_adjacent_xs hits in
-  (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
-  let targets = shoot_find_unknown_on_ends b adjx in
-  (* (print_string "end targets: ";print_coor_list targets); *)
-  let num_targets = List.length targets in
-  if num_targets > 0
-  (* if you find adjacent x's with ? on at least one end; shoot that ? *)
-  then (
+   (* look for adjacent X's in history *)
+   let hits = get_history b in
+   let adjx = find_adjacent_xs hits in
+   (* (print_string "adjx: "; print_coor_pair_lst adjx; print_newline () ); *)
+   let targets = shoot_find_unknown_on_ends b adjx in
+   (* (print_string "end targets: ";print_coor_list targets); *)
+   let num_targets = List.length targets in
+   if num_targets > 0
+   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
+   then (
     (* (print_endline "looking at ends"); *)
     shoot_from b targets)
-  (* otherwise, shoot a ? next to any X *)
-  else 
+   (* otherwise, shoot a ? next to any X *)
+   else 
     (* let hits =
        (* List.filter (fun (_, b) -> b) *)
        history
@@ -283,14 +316,4 @@ let rec shoot_find_nearby c b =
       (* (print_endline "looking at all adjacent"); *)
       shoot_from b adj_questions)
     (* if you don't find one, shoot randomly *)
-    else shoot_random c b
-
-(** [shoot_ship c b] shoots a location on [b] that is likely to be
-    part of a ship; if there is no likely location, it shoots randomly. 
-    It then updates the hit history of [c]. *)
-let rec shoot_ship c b = 
-  shoot_find_nearby c b; ""
-(* (if c.hit_history = [] then
-   shoot_random c b else *)
-
-(* **************************** *)
+    else shoot_random c b *)
