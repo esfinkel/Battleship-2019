@@ -364,7 +364,8 @@ let shoot_helper (i, j) b =
                        ^  (string_of_int (j + 1)) ^ "." 
                        ^ (mine_hit_your_ship !hit_ship));
      ("You hit a mine at location " ^ (String.make 1 (Char.chr (i + 65))) ^ 
-      (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)), false, false, true)
+      (string_of_int (j + 1)) ^ "!" ^ (mine_hit_op_ship !hit_ship)),
+     false, false, true)
   (*BISECT-IGNORE-END*)
   | _ -> raise DuplicateShot
 
