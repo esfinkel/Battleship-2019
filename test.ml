@@ -505,7 +505,7 @@ let command_parser_tests =
       Custom_board_parser.ParsingError;
     make_exn_raised_test "wrong num ships in json"
       Custom_board_parser.get_board_from_file
-      "custom_boards/with_errors/wrong_num_ships.json"
+      "custom_boards/with_errors/wrong_num_ship_sizes.json"
       (Custom_board_parser.InvalidBoardFile 
          "make sure you have same number of ship_names and ship_sizes!");
 
