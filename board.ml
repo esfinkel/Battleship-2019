@@ -8,8 +8,6 @@ exception DuplicateShot
 exception InvalidShipName
 
 (** The type [ship_name] represents the name of each ship in the game. *)
-(* type ship_name = Battleship | Cruiser | Carrier | Destroyer | Submarine *)
-
 type ship_name = string
 
 (** The abstract type of values representing a ship's orientation. *)
@@ -28,19 +26,22 @@ type ship = {
 type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
 
 (** AF: the record
-    [{ grid = 
+    [{board_size = 2; 
+      grid = 
         [|
           [|Water; ShotWater|];
           [|Ship s1; HitShip s2|]
         |];
       ships = [s1; s2];
       player_name = "p1";
-      status = Some "opponent missed"
+      status = Some "opponent missed";
+      mode = "water"
     }]
-    represents a board where the player's name is "p1", the player's
-    opponent missed their last shot, position A1 is water, position A2
+    represents a board with size 2 where the player's name is "p1", the 
+    player's opponent missed their last shot, position A1 is water, position A2
     is water that has been shot, position B1 is a cell of ship s1, and
-    position B2 is a cell of ship s2 (and that shell has been shot).
+    position B2 is a cell of ship s2 (and that shell has been shot). The game
+    mode is "water".
 
     RI : Once board setup has ended, every ship [s] in [t.ships] 
     appears exactly [s.size] times in [t.grid], either as [Ship s] or
@@ -53,7 +54,6 @@ type t = {
   mutable status: string option;
   mode: string;
 }
-
 
 let default_board_size = 10
 
@@ -101,7 +101,6 @@ let init_ships_default () = [
   init_ship "submarine" 3 ("f4", "f6");
 ]
 
-
 let init_board_default player_name = {
   board_size = default_board_size;
   grid = Water |> Array.make_matrix default_board_size default_board_size;
@@ -113,7 +112,8 @@ let init_board_default player_name = {
 
 let board_size b = b.board_size
 
-
+(** [make_ships ships] is a [ship list] where each ship is initialized 
+    according to its given name and size. *)
 let make_ships ships =
   let count = ref 0 in
   let default size = (rev_row_col (!count, 0),
@@ -123,7 +123,6 @@ let make_ships ships =
       init_ship name size (default size)
     )
     ships
-
 
 let init_board_from_file player_name filepath =
   let board_size, mode, ship_info =
@@ -138,10 +137,8 @@ let init_board_from_file player_name filepath =
     mode=mode;
   }
 
-
 let min_ship_size b =
   List.fold_left (fun a sh -> if sh.size < a then sh.size else a) 100 b.ships
-
 
 let player_name b = b.player_name
 
@@ -239,7 +236,6 @@ let place_single_ship sh l1 l2 b =
     done
   done
 
-
 let rec place s l1 l2 b =
   if s="default" then (
     List.fold_left
@@ -262,11 +258,9 @@ let rec place s l1 l2 b =
     place_single_ship (get_ship s b)
       l1 l2 b
 
-
 let place_m_r s ((i_1, j_1) as l1) ((i_2, j_2) as l2) b =
   let sh = get_ship s b in 
   place_single_ship sh (rev_row_col l1) (rev_row_col l2) b
-
 
 (** [is_dead s g] is true iff [s] is a sunken ship in the grid [g] (all
     of [s]'s cells have been hit). *)
@@ -276,7 +270,6 @@ let is_dead (s:ship) (g : spot array array) =
       (fun c sp -> c + (if sp = HitShip s then 1 else 0))
       0 r in
   s.size = (Array.fold_left (fun c r -> c + dead_in_row s r) 0 g)
-
 
 let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
@@ -321,10 +314,16 @@ and bomb_hit (i, j) b =
   if make_bomb_shot bot_right b then hit_ship := true;
   !hit_ship
 
+(** [mine_hit_your_ship boolean] is ["The mine damaged some of your ships."] 
+    if [boolean] is true and is ["The mine didn't damage anything."] 
+    otherwise. *)
 let mine_hit_your_ship boolean =
   if boolean then "\nThe mine damaged some of your ships."
   else "\nThe mine didn't damage anything."
 
+(** [mine_hit_op_ship boolean] is ["The mine damaged some of your opponent's 
+    ships."] if [boolean] is true and is ["The mine didn't damage anything."] 
+    otherwise. *)
 let mine_hit_op_ship boolean =
   if boolean then " The mine damaged some of your opponent's ships."
   else "\nThe mine didn't damage anything."
@@ -351,7 +350,8 @@ let shoot_helper (i, j) b =
     let sh_name = s.name in
     if is_dead s b.grid then (
       (b.status <- Some ("Your opponent sank your "^sh_name^"."));
-      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), true, true, false
+      ("It's a hit! You sunk your opponent's " ^ sh_name ^ "!"), 
+      true, true, false
     ) 
     else  (
       (b.status <- Some ("Your opponent shot your "^sh_name^"."));
@@ -368,15 +368,12 @@ let shoot_helper (i, j) b =
   (*BISECT-IGNORE-END*)
   | _ -> raise DuplicateShot
 
-
 let shoot l b =
   let message, success, _, bomb_success = shoot_helper (row_col l) b in
   message, success, bomb_success
 
-
 let shoot_m_r (i, j) b =
   let _, success, killed, _ = shoot_helper (i, j) b in success, killed
-
 
 let setup_status b = 
   let on_board = List.filter (fun s -> s.on_board) b.ships in
@@ -409,7 +406,6 @@ let is_part_of_living_ship b (i, j) =
     | Ship s | HitShip s -> not (is_dead s g)
     | _ -> false
   with | _ -> false
-
 
 (** [to_string_grid is_self b] is the grid representation of board [b].
     Represented as seen by the board's player if [is_self] is [true], and
