@@ -4,6 +4,11 @@ exception InvalidBoardFile of string
 
 module YoUtils = Yojson.Basic.Util
 
+(** [assert_raise equality issue] is [()] if [equality] is [true]; otherwise
+    raises [InvalidBoardFile issue]. *)
+let assert_raise equality issue =
+  if equality then () else raise (InvalidBoardFile issue)
+
 (** [check_board b] is [b] iff no exception is thrown; if not in "space"
     mode, [b] is now in "water" mode.
     Raises [InvalidBoardFile s] (where [s] is an explanatory message) if:
@@ -14,14 +19,13 @@ module YoUtils = Yojson.Basic.Util
     - There are not 1..20 total ship cells
     - There are too many ship cells for the board size
     - The json has "ship_names" and "ship_sizes" lists of different
-          lengths.*)
+          lengths. (This is actually handled in [get_board_from_file])
+*)
 let check_board (b_size, mode, ships) =
   let rec count a = function
     | [] -> 0
     | v::t -> (if v=a then 1 else 0) + (count a t) in
   let num_cells = List.fold_left (fun acc (_, sz) -> acc + sz) 0 ships in
-  let assert_raise equality issue =
-    if equality then () else raise (InvalidBoardFile issue) in
   let ship_names = (List.map (fun (n, _) -> n) ships) in
   assert_raise (0 < b_size && b_size <= 15)
     "board_size should be in 1..15.";
@@ -60,9 +64,8 @@ let get_board_from_file f =
   in
   let j = try Yojson.Basic.from_file f with | _ -> raise ParsingError in
   let ships, valid_len = try make_ships j with | _ -> raise MissingField in
-  (if valid_len then () else raise
-       (InvalidBoardFile
-          "make sure you have same number of ship_names and ship_sizes!"));
+  assert_raise valid_len 
+    "make sure you have same number of ship_names and ship_sizes!";
   let board_tup = 
     (
       j |> get_member "board_size" |> YoUtils.to_int,

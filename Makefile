@@ -14,7 +14,7 @@ default: build
 build:
 	$(OCAMLBUILD) $(OBJECTS)
 
-test:
+test: build
 	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 # $(OCAMLBUILD) $(MAIN) && ./$(MAIN)

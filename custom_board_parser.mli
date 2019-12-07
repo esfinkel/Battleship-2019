@@ -1,8 +1,13 @@
-(**Custom_board_parser allows the player to import various types of battleship
-   games containing customized ship names, board sizes, and ship sizes
-   using .json files. *)
+(** Custom_board_parser allows the player to import various types of battleship
+    games containing customized ship names, board sizes, and ship sizes
+    using .json files. *)
+
+(** Raised when the json is unable to be parsed. *)
 exception ParsingError
+(** Raised when a field is missing or of the wrong type. *)
 exception MissingField
+(** Raised when the board illegal according to a number of arbitrary rules.
+    String will contain helpful information. *)
 exception InvalidBoardFile of string
 
 (** [get_board_from_file f] is [(board_size, mode, ships)] where [f] is the
