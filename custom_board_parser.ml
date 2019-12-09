@@ -29,8 +29,8 @@ let check_board (b_size, mode, ships) =
     | v::t -> (if v=a then 1 else 0) + (count a t) in
   let num_cells = List.fold_left (fun acc (_, sz) -> acc + sz) 0 ships in
   let ship_names = (List.map (fun (n, _) -> n) ships) in
-  assert_raise (0 < b_size && b_size <= 15)
-    "board_size should be in 1..15.";
+  assert_raise (5 <= b_size && b_size <= 15)
+    "board_size should be in 5..15.";
   assert_raise (List.fold_left
                   (fun b (nm, _) -> b && 1 = count nm ship_names)
                   true ships)
