@@ -12,7 +12,7 @@
    We tested the functions in helpers.ml, command.mli, board.mli, 
    custom_board_parser.mli, ai_normal.mli, ai_smart.mli, and ai_random.mli. 
 
-   Our overall bisect code coverage is 93.93 percent. In general, the only 
+   Our overall bisect code coverage is 93 percent. In general, the only 
    things we omitted in testing were things that involved randomness and 
    could only be tested in gameplay. For these things that relied on the
    outcome of random events, we used the "Bisect ignore" feature, so the code
