@@ -4,7 +4,7 @@ exception InvalidBoardFile of string
 
 module YoUtils = Yojson.Basic.Util
 
-type graphicsMode = | SpaceMode | WaterMode
+type graphics_mode = | SpaceMode | WaterMode
 
 (** [assert_raise equality issue] is [()] if [equality] is [true]; otherwise
     raises [InvalidBoardFile issue]. *)

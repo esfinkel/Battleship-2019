@@ -490,7 +490,7 @@ let make_gbf_test
     (name : string)
     (file : string)
     (expected_output :
-       (int * Custom_board_parser.graphicsMode * (string * int) list))
+       (int * Custom_board_parser.graphics_mode * (string * int) list))
   : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (get_board_from_file file))

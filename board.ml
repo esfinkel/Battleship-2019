@@ -53,7 +53,7 @@ type t = {
   ships: ship list;
   player_name: string;
   mutable status: string option;
-  mode: Custom_board_parser.graphicsMode;
+  mode: Custom_board_parser.graphics_mode;
 }
 
 let default_board_size = 10
