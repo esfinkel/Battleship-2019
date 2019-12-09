@@ -12,13 +12,12 @@ let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
   Sys.command("clear") |> ignore
 
-(** [print_grid grid] prints the string representation of grid
-    (string list list) [grid]. *)
-let print_grid mode grid =
+(** [print_cell mode c] prints the game board representation of [c]
+    in graphics mode [mode]. *)
+let print_cell mode =
   let spacemode = mode = Custom_board_parser.SpaceMode in
-  let print_cell c = ANSITerminal.(
-      let ship = if spacemode then "🚀 " else "🚢 " in
-      match c with
+  ANSITerminal.(
+    let ship = if spacemode then "🚀 " else "🚢 " in function
       | "w" ->
         let colors =
           if spacemode then [white; on_black] else [cyan; on_blue] in
@@ -33,12 +32,15 @@ let print_grid mode grid =
       | "b" -> print_string [if spacemode then on_black else on_blue] "💣 "
       | "B" -> print_string [on_blue]               "💥 "
       | _ -> ()
-    )
-  in
+  )
+
+(** [print_grid grid] prints the string representation of grid
+    (string list list) [grid]. *)
+let print_grid mode grid =
   let print_row i row =
     Helpers.get_letter i |> print_string;
     print_string " ";
-    List.iter print_cell row;
+    List.iter (print_cell mode) row;
     Helpers.get_letter i |> print_string;
     print_newline ()
   in
@@ -137,6 +139,8 @@ let try_placing (ship_phrase: string list) board =
 
 (** [continue_setup board] reads in a command, parses it, and executes it. *)
 let rec continue_setup board  = 
+  let print_red key = ANSITerminal.(print_string [red]
+                                      (Helpers.from_file key)) in
   match Command.parse (read_command ()) with
   | Place ship_phrase -> try_placing ship_phrase board; 
     if Board.complete board then
@@ -145,26 +149,12 @@ let rec continue_setup board  =
   | Help -> print_help (); 
     continue_setup board 
   | Ready -> if Board.complete board then () else
-      (ANSITerminal.(print_string [red]
-                       (Helpers.from_file "main_ready_setup_error"));
-       continue_setup board)
-  | Status -> ANSITerminal.(
-      print_string [red]
-        (Helpers.from_file "main_status_setup_error")
-    );
-    continue_setup board
-  | Shoot _ -> ANSITerminal.(
-      print_string [red]
-        (Helpers.from_file "main_shoot_setup_error")
-    );
-    continue_setup board
-  | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
+      (print_red "main_ready_setup_error"; continue_setup board)
+  | Status -> print_red "main_status_setup_error"; continue_setup board
+  | Shoot _ -> print_red "main_shoot_setup_error"; continue_setup board
+  | exception Command.Malformed -> print_red "main_invalid_command";
     continue_setup board 
-  | exception Command.Empty -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
+  | exception Command.Empty -> print_red "main_invalid_command";
     continue_setup board 
 
 (**  [wait_next_move ()] clears the terminal screen and waits

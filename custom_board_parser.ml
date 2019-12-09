@@ -68,11 +68,9 @@ let get_board_from_file f =
   let ships, valid_len = try make_ships j with | _ -> raise MissingField in
   assert_raise valid_len 
     "make sure you have same number of ship_names and ship_sizes!";
-  let board_tup = 
-    (
-      j |> get_member "board_size" |> YoUtils.to_int,
-      j |> get_member "mode" |> YoUtils.to_string,
-      ships
-    ) in
+  let board_tup = (
+    j |> get_member "board_size" |> YoUtils.to_int,
+    j |> get_member "mode" |> YoUtils.to_string,
+    ships) in
   check_board board_tup
 
