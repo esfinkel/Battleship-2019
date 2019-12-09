@@ -253,29 +253,20 @@ let rec try_shooting shoot_phrase target_board my_board =
 (** [continue_game board o_board] reads in a command, parses it, and 
     executes it. *)
 let rec continue_game board o_board = 
+  let print_red key = ANSITerminal.( 
+      print_string[red] (Helpers.from_file "main_place_game_error")) in
   match Command.parse (read_command ()) with
-  | Place _ -> ANSITerminal.( 
-      print_string[red] (Helpers.from_file "main_place_game_error"));
+  | Place _ -> print_red "main_place_game_error";
     continue_game board o_board
   | Help -> print_help (); 
     continue_game board o_board
-  | Ready -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
-    continue_game board o_board
-  | Status -> ANSITerminal.(
-      print_string [cyan] (Board.status board)
-    );
+  | Status -> ANSITerminal.(print_string [cyan] (Board.status board));
     continue_game board o_board
   | Shoot shoot_phrase -> if try_shooting shoot_phrase o_board board then () 
     else continue_game board o_board
-  | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
-    continue_game board o_board
-  | exception Command.Empty -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
+  | Ready
+  | exception Command.Malformed
+  | exception Command.Empty -> print_red "main_invalid_command"; 
     continue_game board o_board
 
 (** [next_move board o_board] prompts the player for a gameplay
@@ -394,7 +385,6 @@ let rec single_continue_game player_board ai_board =
     single_continue_game player_board ai_board
   | Help -> print_help (); 
     single_continue_game player_board ai_board
-  | Ready -> ()
   | Status -> ANSITerminal.(
       print_string [cyan] (Board.status player_board)
     );
@@ -402,10 +392,8 @@ let rec single_continue_game player_board ai_board =
   | Shoot shoot_phrase -> 
     if single_try_shooting shoot_phrase ai_board player_board then () 
     else single_continue_game player_board ai_board
-  | exception Command.Malformed -> ANSITerminal.(
-      print_string [red] (Helpers.from_file "main_invalid_command")
-    );
-    single_continue_game player_board ai_board
+  | Ready
+  | exception Command.Malformed 
   | exception Command.Empty -> ANSITerminal.(
       print_string [red] (Helpers.from_file "main_invalid_command")
     );
@@ -458,16 +446,9 @@ let rec make_ai_player_dif style =
                          "\n\nEnter 'easy', 'medium', or 'hard'."); 
     make_ai_player_dif style
 
-(** [singleplayer style] prompts for the singleplayer game to play,
-    with board style [style], then starts it.*)
-let singleplayer style =
-  let player = get_name () in
-  let player_board = match style with
-    | "default" -> Board.init_board_default player
-    | f -> Board.init_board_from_file player f
-  in
-  let ai_player_with_diff = make_ai_player_dif style in
-  let mine_count = choose_mines () in
+(** [instantiate player_board mine_count ai_player_with_diff] sets
+    up the player and ai boards and begins the game. *)
+let instantiate player_board mine_count ai_player_with_diff =
   setup player_board; Board.place_mine player_board mine_count;
   match ai_player_with_diff with
   | Easy ai_player -> 
@@ -488,6 +469,19 @@ let singleplayer style =
     clear_screen ();
     single_next_move player_board (Ai_smart.get_board ai_player)
       ai_player_with_diff
+
+
+(** [singleplayer style] prompts for the singleplayer game to play,
+    with board style [style], then starts it.*)
+let singleplayer style =
+  let player = get_name () in
+  let player_board = match style with
+    | "default" -> Board.init_board_default player
+    | f -> Board.init_board_from_file player f
+  in
+  let ai_player_with_diff = make_ai_player_dif style in
+  let mine_count = choose_mines () in
+  instantiate player_board mine_count ai_player_with_diff
 
 (**[board_style] prompts the player for a style of board. Can either be 
    [default] or a custom board found in a .json file. *)
