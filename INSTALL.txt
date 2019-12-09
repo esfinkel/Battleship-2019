@@ -7,7 +7,10 @@ Go to the directory the zip file is in.
 - Run "make build".
 - Run "make play" to run the program and play the game.
 - Run "make play-music" to play the game with sound effects/music and an 
-animated title screen.
+animated title screen. (We only tested the title screen and 
+volume/sound effects on mac, so if make play-music runs into any errors, just 
+run make play instead to get all of the same functionality only without sound.
+Emoji's may appear differently on windows as well. )
 - Run "make test" to run our unit tests.
 - Run "make bisect" and type 'open report/index.html' to view our code coverage 
 percentages.
