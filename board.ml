@@ -1,6 +1,5 @@
 open Helpers
 
-exception OffBoard
 exception Misaligned
 exception WrongLength
 exception OverlappingShips 
@@ -164,18 +163,21 @@ let get_ship str_name b =
   | s::[] -> s
   | _ -> raise InvalidShipName
 
-(** [on_board loc b] raises [OffBoard] iff [loc] refers to an invalid
-    location on board [b]. *)
-let on_board (loc : Command.location) (b : t) =
-  let size = b.board_size in
-  match row_col loc with 
-  | (r, c) when (0 <= r && r < size) && (0 <= c && c < size) -> ()
-  | _ -> raise OffBoard
+(** [is_on_board loc] is true if [(i, j)] is on the board. False otherwise. *)
+let is_on_board (i, j) b = 
+  (0 <= i && i < b.board_size) && (0 <= j && j < b.board_size)
 
-(** [check_alignment_and_length loc1 loc2 s] raises [WrongLength] iff the
-    inclusive distance between loc1 and loc2 does not equal the size of [s],
-    or [Misaligned] iff [loc1] and [loc2] are not in the same row or
-    column. *)
+(** [on_board loc b] raises [Helpers.InvalidLoc] iff [loc] refers to an
+    invalid location on board [b]. *)
+let on_board (loc : Command.location) (b : t) =
+  if is_on_board (row_col loc) b then () else raise InvalidLoc
+
+(** [check_alignment_and_length loc1 loc2 s] raises
+    - [WrongLength] iff the inclusive distance between loc1 and loc2 does
+      not equal the size of [s],
+    - or [Misaligned] iff [loc1] and [loc2] are not in the same row or
+      column.
+    - Technically raises [InvalidLoc] if [loc1] or [loc2] is invalid. *)
 let check_alignment_and_length loc1 loc2 s =
   let (r1, c1), (r2, c2) = row_col loc1, row_col loc2 in
   if r1 = r2 then 
@@ -217,13 +219,12 @@ let new_orientation ((i1, j1):Helpers.coor_type) ((i2, j2):Helpers.coor_type)
     with its ends on the locations represented by [c1] and [c2].
     If [sh] was already on [b], it is removed before being re-placed.
     Raises:
-    - OffBoard if [l1] or [l2] is off the game board
+    - InvalidLoc if [l1] or [l2] is invalid or off the game board
     - Misaligned if [l1] and [l2] are not in the same row or column
     - WrongLength if [l1] and [l2] are the wrong distance apart
     - OverlappingShips if the ship would overlap with a ship already
         present on [b]. *)
 let place_single_ship sh l1 l2 b =
-  (* let sh = get_ship s b in *)
   let ((i_1, j_1) as coors_1:Helpers.coor_type),
       ((i_2, j_2) as coors_2:Helpers.coor_type) = 
     ordered_strings l1 l2 in 
@@ -281,9 +282,6 @@ let did_lose b = List.fold_left
     (fun true_so_far s -> true_so_far && is_dead s b.grid) true b.ships
 
 (*BISECT-IGNORE-BEGIN*)
-(** [is_on_board loc] is true if [(i, j)] is on the board. False otherwise. *)
-let is_on_board (i, j) b = 
-  (0 <= i && i < b.board_size) && (0 <= j && j < b.board_size)
 
 (** [make_bomb_shot (i, j) b] updates board to have the (i, j) coordinate 
     counted as a shot. (Used for bomb damage.) *)

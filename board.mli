@@ -1,10 +1,6 @@
 (** Board initiates the battleship boards and keeps track of ship
     locations, hit spots, and mine locations. *)
 
-(** Raised when a player attempts to place a ship on a location that is
-    off the board. *)
-exception OffBoard
-
 (** Raised when a player attempts to place a ship on coordinates that are 
     not in line with each other. (eg. a3 and b6) *)
 exception Misaligned
@@ -33,7 +29,8 @@ type t
 val init_board_default : string -> t 
 
 (** [init_board_from_file n f] is a new [t], with attributes from json with
-    name [f], all cells initialized to [Water], and player_name [n]. *)
+    name [f], all cells initialized to [Water], and player_name [n].
+    Raises: Same exceptions as Custom_board_parser.get_board_from_file. *)
 val init_board_from_file : string -> string -> t 
 
 (** [min_ship_size b] is the length of the shortest ship of [b]. *)
@@ -49,11 +46,12 @@ val player_name : t -> string
     ends on locations represented by [l1] and [l2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
-    - OffBoard if [l1] or [l2] is off the game board
+    - InvalidLoc if [l1] or [l2] is off the game board
     - Misaligned if [l1] and [l2] are not in the same row or column
     - WrongLength if [l1] and [l2] are the wrong distance apart
     - OverlappingShips if the ship would overlap with a ship already
-        present in [b]. *)
+        present in [b].
+    - InvalidShipName if there is no ship with name [n]. *)
 val place : string -> Command.location -> Command.location -> t -> unit 
 
 (* i.e. place machine readable *)
@@ -61,11 +59,12 @@ val place : string -> Command.location -> Command.location -> t -> unit
     ends are on locations represented by [c1] and [c2].
     If that ship was already on [b], it is removed before being re-placed.
     Raises:
-    - OffBoard if [c1] or [c2] is off the game board
+    - InvalidLoc if [c1] or [c2] is off the game board
     - Misaligned if [c1] and [c2] are not in the same row or column
     - WrongLength if [c1] and [c2] are the wrong distance apart
     - OverlappingShips if the ship would overlap with a ship already
-        present in [b]. *)
+        present in [b].
+    - InvalidShipName if there is no ship with name [n].*)
 val place_m_r : string -> Helpers.coor_type -> Helpers.coor_type -> t -> unit
 
 (** [did_lose b] is true iff all ships have been destroyed in [b]. *)

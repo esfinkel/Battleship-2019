@@ -115,8 +115,6 @@ let try_placing (ship_phrase: string list) board =
   match ship_phrase with
   | name::l1::l2::[] -> (
       match Board.place name l1 l2 board with 
-      | exception Board.OffBoard -> 
-        ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
       | exception Helpers.InvalidLoc -> 
         ANSITerminal.(print_string [red] (Helpers.from_file "main_offboard"))
       | exception Board.Misaligned -> 

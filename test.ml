@@ -252,7 +252,7 @@ let board_tests = [
   make_board_op_exn_test "OverlappingShips"
     (Board.place "destroyer" "b1" "b3") bd1 Board.OverlappingShips;
   make_board_op_exn_test "InvalidLoc"
-    (Board.place "destroyer" "b9" "b12") bd1 Board.OffBoard;
+    (Board.place "destroyer" "b9" "b12") bd1 Helpers.InvalidLoc;
   make_board_op_exn_test "InvalidShipName"
     (Board.place "destroyor" "b9" "b12") bd1 Board.InvalidShipName;
   make_board_op_exn_test "WrongLength horz"

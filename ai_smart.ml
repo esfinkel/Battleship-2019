@@ -102,41 +102,47 @@ let all_cells_adjacent_to_next_ship ship_cells off_limits =
   |> List.sort_uniq Stdlib.compare
 
 (** [place b sh c1 c2] places the ship named [sh] on [b] with its ends on
-    [c1] and [c2]. *)
+    [c1] and [c2].
+    Raises: Same exceptions as Board.place_m_r. *)
 let place b sh c1 c2 = Board.place_m_r sh c1 c2 b
 
-(** - [place_ship_smartly b name size off_limits] is a new list [res]:
+(** [place_ship_smartly b name size off_limits dec] is a new list [res]:
     - The ship with [name] and [size] has been placed on [b] such that 
       the ship does not overlap with the cells described by [off_limits].
       In effect, the ship is not directly adjacent to any existing ships.
     - [res] if [off_limits] with the addition of the cells surrounding
-      the ship's location. *)
-let rec place_ship_smartly b name size off_limits =
-  (* pick a two random coors at appropriate distance; order them *)
-  let c1, c2 = random_placement_coors b size in
-  let c1, c2 = Helpers.ordered_coors c1 c2 in
-  (* if anything off_board, recurse *)
-  if not (coor_on_board b c1 && coor_on_board b c2)
-  then place_ship_smartly b name size off_limits
+      the ship's location.
+    - Raises: Same exceptions as Board.place_m_r. *)
+let rec place_ship_smartly b name size off_limits dec =
+  if dec <= 0 then failwith "Something might be wrong with board params."
   else
-    (* calculate coors for all ship cells *)
-    let ship_cells = all_cells_between c1 c2 in
-    (* if any overlap between that and off_limits, recurse *)
-    if no_overlap ship_cells off_limits |> not
-    then place_ship_smartly b name size off_limits
-    (* otherwise add to off_limits and return new off_limits *)
+    (* pick a two random coors at appropriate distance; order them *)
+    let c1, c2 = random_placement_coors b size in
+    let c1, c2 = Helpers.ordered_coors c1 c2 in
+    (* if anything off_board, recurse *)
+    if not (coor_on_board b c1 && coor_on_board b c2)
+    then place_ship_smartly b name size off_limits (dec-1)
     else
-      (place b name c1 c2;
-       all_cells_adjacent_to_next_ship ship_cells off_limits)
+      (* calculate coors for all ship cells *)
+      let ship_cells = all_cells_between c1 c2 in
+      (* if any overlap between that and off_limits, recurse *)
+      if no_overlap ship_cells off_limits |> not
+      then place_ship_smartly b name size off_limits (dec-1)
+      (* otherwise add to off_limits and return new off_limits *)
+      else
+        (place b name c1 c2;
+         all_cells_adjacent_to_next_ship ship_cells off_limits)
 
 (** [place_all_ships c] places all ships on the board belonging to [c],
     such that no ships are touching. *)
 let place_all_ships c = 
   let to_place = Board.setup_status_m_r c.board in
-  List.fold_left
-    (fun off_limits (n, s) -> place_ship_smartly c.board n s off_limits)
-    [] to_place
-  |> ignore
+  try
+    List.fold_left
+      (fun off_limits (n, s) -> place_ship_smartly c.board n s off_limits 100)
+      [] to_place
+    |> ignore
+  with | _ -> Board.place "random" "" "" c.board
 
 
 (* **************************** *)
@@ -173,25 +179,27 @@ let rec living_coors_adjacent_to_this
   List.filter (is_adjacent) coor_list
   |> List.map (fun (c2) -> (coor, c2))
 
-(** [shoot b coor] shoots coordinate [coor] on [b]. *)
+(** [shoot b coor] shoots coordinate [coor] on [b].
+    Raises: Same exceptions as Board.shoot_m_r. *)
 let shoot b coor =
   match Board.shoot_m_r (coor) b with
-  | _ -> ()
+  | _, _ -> ()
 
 (** [shoot_random c b] shoots randomly on board [b]. *)
 let rec shoot_random c b = 
   try shoot b (random_coors c)
   with | _ -> shoot_random c b
 
-(** [shoot_from b targets] randomly selects a member of [targets] and
+(** [shoot_from c b targets dec] randomly selects a member of [targets] and
     shoots it on [b]. *)
-let rec shoot_from b targets =
-  try
-    let len = List.length targets in
-    let target = List.nth targets (Random.int len) in
-    shoot b target
-  with 
-  | _ -> shoot_from b targets
+let rec shoot_from c b targets dec =
+  if dec <= 0 then shoot_random c b else 
+    try
+      let len = List.length targets in
+      let target = List.nth targets (Random.int len) in
+      shoot b target
+    with 
+    | _ -> shoot_from c b targets (dec-1)
 
 (** [find_adjacent_xs xs] is a list of all pairs [(c1, c2)], with each [c]
     selected from [xs], such that [c1] is adjacent to [c2] and both
@@ -237,13 +245,13 @@ let rec shoot_find_nearby c b =
   if num_targets > 0
   (* if you find adjacent x's with ? on at least one end; shoot that ? *)
   (*BISECT-IGNORE-BEGIN*)
-  then shoot_from b targets
+  then shoot_from c b targets 100
   else 
     let adj = nearby b hits in
     let adj_questions = adj |> List.filter (Board.is_unshot b)
     in 
     if List.length adj_questions > 0 then 
-      shoot_from b adj_questions
+      shoot_from c b adj_questions 100
       (* if you don't find one, shoot randomly *)
     else shoot_random c b
 (*BISECT-IGNORE-END*)

@@ -77,7 +77,7 @@ let rec shoot_random b =
     let coor = Helpers.random_coor_string (Board.board_size b) in 
     match Board.shoot (coor) b with
     | _, true, _ -> hit_history.hit <- coor; "It's a hit!"
-    | _ -> ""
+    | _, _, _ -> ""
   with | _ -> shoot_random b
 
 (*BISECT-IGNORE-BEGIN*)
