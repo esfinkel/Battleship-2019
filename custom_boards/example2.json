@@ -1,8 +1,16 @@
 {
   "ship_names": [
-      "fettuccine", "penne", "spaghetti", "linguini"
+    "fettuccine",
+    "penne",
+    "spaghetti",
+    "linguini"
   ],
-  "ship_sizes": [4, 2, 9, 4],
+  "ship_sizes": [
+    4,
+    2,
+    9,
+    4
+  ],
   "board_size": 12,
   "mode": ""
 }
