@@ -20,7 +20,8 @@ We included an example of one of these JSON files called "example.json". To
 use this file instead of the default battleship game mode, follow gameplay 
 instructions and type 'custom_boards/example.json'. This JSON example is an 
 example of a space mode version of battleship. (The two types battleship game 
-modes we allow are "water" and "space", where every mode that isn't space mode is in water mode.)
+modes we allow are "water" and "space", where every mode that isn't space mode 
+is in water mode.)
 
 The format of our JSONS: see the example files in the 'custom_boards' folder.
 
