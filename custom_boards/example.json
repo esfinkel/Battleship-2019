@@ -1,8 +1,14 @@
 {
     "ship_names": [
-        "klingons", "destroyer", "punisher"
+        "klingons",
+        "destroyer",
+        "punisher"
     ],
-    "ship_sizes": [4, 2, 5],
+    "ship_sizes": [
+        4,
+        2,
+        5
+    ],
     "board_size": 12,
     "mode": "space"
 }

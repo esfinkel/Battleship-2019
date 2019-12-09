@@ -1,0 +1,16 @@
+{
+  "ship_names": [
+    "stardestroyer",
+    "tiefighter",
+    "xwing",
+    "ywing"
+  ],
+  "ship_sizes": [
+    5,
+    3,
+    2,
+    2
+  ],
+  "board_size": 12,
+  "mode": "space"
+}
