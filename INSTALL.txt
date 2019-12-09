@@ -14,10 +14,19 @@ percentages.
 
 Note:
 We added the option to use the 'default' (normal battleship style) game mode 
-upon running 'make play' and also the option to use a customizeable JSON to 
-change things such as board size, ship names, etc. We included an example of 
-one of these JSON files called "example.json". To use this file instead of the 
-default battleship game mode, follow gameplay instructions and 
-type 'custom_boards/example.json'. This JSON example is an example of a space 
-mode version of battleship. (The two types battleship game modes we allow are
-"water" and "space", where every mode that isn't space mode is in water mode.)
+upon running 'make play' (or make play-music) and also the option to use a 
+customizeable JSON to change things such as board size, ship names, etc. 
+We included an example of one of these JSON files called "example.json". To 
+use this file instead of the default battleship game mode, follow gameplay 
+instructions and type 'custom_boards/example.json'. This JSON example is an 
+example of a space mode version of battleship. (The two types battleship game 
+modes we allow are "water" and "space", where every mode that isn't space mode 
+is in water mode.)
+
+The format of our JSONS: see the example files in the 'custom_boards' folder.
+
+To use a newly created JSON, just type in the file path when the game prompts 
+you to. Otherwise, you can always just use the classic, 'default' battleship 
+game with all of the familiar battleship ships and features. (Note that an 
+illegal JSON file, such as one with a ship length that exceeds the board size, 
+will give a helpful error message telling you how to fix your JSON file.)
