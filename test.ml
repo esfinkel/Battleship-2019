@@ -27,7 +27,7 @@
    - AI shots involving hits:
      Getting a successful hit is also based on random chance. For medium
       (and hard) difficulty AI, much of the code is based on getting the AI
-      to continue shoot successfully after a hit has been made. This code is
+      to continue to shoot successfully after a hit has been made. This code is
       based on the random chance of getting an initial hit and choosing certain
       directions to shoot in. 
 
