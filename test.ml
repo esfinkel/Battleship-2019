@@ -471,7 +471,8 @@ let helper_tests = [
 
   make_helper_ff_test "Test load screen" "load_screen_a" 
     ("---------------" ^
-     "\n    //\\\\       \n   //  \\\\      \n  //____\\\\     \n //      \\\\"^
+     "\n    //\\\\       \n   //  \\\\"^
+     "      \n  //____\\\\     \n //      \\\\"^
      "    \n//        \\\\   ");
   make_helper_ff_test "Test error" "main_offboard" 
     ("\n\nYou cannot place the ship there.\nPlease enter coordinates that" ^
@@ -488,7 +489,9 @@ let helper_tests = [
 let make_gbf_test 
     (name : string)
     (file : string)
-    (expected_output : int * string * (string * int) list) : test = 
+    (expected_output :
+       (int * Custom_board_parser.graphicsMode * (string * int) list))
+  : test = 
   name >:: (fun _ -> 
       assert_equal expected_output (get_board_from_file file))
 
@@ -497,9 +500,10 @@ let ai_smart_sample_board = Ai_smart.init_custom "custom_boards/example.json"
 let command_parser_tests = 
   [
     make_gbf_test "space board" "custom_boards/example.json" 
-      (12, "space", [("klingons", 4); ("destroyer", 2); ("punisher", 5)]);
+      (12, Custom_board_parser.SpaceMode,
+       [("klingons", 4); ("destroyer", 2); ("punisher", 5)]);
     make_gbf_test "pasta board" "custom_boards/example2.json" 
-      (12, "", 
+      (12, Custom_board_parser.WaterMode, 
        [("fettuccine", 4); ("penne", 2); ("spaghetti", 9); ("linguini", 4)]);
     make_exn_raised_test "invalid json"
       Custom_board_parser.get_board_from_file
@@ -527,7 +531,8 @@ let command_parser_tests =
     make_equal_test "min ship size" Board.min_ship_size
       (Ai_smart.get_board ai_smart_sample_board) 2;
     make_equal_test "style mode" Board.graphics_mode
-      (Ai_smart.get_board ai_smart_sample_board) "space";
+      (Ai_smart.get_board ai_smart_sample_board)
+      Custom_board_parser.SpaceMode;
   ]
 
 let suite =

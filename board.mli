@@ -129,4 +129,4 @@ val is_unshot : t -> Helpers.coor_type -> bool
 val place_mine : t -> int -> unit
 
 (** [graphics_mode b] is the graphical mode of [b]. *)
-val graphics_mode : t -> string
+val graphics_mode : t -> Custom_board_parser.graphicsMode

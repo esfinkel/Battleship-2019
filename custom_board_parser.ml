@@ -4,6 +4,8 @@ exception InvalidBoardFile of string
 
 module YoUtils = Yojson.Basic.Util
 
+type graphicsMode = | SpaceMode | WaterMode
+
 (** [assert_raise equality issue] is [()] if [equality] is [true]; otherwise
     raises [InvalidBoardFile issue]. *)
 let assert_raise equality issue =
@@ -44,8 +46,8 @@ let check_board (b_size, mode, ships) =
   assert_raise (List.length ships < b_size - 1)
     "Too many ships for the board size.";
   let mode = match String.lowercase_ascii mode with
-    | "space" -> "space"
-    | _ -> "" in (* default to water mode *)
+    | "space" -> SpaceMode
+    | _ -> WaterMode in (* default to water mode *)
   (b_size, mode, ships)
 
 

@@ -15,7 +15,7 @@ let clear_screen () =
 (** [print_grid grid] prints the string representation of grid
     (string list list) [grid]. *)
 let print_grid mode grid =
-  let spacemode = mode = "space" in
+  let spacemode = mode = Custom_board_parser.SpaceMode in
   let print_cell c = ANSITerminal.(
       let ship = if spacemode then "🚀 " else "🚢 " in
       match c with

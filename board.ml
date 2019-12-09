@@ -23,7 +23,9 @@ type ship = {
 }
 
 (** The abstract type of values representing a grid spot. *)
-type spot =  Water | ShotWater | Ship of ship | HitShip of ship | Bomb | HitBomb
+type spot =  Water | ShotWater
+          | Ship of ship | HitShip of ship
+          | Bomb | HitBomb
 
 (** AF: the record
     [{board_size = 2; 
@@ -52,7 +54,7 @@ type t = {
   ships: ship list;
   player_name: string;
   mutable status: string option;
-  mode: string;
+  mode: Custom_board_parser.graphicsMode;
 }
 
 let default_board_size = 10
@@ -108,7 +110,7 @@ let init_board_default player_name = {
   ships = init_ships_default ();
   player_name = player_name;
   status = None;
-  mode = ""; (* default to water mode *)
+  mode = Custom_board_parser.WaterMode;
 }
 
 let board_size b = b.board_size

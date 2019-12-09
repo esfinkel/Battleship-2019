@@ -12,6 +12,9 @@ exception MissingField
     String will contain helpful information. *)
 exception InvalidBoardFile of string
 
+(** Type representing the graphical mode of a game. *)
+type graphicsMode = | SpaceMode | WaterMode
+
 (** [get_board_from_file f] is [(board_size, mode, ships)] where [f] is the
     filepath of a valid json containing valid values corresponding to
     [board_size], [mode], and [ships].
@@ -20,4 +23,4 @@ exception InvalidBoardFile of string
         [s] will contain helpful information (see [check_board]).
     - ParsingError if the json cannot be found or parsed.
     - MissingField if a required field is missing. *)
-val get_board_from_file : string -> int * string * (string*int) list
+val get_board_from_file : string -> int * graphicsMode * (string*int) list
