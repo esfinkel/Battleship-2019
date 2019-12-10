@@ -12,9 +12,9 @@ let clear_screen () =
   ANSITerminal.(erase Screen; erase Screen; erase Screen; erase Screen);
   Sys.command("clear") |> ignore
 
-(** [print_cell mode c] prints the game board representation of [c]
-    in graphics mode [mode]. *)
-let print_cell mode =
+(** [print_cell mode setup c] prints the game board representation of [c]
+    in graphics mode [mode] and still-setting-up status [setup]. *)
+let print_cell mode setup =
   let spacemode = mode = Custom_board_parser.SpaceMode in
   let ship = if spacemode then "🚀 " else "🚢 " in 
   ANSITerminal.(
@@ -25,8 +25,8 @@ let print_cell mode =
     | "x" -> let sym = if spacemode then "[☼]" else  "🌀 " in
       print_string  [cyan; def_bg] sym
     | "?" -> print_string [def_bg] "❔ "
-    | "-" -> print_string [on_magenta] ship 
-    | "|" -> print_string [on_green] ship
+    | "-" -> print_string [on_magenta; if setup then Blink else Bold] ship 
+    | "|" -> print_string [on_green; if setup then Blink else Bold] ship
     | "X|" | "X-" -> print_string [on_red] "💥 "
     | "#" -> print_string [def_bg] "🔥 "
     | "b" -> print_string [def_bg] "💣 "
@@ -35,13 +35,13 @@ let print_cell mode =
   )
 (* " ○ " 🕳️ " ■ " ═ ║ *)
 
-(** [print_grid mode grid] prints the string representation of grid
-    [grid] in graphics mode [mode]. *)
-let print_grid mode grid =
+(** [print_grid mode setup grid] prints the string representation of grid
+    [grid] in graphics mode [mode] and still-setting-up status [setup]. *)
+let print_grid mode setup grid =
   let print_row i row =
     Helpers.get_letter i |> print_string;
     print_string " ";
-    List.iter (print_cell mode) row;
+    List.iter (print_cell mode setup) row;
     Helpers.get_letter i |> print_string;
     print_newline ()
   in
@@ -60,15 +60,15 @@ let print_grid mode grid =
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ()
 
-(** [print_self_board mode b] prints the colorful string representation of
+(** [print_self_board mode setup b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
-let print_self_board mode b =
-  b |> Board.string_self |> print_grid mode
+let print_self_board mode setup b =
+  b |> Board.string_self |> print_grid mode setup
 
 (** [print_other_board mode b] prints the colorful string representation of
     board [b], as seen by other playesr. *)
 let print_other_board mode b =
-  b |> Board.string_other |> print_grid mode
+  b |> Board.string_other |> print_grid mode false
 
 (** [print_help] prints the list of valid commands. *)
 let print_help () : unit = 
@@ -119,7 +119,7 @@ let read_command () : string =
 let display_board other_board my_board =
   let mode = Board.graphics_mode other_board in
   print_other_board mode other_board;
-  print_self_board mode my_board
+  print_self_board mode false my_board
 
 (** [try_placing ship_phrase board] attempts to place a ship on the board. *)
 let try_placing (ship_phrase: string list) board =
@@ -140,7 +140,7 @@ let try_placing (ship_phrase: string list) board =
       | exception Board.OverlappingShips ->
         ANSITerminal.(print_string [red] 
                         (Helpers.from_file "main_overlapping"));
-      | () -> print_self_board (Board.graphics_mode board) board;
+      | () -> print_self_board (Board.graphics_mode board) true board;
         print_endline ("\n\nYou placed the "  ^  name ^ ".");
         Board.setup_status board |> print_endline
     ) 
@@ -185,7 +185,7 @@ let pause () =
 
 (** [setup board] starts the process of setting up [board]. *)
 let setup board  =
-  print_self_board (Board.graphics_mode board) board; 
+  print_self_board (Board.graphics_mode board) true board; 
   Board.setup_status board |> print_endline;
   ANSITerminal.(
     print_string [cyan]
@@ -204,13 +204,13 @@ let lose_message = Helpers.from_file "main_lose_message"
 let display_two_player_end_message loser_board winner_board = 
   print_string "\n\n\n\n";
   let mode = (Board.graphics_mode loser_board) in
-  print_self_board mode loser_board;
+  print_self_board mode false loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
        ^(Board.player_name loser_board)
        ^lose_message));
-  print_self_board mode winner_board;
+  print_self_board mode false winner_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
@@ -222,8 +222,8 @@ let display_two_player_end_message loser_board winner_board =
 let display_one_player_end_message won winner_board loser_board = 
   print_string "\n\n\n\n";
   let mode = (Board.graphics_mode loser_board) in
-  print_self_board mode winner_board;
-  print_self_board mode loser_board;
+  print_self_board mode false winner_board;
+  print_self_board mode false loser_board;
   ANSITerminal.(
     print_string [yellow]
       ("Player "
