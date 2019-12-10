@@ -74,13 +74,21 @@ let print_help () : unit =
   ANSITerminal.(print_string [cyan] (Helpers.from_file "main_help"))
 
 (** [hit_sound ()] plays the hit-ship sound. *)
-let hit_sound () =
-  try Sys.command "afplay audio/boom_midlength.m4a -v 1.0 & :" |> ignore
+let hit_sound board =
+  try 
+    if Board.graphics_mode board = Custom_board_parser.SpaceMode then 
+      Sys.command "afplay audio/space_hit.m4a -v 0.5 & :" |> ignore
+    else 
+      Sys.command "afplay audio/boom_midlength.m4a -v 1.0 & :" |> ignore
   with | _ -> ()
 
 (** [splash_sound ()] plays the splash sound. *)
-let splash_sound () =
-  try Sys.command "afplay audio/splash_midlength.m4a -v 0.3 & :" |> ignore
+let splash_sound board =
+  try 
+    if Board.graphics_mode board = Custom_board_parser.SpaceMode then
+      Sys.command "afplay audio/space_miss.m4a -v 1.4 & :" |> ignore
+    else
+      Sys.command "afplay audio/splash_midlength.m4a -v 0.3 & :" |> ignore
   with | _ -> ()
 
 (** [bomb_sound ()] plays the bomb sound. *)
@@ -89,12 +97,12 @@ let bomb_sound () =
   with | _ -> ()
 
 (** [shoot_sound suc bomb_suc] plays the appropriate sound. *)
-let shoot_sound suc bomb_suc =
+let shoot_sound suc bomb_suc board=
   let with_sound = Sys.argv.(1) in
   if with_sound = "1" then
     if bomb_suc then bomb_sound () 
-    else if suc then hit_sound ()
-    else splash_sound ()
+    else if suc then hit_sound board
+    else splash_sound board
   else ()
 
 (** [read_command] returns a user string input from the command line. *)
@@ -237,7 +245,7 @@ let rec try_shooting shoot_phrase target_board my_board =
           print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
       | message, success, bomb_suc -> display_board target_board my_board; 
-        shoot_sound success bomb_suc;
+        shoot_sound success bomb_suc my_board;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
@@ -363,7 +371,7 @@ let rec single_try_shooting shoot_phrase ai_board my_board =
           print_string [red] (Helpers.from_file "main_invalid_loc")
         ); false
       | message, success, bomb_suc -> clear_screen (); 
-        shoot_sound success bomb_suc;
+        shoot_sound success bomb_suc my_board;
         ANSITerminal.( 
           print_string [cyan] ("You shot: " ^ loc ^ ".\n");
           print_string [cyan] message; print_newline (););
