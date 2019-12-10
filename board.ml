@@ -290,7 +290,7 @@ let rec make_bomb_shot (i, j) b =
     match b.grid.(i).(j) with 
     | Water -> b.grid.(i).(j) <- ShotWater; false
     | Ship s -> b.grid.(i).(j) <- HitShip s; true
-    | Bomb -> b.grid.(i).(j) <- ShotWater; bomb_hit (i, j) b
+    | Bomb -> b.grid.(i).(j) <- HitBomb; bomb_hit (i, j) b
     | _ -> false
   else false
 (** [bomb_hit (i, j) b] updates the board to have damage from the bomb/mine. 
@@ -432,7 +432,8 @@ let to_string_grid is_self b =
         ))::(row_str self g t) 
     (*BISECT-IGNORE-BEGIN*)
     | Bomb::t -> (if self then "b" else "?")::(row_str self g t) 
-    | HitBomb::t -> (if self then "B" else "?")::(row_str self g t) in
+    (* | HitBomb::t -> (if self then "B" else "?")::(row_str self g t) in *)
+    | HitBomb::t -> ("x")::(row_str self g t) in
   (*BISECT-IGNORE-END*)
   b.grid |> Array.to_list
   |> List.map (fun r -> row_str is_self b.grid (Array.to_list r))

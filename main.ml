@@ -16,26 +16,27 @@ let clear_screen () =
     in graphics mode [mode]. *)
 let print_cell mode =
   let spacemode = mode = Custom_board_parser.SpaceMode in
+  let ship = if spacemode then "🚀 " else "🚢 " in 
   ANSITerminal.(
-    let ship = if spacemode then "🚀 " else "🚢 " in function
-      | "w" ->
-        let colors =
-          if spacemode then [white; on_black] else [cyan; on_blue] in
-        print_string colors         "[ ]" (* " ■ " *)
-      | "x" -> if spacemode then print_string [on_black]  "🕳️  "
-        else print_string [on_blue]        "🌀 "
-      | "?" -> print_string [if spacemode then on_black else on_blue] "❔ "
-      | "-" -> print_string [on_magenta] ship (* "═══" or === *)
-      | "|" -> print_string [on_green] ship (* " ║ " *)
-      | "X|" | "X-" -> print_string [on_red]  "💥 "
-      | "#" -> print_string [on_blue]               "🔥 "
-      | "b" -> print_string [if spacemode then on_black else on_blue] "💣 "
-      | "B" -> print_string [on_blue]               "💥 "
-      | _ -> ()
+    let def_bg = if spacemode then on_black else on_blue in
+    function
+    | "w" -> let colors = [if spacemode then white else cyan; def_bg] in
+      print_string colors "[ ]"
+    | "x" -> let sym = if spacemode then "[☼]" else  "🌀 " in
+      print_string  [cyan; def_bg] sym
+    | "?" -> print_string [def_bg] "❔ "
+    | "-" -> print_string [on_magenta] ship 
+    | "|" -> print_string [on_green] ship
+    | "X|" | "X-" -> print_string [on_red] "💥 "
+    | "#" -> print_string [def_bg] "🔥 "
+    | "b" -> print_string [def_bg] "💣 "
+    (* | "B" -> print_string [def_bg] "💥 " *)
+    | _ -> ()
   )
+(* " ○ " 🕳️ " ■ " ═ ║ *)
 
-(** [print_grid grid] prints the string representation of grid
-    (string list list) [grid]. *)
+(** [print_grid mode grid] prints the string representation of grid
+    [grid] in graphics mode [mode]. *)
 let print_grid mode grid =
   let print_row i row =
     Helpers.get_letter i |> print_string;
@@ -59,12 +60,12 @@ let print_grid mode grid =
   print_nums 1 (List.length (List.nth grid 0));
   print_newline ()
 
-(** [print_self_board b] prints the colorful string representation of
+(** [print_self_board mode b] prints the colorful string representation of
     board [b], as seen by the board's player. *)
 let print_self_board mode b =
   b |> Board.string_self |> print_grid mode
 
-(** [print_other_board b] prints the colorful string representation of
+(** [print_other_board mode b] prints the colorful string representation of
     board [b], as seen by other playesr. *)
 let print_other_board mode b =
   b |> Board.string_other |> print_grid mode
