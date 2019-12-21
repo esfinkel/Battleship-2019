@@ -14,8 +14,14 @@ default: build
 build:
 	$(OCAMLBUILD) $(OBJECTS)
 
+build-full: build
+	$(OCAMLBUILD) $(MAIN)
+
 test: build
 	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
+
+play-outside:
+	./main.byte 0	
 
 play_h: build
 	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "") && echo "log back in during your next war!\n"
