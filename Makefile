@@ -21,16 +21,16 @@ test: build
 	BISECT_COVERAGE=YES $(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 play-outside:
-	./main.byte 0	
+	echo "not yet implemented"
 
-play_h: build
-	$(OCAMLBUILD) $(MAIN) && bash bg_music.sh && (killall afplay || echo "") && echo "log back in during your next war!\n"
+play_h: build-full
+	bash bg_music.sh && (killall afplay || echo "") && echo "log back in for your next war!\n"
 
 # I think afplay is Mac-only?
 
 # -s silence command printing
 # -k ignore errors
-play-music play_music: build
+play-music play_music:
 	make -s -k play_h
 
 play: build-full
