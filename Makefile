@@ -33,8 +33,8 @@ play_h: build
 play-music play_music: build
 	make -s -k play_h
 
-play: build
-	$(OCAMLBUILD) $(MAIN) && ./$(MAIN) 0
+play: build-full
+	./$(MAIN) 0
 
 bisect: clean test
 	bisect-ppx-report -I _build -html report bisect0001.out
