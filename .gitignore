@@ -10,7 +10,7 @@ battleship.zip
 *.out
 *.cmx
 *.native
-*.byte
+test.byte
 _build
 
 # temporary files
