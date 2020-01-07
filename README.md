@@ -18,7 +18,7 @@ Packages used by this game:
 * ANSITerminal
 * Yojson
 
-These are a strict subset of the ones installed in following those course website's instructions.
+Those packages are a strict subset of the ones installed if you follow the course website's instructions.
 
 ## Gameplay
 
